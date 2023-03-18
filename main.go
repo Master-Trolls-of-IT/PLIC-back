@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
+	_ "github.com/jackc/pgx/v4/stdlib"
 	_ "github.com/lib/pq"
 )
 
@@ -15,7 +16,7 @@ func connectUnixSocket() (*sql.DB, error) {
 	mustGetenv := func(k string) string {
 		v := os.Getenv(k)
 		if v == "" {
-			log.Fatalf("Fatal Error in connect_unix.go: %s environment variable not set.", k)
+			log.Fatalf("Fatal Error in connect_unix.go: %s environment variable not set.\n", k)
 		}
 		return v
 	}
@@ -24,17 +25,17 @@ func connectUnixSocket() (*sql.DB, error) {
 	// Cloud Secret Manager (https://cloud.google.com/secret-manager) to help
 	// keep secrets safe.
 	var (
-		dbUser         = mustGetenv("admin")                                          // e.g. 'my-db-user'
-		dbPwd          = mustGetenv("gaia2024")                                       // e.g. 'my-db-password'
-		dbName         = mustGetenv("gaia")                                           // e.g. 'my-database'
-		unixSocketPath = mustGetenv("/cloudsql/gaia-api-380213:europe-west9:gaia-db") // e.g. '/cloudsql/project:region:instance'
+		dbUser         = mustGetenv("admin")                                // e.g. 'my-db-user'
+		dbPwd          = mustGetenv("gaia2024")                             // e.g. 'my-db-password'
+		unixSocketPath = mustGetenv("gaia-api-380213:europe-west9:gaia-db") // e.g. '/cloudsql/project:region:instance'
+		dbName         = mustGetenv("gaia")                                 // e.g. 'my-database'
 	)
 
-	dbURI := fmt.Sprintf("%s:%s@unix(%s)/%s?parseTime=true",
-		dbUser, dbPwd, unixSocketPath, dbName)
+	dbURI := fmt.Sprintf("user=%s password=%s database=%s host=%s",
+		dbUser, dbPwd, dbName, unixSocketPath)
 
 	// dbPool is the pool of database connections.
-	dbPool, err := sql.Open("postgres", dbURI)
+	dbPool, err := sql.Open("pgx", dbURI)
 	if err != nil {
 		return nil, fmt.Errorf("sql.Open: %v", err)
 	}
