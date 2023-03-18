@@ -25,10 +25,10 @@ func connectUnixSocket() (*sql.DB, error) {
 	// Cloud Secret Manager (https://cloud.google.com/secret-manager) to help
 	// keep secrets safe.
 	var (
-		dbUser         = mustGetenv("admin")                                // e.g. 'my-db-user'
-		dbPwd          = mustGetenv("gaia2024")                             // e.g. 'my-db-password'
-		unixSocketPath = mustGetenv("gaia-api-380213:europe-west9:gaia-db") // e.g. '/cloudsql/project:region:instance'
-		dbName         = mustGetenv("gaia")                                 // e.g. 'my-database'
+		dbUser         = mustGetenv("my-db-user")     // e.g. 'my-db-user'
+		dbPwd          = mustGetenv("my-db-password") // e.g. 'my-db-password'
+		unixSocketPath = mustGetenv("instance")       // e.g. '/cloudsql/project:region:instance'
+		dbName         = mustGetenv("my-database")    // e.g. 'my-database'
 	)
 
 	dbURI := fmt.Sprintf("user=%s password=%s database=%s host=%s",
