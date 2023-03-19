@@ -20,10 +20,6 @@ func connectUnixSocket() (*sql.DB, error) {
 		}
 		return v
 	}
-	// Note: Saving credentials in environment variables is convenient, but not
-	// secure - consider a more secure solution such as
-	// Cloud Secret Manager (https://cloud.google.com/secret-manager) to help
-	// keep secrets safe.
 	var (
 		dbUser         = mustGetenv("my-db-user")     // e.g. 'my-db-user'
 		dbPwd          = mustGetenv("my-db-password") // e.g. 'my-db-password'
@@ -35,33 +31,15 @@ func connectUnixSocket() (*sql.DB, error) {
 		dbUser, dbPwd, dbName, unixSocketPath)
 
 	// dbPool is the pool of database connections.
-	dbPool, err := sql.Open("pgx", dbURI)
+	db, err := sql.Open("pgx", dbURI)
 	if err != nil {
 		return nil, fmt.Errorf("sql.Open: %v", err)
 	}
 
-	// ...
-
-	return dbPool, nil
+	return db, nil
 }
 
 func main() {
-	/*connStr := "host= port= dbname=gaia user=admin password=gaia2024 sslmode=disable"
-
-		db, err := sql.Open("postgres", connStr)
-		if err != nil {
-			panic(err.Error())
-		}
-		defer db.Close()
-
-	    err = db.Ping()
-
-	    if err != nil {
-	        panic(err)
-	    }
-
-		fmt.Println("Connected to Google Cloud SQL instance Postgres database!")
-	*/
 	db, err := connectUnixSocket()
 	if err != nil {
 		panic(err)
