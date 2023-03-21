@@ -30,7 +30,7 @@ func connectUnixSocket() (*sql.DB, error) {
 	dbURI := fmt.Sprintf("user=%s password=%s database=%s host=%s",
 		dbUser, dbPwd, dbName, unixSocketPath)
 
-	// dbPool is the pool of database connections.
+	// db is the pool of database connections.
 	db, err := sql.Open("pgx", dbURI)
 	if err != nil {
 		return nil, fmt.Errorf("sql.Open: %v", err)
