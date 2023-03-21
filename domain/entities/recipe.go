@@ -10,6 +10,6 @@ type Recipe struct {
 	Total_steps   int       `json:"total_steps"`
 	Nutriscore    int       `json:"nutriscore"`
 	Score         float32   `json:"score"`
-	Icon          []byte    `json:"image"`
+	Icon          []byte    `json:"icon"`
 	Kcal          int       `json:"kcal"`
 }
