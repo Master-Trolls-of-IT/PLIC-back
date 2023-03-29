@@ -10,9 +10,9 @@ import (
 )
 
 func main() {
-	db, err := repositories.NewPostgresDB()
+	db, err := repositories.NewDatabase()
 	if err != nil {
-		panic (err)
+		panic(err)
 	}
 	_ = db
 	if err != nil {
@@ -23,6 +23,8 @@ func main() {
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"Mathis": "quoicoubeh"})
 	})
+
+	r.POST("/login", Login)
 
 	r.Run()
 }

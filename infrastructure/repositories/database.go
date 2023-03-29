@@ -7,11 +7,11 @@ import (
 	"os"
 )
 
-type PostgresDB struct {
+type Database struct {
 	DB *sql.DB
 }
 
-func NewPostgresDB() (*PostgresDB, error) {
+func NewDatabase() (*Database, error) {
 	mustGetenv := func(k string) string {
 		v := os.Getenv(k)
 		if v == "" {
@@ -35,5 +35,5 @@ func NewPostgresDB() (*PostgresDB, error) {
 		return nil, fmt.Errorf("sql.Open: %v", err)
 	}
 
-	return &PostgresDB{db}, nil
+	return &Database{db}, nil
 }
