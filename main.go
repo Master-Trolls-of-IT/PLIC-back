@@ -24,7 +24,5 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{"Mathis": "quoicoubeh"})
 	})
 
-	r.POST("/login", Login)
-
 	r.Run()
 }
