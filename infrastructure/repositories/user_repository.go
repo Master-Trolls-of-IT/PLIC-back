@@ -33,6 +33,10 @@ func (user_repo *User_repo) GetUserByUsername(username string) (entities.User, e
 	return user_repo.getUser("SELECT * FROM USER WHERE Username = $1", username)
 }
 
+func (user_repo *User_repo) GetUserById(id int) (entities.User, error) {
+	return user_repo.getUser("SELECT * FROM USER WHERE Id = $1", id)
+}
+
 func (user_repo *User_repo) Login(login_info *entities.Login_info) {
 
 }

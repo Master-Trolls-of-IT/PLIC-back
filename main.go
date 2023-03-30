@@ -21,7 +21,11 @@ func main() {
 
 	r := gin.Default()
 	r.GET("/", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"Mathis": "quoicoubeh"})
+		c.JSON(http.StatusOK, gin.H{"Api": "Ok"})
+	})
+
+	r.GET("/ping", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"ping": "pong"})
 	})
 
 	r.Run()
