@@ -1,92 +1,31 @@
 package main
 
 import (
-	"database/sql"
-	"fmt"
-	"log"
+	"gaia-api/infrastructure/repositories"
 	"net/http"
-	"os"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/jackc/pgx/v4/stdlib"
 	_ "github.com/lib/pq"
 )
 
-func connectUnixSocket() (*sql.DB, error) {
-	mustGetenv := func(k string) string {
-		v := os.Getenv(k)
-		if v == "" {
-			log.Fatalf("Fatal Error in connect_unix.go: %s environment variable not set.\n", k)
-		}
-		return v
-	}
-	// Note: Saving credentials in environment variables is convenient, but not
-	// secure - consider a more secure solution such as
-	// Cloud Secret Manager (https://cloud.google.com/secret-manager) to help
-	// keep secrets safe.
-	var (
-		dbUser         = mustGetenv("my-db-user")     // e.g. 'my-db-user'
-		dbPwd          = mustGetenv("my-db-password") // e.g. 'my-db-password'
-		unixSocketPath = mustGetenv("instance")       // e.g. '/cloudsql/project:region:instance'
-		dbName         = mustGetenv("my-database")    // e.g. 'my-database'
-	)
-
-	dbURI := fmt.Sprintf("user=%s password=%s database=%s host=%s",
-		dbUser, dbPwd, dbName, unixSocketPath)
-
-	// dbPool is the pool of database connections.
-	dbPool, err := sql.Open("pgx", dbURI)
-	if err != nil {
-		return nil, fmt.Errorf("sql.Open: %v", err)
-	}
-
-	// ...
-
-	return dbPool, nil
-}
-
 func main() {
-	/*connStr := "host= port= dbname=gaia user=admin password=gaia2024 sslmode=disable"
-
-		db, err := sql.Open("postgres", connStr)
-		if err != nil {
-			panic(err.Error())
-		}
-		defer db.Close()
-
-	    err = db.Ping()
-
-	    if err != nil {
-	        panic(err)
-	    }
-
-		fmt.Println("Connected to Google Cloud SQL instance Postgres database!")
-	*/
-	db, err := connectUnixSocket()
+	db, err := repositories.NewDatabase()
+	if err != nil {
+		panic(err)
+	}
+	_ = db
 	if err != nil {
 		panic(err)
 	}
 
-	stmt, err := db.Query("SELECT tablename FROM pg_catalog.pg_tables;")
-
-	if err != nil {
-		stmt.Err()
-	}
-
-	var tables []string
-	var name string
-	for stmt.Next() {
-		err := stmt.Scan(&name)
-		if err != nil {
-			panic(err)
-		}
-		tables = append(tables, name)
-	}
-	log.Println(tables)
-
 	r := gin.Default()
 	r.GET("/", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"data": tables})
+		c.JSON(http.StatusOK, gin.H{"Api": "Ok"})
+	})
+
+	r.GET("/ping", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"ping": "pong"})
 	})
 
 	r.Run()
