@@ -12,12 +12,12 @@ type Database struct {
 }
 
 func NewDatabase() (*Database, error) {
-	mustGetenv := func(k string) string {
-		v := os.Getenv(k)
-		if v == "" {
-			log.Fatalf("Fatal Error in connect_unix.go: %s environment variable not set.\n", k)
+	mustGetenv := func(variable string) string {
+		value := os.Getenv(variable)
+		if value == "" {
+			log.Fatalf("Fatal Error in connect_unix.go: %s environment variable not set.\n", variable)
 		}
-		return v
+		return value
 	}
 	var (
 		dbUser         = mustGetenv("my-db-user")     // e.g. 'my-db-user'
