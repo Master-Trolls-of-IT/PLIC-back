@@ -38,7 +38,7 @@ func (server *Server) ping(context *gin.Context) {
 
 func (server *Server) login(context *gin.Context) {
 	var login = entities.Login_info{}
-	if err := context.BindJSON(&login); err != nil {
+	if err := context.ShouldBindJSON(&login); err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
 	var user_repo = *server.auth_service.User_repo
@@ -57,9 +57,11 @@ func (server *Server) register(context *gin.Context) {
 	var user = entities.User{}
 	if err := context.ShouldBindJSON(&user); err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
 	var user_repo = *server.auth_service.User_repo
 	registered, err := user_repo.Register(&user)
+
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	} else if registered {
