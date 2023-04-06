@@ -10,13 +10,13 @@ import (
 )
 
 func main() {
-	/*db, err := repositories.NewDatabase()
+	db, err := repositories.NewDatabase()
 	if err != nil {
 		panic(err)
-	}*/
-	user_repo := repositories.NewUserRepository(&repositories.Database{})
+	}
+	user_repo := repositories.NewUserRepository(db)
 	authentication_service := services.NewAuthService(user_repo)
 	gin_server := api.NewServer(authentication_service)
 
-	r.Run()
+	gin_server.Start()
 }

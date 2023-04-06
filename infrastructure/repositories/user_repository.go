@@ -21,7 +21,7 @@ func (user_repo *User_repo) getUser(query string, args ...interface{}) (entities
 		return entities.User{}, err
 	}
 	var user entities.User
-	err = stmt.QueryRow(args...).Scan(&user.Id, &user.Username,&user.Password, &user.Email, &user.Pseudo,&user.Rights, &user.Birthdate, &user.Weight, &user.Height, &user.Gender, &user.Sportiveness, &user.BasalMetabolism)
+	err = stmt.QueryRow(args...).Scan(&user.Id, &user.Username, &user.Password, &user.Email, &user.Pseudo, &user.Rights, &user.Birthdate, &user.Weight, &user.Height, &user.Gender, &user.Sportiveness, &user.BasalMetabolism)
 	if err != nil {
 		return entities.User{}, err
 	}
@@ -58,7 +58,7 @@ func (user_repo *User_repo) Register(user_info *entities.User) (bool, error) {
 		return false, nil
 	}
 	_, err = db.Exec("INSERT INTO users (email, rights,username, password, birthdate, weight, height, gender, sportiveness, basalmetabolism) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)",
-		user_info.Email,user_info.. user_info.Username, user_info.Password, user_info.Birthdate, user_info.Weight, user_info.Height, user_info.Gender, user_info.Sportiveness, user_info.BasalMetabolism)
+		user_info.Email, user_info, user_info.Username, user_info.Password, user_info.Birthdate, user_info.Weight, user_info.Height, user_info.Gender, user_info.Sportiveness, user_info.BasalMetabolism)
 	if err != nil {
 		return false, err
 	}
