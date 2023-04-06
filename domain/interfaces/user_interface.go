@@ -7,6 +7,6 @@ type User_interface interface {
 	GetUserByEmail(email string) (entities.User, error)
 	GetUserByUsername(username string) (entities.User, error)
 
-	Login(login_info *entities.Login_info)
-	Register(user_info *entities.User)
+	CheckLogin(login_info *entities.Login_info) (bool, error)
+	Register(user_info *entities.User) (bool, error)
 }
