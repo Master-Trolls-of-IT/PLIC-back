@@ -30,6 +30,7 @@ func NewDatabase() (*Database, error) {
 		dbUser, dbPwd, dbName, unixSocketPath)
 
 	// db is the pool of database connections.
+
 	db, err := sql.Open("pgx", dbURI)
 	if err != nil {
 		return nil, fmt.Errorf("sql.Open: %v", err)

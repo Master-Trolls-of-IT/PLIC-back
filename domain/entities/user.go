@@ -2,9 +2,11 @@ package entities
 
 type User struct {
 	Id              int          `json:"id"`
+	Rights          int          `json:"rights"`
 	Email           string       `json:"email"`
 	Username        string       `json:"username"`
 	Password        string       `json:"password"`
+	Pseudo          string       `json:"pseudo"`
 	Birthdate       string       `json:"birthdate"`
 	Weight          float32      `json:"weight"`
 	Height          int          `json:"height"`
@@ -13,12 +15,12 @@ type User struct {
 	BasalMetabolism int          `json:"basal_metabolism"`
 }
 
-type Gender string
+type Gender int
 
 const (
-	male   Gender = "Homme"
-	female Gender = "Femme"
-	other  Gender = "Autre"
+	male Gender = iota
+	female
+	other
 )
 
 type Sportiveness int
