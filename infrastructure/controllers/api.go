@@ -38,6 +38,7 @@ func (server *Server) ping(context *gin.Context) {
 
 func (server *Server) login(context *gin.Context) {
 	var login = entities.Login_info{}
+	//binds Json Body to Entities.Login_info Class
 	if err := context.ShouldBindJSON(&login); err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
@@ -55,10 +56,12 @@ func (server *Server) login(context *gin.Context) {
 
 func (server *Server) register(context *gin.Context) {
 	var user = entities.User{}
+	//binds Json Body to Entities.User Class
 	if err := context.ShouldBindJSON(&user); err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
 	var user_repo = *server.auth_service.User_repo
 	registered, err := user_repo.Register(&user)
 
