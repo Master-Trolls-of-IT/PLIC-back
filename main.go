@@ -6,6 +6,7 @@ import (
 	api "gaia-api/infrastructure/controllers"
 	"gaia-api/infrastructure/repositories"
 
+	_ "github.com/golang-jwt/jwt/v5"
 	_ "github.com/jackc/pgx/v4/stdlib"
 	_ "github.com/lib/pq"
 )

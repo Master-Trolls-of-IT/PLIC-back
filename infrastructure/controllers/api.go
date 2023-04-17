@@ -1,4 +1,4 @@
-package api
+package controllers
 
 import (
 	"gaia-api/domain/entities"
@@ -25,6 +25,7 @@ func (server *Server) Start() {
 	gin_engine.POST("/register", server.register)
 	gin_engine.PUT("/users/:id", server.update)
 	gin_engine.DELETE("/users/:id", server.delete)
+	//gin_engine.GET("/api/access-token/:refresh_token/:secret_key", controllers.GenerateAccessToken")
 
 	gin_engine.Run()
 }
