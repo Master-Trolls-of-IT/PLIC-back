@@ -1,8 +1,10 @@
 package controllers
 
 import (
-	_ "github.com/golang-jwt/jwt/v4"
 	"time"
+
+	_ "github.com/golang-jwt/jwt/v4"
+	jwt "github.com/golang-jwt/jwt/v5"
 )
 
 // Define a function to generate a new refresh token with a secret key

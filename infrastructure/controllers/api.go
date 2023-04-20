@@ -5,6 +5,8 @@ import (
 	"gaia-api/domain/services"
 	"net/http"
 
+	_ "github.com/golang-jwt/jwt/v5"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -25,14 +27,59 @@ func (server *Server) Start() {
 	gin_engine.POST("/register", server.register)
 	gin_engine.PUT("/users/:id", server.update)
 	gin_engine.DELETE("/users/:id", server.delete)
-	//gin_engine.GET("/api/access-token/:refresh_token/:secret_key", controllers.GenerateAccessToken")
-
+	gin_engine.GET("/refresh_token/:password", server.getRefreshToken)
+	gin_engine.GET("/access_token/:password/:refreshtoken", server.getAccessToken)
+	gin_engine.GET("/access_token/check/:token", server.checkAccessToken)
+	gin_engine.GET("/refresh_token/check/:token", server.checkRefreshToken)
 	gin_engine.Run()
 }
 
+// Function that checks if the access token is valid, it takes an access token as parameter and returns a JSON with this structure: {"valid": true}
+func (server *Server) checkAccessToken(context *gin.Context) {
+	retVal, err := verifyAccessToken(context.Param("token"))
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	} else {
+		context.JSON(http.StatusOK, gin.H{"valid": retVal})
+	}
+}
+
+// Function that checks if the refresh token is valid, it takes a refresh token as parameter and returns a JSON with this structure: {"valid": true}
+func (server *Server) checkRefreshToken(context *gin.Context) {
+	retVal, err := verifyRefreshToken(context.Param("token"))
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	} else {
+		context.JSON(http.StatusOK, gin.H{"valid": retVal})
+	}
+}
+
+// Function that generates an access token, it takes a password and a refreshtoken as parameter and returns a JSON with this structure : { "token": generatedToken }
+func (server *Server) getAccessToken(context *gin.Context) {
+	// Use GenerateAccessToken function to generate a new access token
+	accessToken, err := generateAccessToken(context.Param("password"), []byte(context.Param("refreshtoken")))
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	}
+	context.JSON(http.StatusOK, gin.H{"token": accessToken})
+}
+
+// Function that generates a refresh token, it takes a password as parameter and returns a JSON with this structure : { "token": generatedToken }
+func (server *Server) getRefreshToken(context *gin.Context) {
+	// Use GenerateRefreshToken function to generate a new refresh token
+	refreshToken, err := generateRefreshToken([]byte(context.Param("password")))
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	}
+	context.JSON(http.StatusOK, gin.H{"token": refreshToken})
+}
+
+// Welcome function that returns a JSON with this structure : { "Title": "Gaia" }
 func (server *Server) welcome(context *gin.Context) {
 	context.JSON(http.StatusOK, gin.H{"Title": "Gaia"})
 }
+
+// Ping function that returns a JSON with this structure : { "ping": "pong" }
 func (server *Server) ping(context *gin.Context) {
 	context.JSON(http.StatusOK, gin.H{"ping": "pong"})
 }
