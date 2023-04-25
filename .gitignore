@@ -24,4 +24,8 @@
 # Go workspace file
 go.work
 
+# IDE
+.idea
+.vs
+
 # End of https://www.toptal.com/developers/gitignore/api/go
