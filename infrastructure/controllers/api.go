@@ -93,12 +93,12 @@ func (server *Server) login(context *gin.Context) {
 	var user_repo = *server.auth_service.User_repo
 	logged_in, err := user_repo.CheckLogin(&login)
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, err.Error())
+		context.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid Credentials"})
 	} else if logged_in {
 		//a function that generates a token using JWT
 		context.JSON(http.StatusAccepted, gin.H{"cnx_Token": "token"})
 	} else {
-		context.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid Credentials"})
+		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}
 }
 
