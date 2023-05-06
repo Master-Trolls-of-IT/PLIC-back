@@ -86,7 +86,7 @@ func (server *Server) welcome(context *gin.Context) {
 
 // Ping function that returns a JSON with this structure : { "ping": "pong" }
 func (server *Server) ping(context *gin.Context) {
-	context.JSON(http.StatusOK, gin.H{"ping": "pong"})
+	context.JSON(http.StatusOK, server.returnAPIData.Ping())
 }
 
 func (server *Server) login(context *gin.Context) {

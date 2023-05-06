@@ -10,6 +10,7 @@ type IReturnAPIData interface {
 	RegisterSucces(user entities.User)
 	GetToken(token string)
 	CheckToken(isTokenValid bool)
+	Ping()
 }
 
 type ReturnAPIData struct {
@@ -92,5 +93,13 @@ func (ReturnAPIData *ReturnAPIData) CheckToken(isTokenValid bool) JSONObject {
 		"data": JSONObject{
 			"isTokenValid": isTokenValid,
 		},
+	}
+}
+
+func (ReturnAPIData *ReturnAPIData) Ping() JSONObject {
+	return JSONObject{
+		"status":  200,
+		"message": "Pong",
+		"data":    JSONObject{},
 	}
 }
