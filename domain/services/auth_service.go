@@ -4,12 +4,12 @@ import (
 	ports "gaia-api/domain/interfaces"
 )
 
-type Auth_service struct {
-	User_repo *ports.User_interface
+type AuthService struct {
+	UserRepo *ports.UserInterface
 }
 
-func NewAuthService(db_access ports.User_interface) *Auth_service {
-	return &Auth_service{
-		User_repo: &db_access,
+func NewAuthService(dbAccess ports.UserInterface) *AuthService {
+	return &AuthService{
+		UserRepo: &dbAccess,
 	}
 }
