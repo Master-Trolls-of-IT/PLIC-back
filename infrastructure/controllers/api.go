@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"gaia-api/application/interfaces"
 	"gaia-api/domain/entities"
 	"gaia-api/domain/services"
 	"net/http"
@@ -11,46 +12,50 @@ import (
 )
 
 type Server struct {
-	auth_service *services.Auth_service
+	authService   *services.AuthService
+	returnAPIData *interfaces.ReturnAPIData
 }
 
-func NewServer(auth_service *services.Auth_service) *Server {
-	return &Server{auth_service: auth_service}
+func NewServer(authService *services.AuthService, returnAPIData *interfaces.ReturnAPIData) *Server {
+	return &Server{authService: authService, returnAPIData: returnAPIData}
 }
 
 func (server *Server) Start() {
-	gin_engine := gin.Default()
+	ginEngine := gin.Default()
 
-	gin_engine.GET("/", server.welcome)
-	gin_engine.GET("/ping", server.ping)
-	gin_engine.POST("/login", server.login)
-	gin_engine.POST("/register", server.register)
-	gin_engine.PUT("/users/:id", server.update)
-	gin_engine.DELETE("/users/:id", server.delete)
-	gin_engine.GET("/refresh_token/:password", server.getRefreshToken)
-	gin_engine.GET("/access_token/:password/:refreshtoken", server.getAccessToken)
-	gin_engine.GET("/access_token/check/:token", server.checkAccessToken)
-	gin_engine.GET("/refresh_token/check/:token", server.checkRefreshToken)
-	gin_engine.Run()
+	ginEngine.GET("/", server.welcome)
+	ginEngine.GET("/ping", server.ping)
+	ginEngine.POST("/login", server.login)
+	ginEngine.POST("/register", server.register)
+	ginEngine.PUT("/users/:id", server.update)
+	ginEngine.DELETE("/users/:id", server.delete)
+	ginEngine.GET("/refresh_token/:password", server.getRefreshToken)
+	ginEngine.GET("/access_token/:password/:refreshtoken", server.getAccessToken)
+	ginEngine.GET("/access_token/check/:token", server.checkAccessToken)
+	ginEngine.GET("/refresh_token/check/:token", server.checkRefreshToken)
+	err := ginEngine.Run()
+	if err != nil {
+		return
+	}
 }
 
 // Function that checks if the access token is valid, it takes an access token as parameter and returns a JSON with this structure: {"valid": true}
 func (server *Server) checkAccessToken(context *gin.Context) {
-	retVal, err := verifyAccessToken(context.Param("token"))
+	isTokenValid, err := verifyAccessToken(context.Param("token"))
 	if err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		context.JSON(http.StatusBadRequest, server.returnAPIData.Error(http.StatusBadRequest, err.Error()))
 	} else {
-		context.JSON(http.StatusOK, gin.H{"valid": retVal})
+		context.JSON(http.StatusOK, server.returnAPIData.CheckToken(isTokenValid))
 	}
 }
 
 // Function that checks if the refresh token is valid, it takes a refresh token as parameter and returns a JSON with this structure: {"valid": true}
 func (server *Server) checkRefreshToken(context *gin.Context) {
-	retVal, err := verifyRefreshToken(context.Param("token"))
+	isTokenValid, err := verifyRefreshToken(context.Param("token"))
 	if err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		context.JSON(http.StatusBadRequest, server.returnAPIData.Error(http.StatusBadRequest, err.Error()))
 	} else {
-		context.JSON(http.StatusOK, gin.H{"valid": retVal})
+		context.JSON(http.StatusOK, server.returnAPIData.CheckToken(isTokenValid))
 	}
 }
 
@@ -59,9 +64,9 @@ func (server *Server) getAccessToken(context *gin.Context) {
 	// Use GenerateAccessToken function to generate a new access token
 	accessToken, err := generateAccessToken(context.Param("password"), []byte(context.Param("refreshtoken")))
 	if err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		context.JSON(http.StatusBadRequest, server.returnAPIData.Error(http.StatusBadRequest, err.Error()))
 	}
-	context.JSON(http.StatusOK, gin.H{"token": accessToken})
+	context.JSON(http.StatusOK, server.returnAPIData.GetToken(accessToken))
 }
 
 // Function that generates a refresh token, it takes a password as parameter and returns a JSON with this structure : { "token": generatedToken }
@@ -69,9 +74,9 @@ func (server *Server) getRefreshToken(context *gin.Context) {
 	// Use GenerateRefreshToken function to generate a new refresh token
 	refreshToken, err := generateRefreshToken([]byte(context.Param("password")))
 	if err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		context.JSON(http.StatusBadRequest, server.returnAPIData.Error(http.StatusBadRequest, err.Error()))
 	}
-	context.JSON(http.StatusOK, gin.H{"token": refreshToken})
+	context.JSON(http.StatusOK, server.returnAPIData.GetToken(refreshToken))
 }
 
 // Welcome function that returns a JSON with this structure : { "Title": "Gaia" }
@@ -88,17 +93,19 @@ func (server *Server) login(context *gin.Context) {
 	var login = entities.Login_info{}
 	//binds Json Body to Entities.Login_info Class
 	if err := context.ShouldBindJSON(&login); err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		context.JSON(http.StatusBadRequest, server.returnAPIData.Error(http.StatusBadRequest, err.Error()))
 	}
-	var user_repo = *server.auth_service.User_repo
-	logged_in, err := user_repo.CheckLogin(&login)
+	var userRepo = *server.authService.UserRepo
+	loggedIn, err := userRepo.CheckLogin(&login)
 	if err != nil {
-		context.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid Credentials"})
-	} else if logged_in {
+		context.JSON(http.StatusUnauthorized, server.returnAPIData.Error(http.StatusUnauthorized, "Informations de connexion non valides"))
+	} else if loggedIn {
+		var user, _ = userRepo.GetUserByEmail(login.Email)
+
 		//a function that generates a token using JWT
-		context.JSON(http.StatusAccepted, gin.H{"cnx_Token": "token"})
+		context.JSON(http.StatusAccepted, server.returnAPIData.LoginSuccess(user))
 	} else {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusBadRequest, err.Error()))
 	}
 }
 
@@ -106,19 +113,19 @@ func (server *Server) register(context *gin.Context) {
 	var user = entities.User{}
 	//binds Json Body to Entities.User Class
 	if err := context.ShouldBindJSON(&user); err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		context.JSON(http.StatusBadRequest, server.returnAPIData.Error(http.StatusBadRequest, err.Error()))
 		return
 	}
 
-	var user_repo = *server.auth_service.User_repo
-	registered, err := user_repo.Register(&user)
+	var userRepo = *server.authService.UserRepo
+	registered, err := userRepo.Register(&user)
 
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, err.Error()))
 	} else if registered {
-		context.JSON(http.StatusOK, gin.H{"message": "User registered successfully"})
+		context.JSON(http.StatusOK, server.returnAPIData.RegisterSuccess(user))
 	} else {
-		context.JSON(http.StatusConflict, gin.H{"error": "Username or Email already taken"})
+		context.JSON(http.StatusConflict, server.returnAPIData.Error(http.StatusConflict, "Nom d'utilisateur ou email déjà utilisée"))
 	}
 }
 

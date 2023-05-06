@@ -2,11 +2,11 @@ package ports
 
 import "gaia-api/domain/entities"
 
-type User_interface interface {
+type UserInterface interface {
 	GetUserById(id int) (entities.User, error)
 	GetUserByEmail(email string) (entities.User, error)
 	GetUserByUsername(username string) (entities.User, error)
 
-	CheckLogin(login_info *entities.Login_info) (bool, error)
-	Register(user_info *entities.User) (bool, error)
+	CheckLogin(loginInfo *entities.Login_info) (bool, error)
+	Register(userInfo *entities.User) (bool, error)
 }
