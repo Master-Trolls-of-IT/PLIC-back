@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"gaia-api/application/interfaces"
 	"gaia-api/domain/entities"
 	"gaia-api/domain/services"
@@ -14,6 +15,8 @@ import (
 type Server struct {
 	authService   *services.AuthService
 	returnAPIData *interfaces.ReturnAPIData
+	// TODO: Store the logs ?
+	//logger        *services.LoggerService
 }
 
 func NewServer(authService *services.AuthService, returnAPIData *interfaces.ReturnAPIData) *Server {
@@ -27,6 +30,7 @@ func (server *Server) Start() {
 	ginEngine.GET("/ping", server.ping)
 	ginEngine.POST("/login", server.login)
 	ginEngine.POST("/register", server.register)
+	ginEngine.POST("/logs", server.getLogs)
 	ginEngine.PUT("/users/:id", server.update)
 	ginEngine.DELETE("/users/:id", server.delete)
 	ginEngine.GET("/refresh_token/:password", server.getRefreshToken)
@@ -36,6 +40,27 @@ func (server *Server) Start() {
 	err := ginEngine.Run()
 	if err != nil {
 		return
+	}
+}
+
+func (Server *Server) getLogs(context *gin.Context) {
+	var logs []entities.UserLogs
+	var color string
+	if err := context.BindJSON(&logs); err != nil {
+		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	}
+	for _, log := range logs {
+		switch log.Level {
+		case "ERROR":
+			color = "\033[31m" // red
+		case "WARNING":
+			color = "\033[33m" // yellow
+		case "INFO":
+			color = "\033[32m" // green
+		default:
+			color = "\033[0m" // reset color
+		}
+		fmt.Printf("\n%s[%s] {%s}:\nDescription: %s\nDetails: %s\nSource: %s\n", color, log.Date, log.Level, log.Message, log.Details, log.Source)
 	}
 }
 
