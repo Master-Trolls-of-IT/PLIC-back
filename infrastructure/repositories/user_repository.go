@@ -15,13 +15,14 @@ type UserRepo struct {
 func NewUserRepository(db *Database) *UserRepo {
 	return &UserRepo{data: db}
 }
+
 func (userRepo *UserRepo) getUser(query string, args ...interface{}) (entities.User, error) {
 	stmt, err := userRepo.data.DB.Prepare(query)
 	if err != nil {
 		return entities.User{}, err
 	}
 	var user entities.User
-	err = stmt.QueryRow(args...).Scan(&user.Id, &user.Username, &user.Password, &user.Email, &user.Pseudo, &user.Rights, &user.Birthdate, &user.Weight, &user.Height, &user.Gender, &user.Sportiveness, &user.BasalMetabolism)
+	err = stmt.QueryRow(args...).Scan(&user.Id, &user.Rights, &user.Email, &user.Username, &user.Birthdate, &user.Weight, &user.Height, &user.Gender, &user.Sportiveness, &user.BasalMetabolism, &user.Password, &user.Pseudo)
 	if err != nil {
 		return entities.User{}, err
 	}
