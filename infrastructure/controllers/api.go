@@ -125,7 +125,12 @@ func (server *Server) login(context *gin.Context) {
 	if err != nil {
 		context.JSON(http.StatusUnauthorized, server.returnAPIData.Error(http.StatusUnauthorized, "Informations de connexion non valides"))
 	} else if loggedIn {
-		var user, _ = userRepo.GetUserByEmail(login.Email)
+		var user entities.User
+		if login.Email == "" {
+			user, _ = userRepo.GetUserByUsername(login.Username)
+		} else {
+			user, _ = userRepo.GetUserByEmail(login.Email)
+		}
 
 		//a function that generates a token using JWT
 		context.JSON(http.StatusAccepted, server.returnAPIData.LoginSuccess(user))
