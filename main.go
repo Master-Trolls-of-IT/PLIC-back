@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"gaia-api/application/interfaces"
 	"gaia-api/domain/services"
 	api "gaia-api/infrastructure/controllers"
 	"gaia-api/infrastructure/repositories"
@@ -27,9 +28,10 @@ func main() {
 		panic(err)
 	}
 
-	user_repo := repositories.NewUserRepository(db)
-	authentication_service := services.NewAuthService(user_repo)
-	gin_server := api.NewServer(authentication_service)
+	userRepo := repositories.NewUserRepository(db)
+	authenticationService := services.NewAuthService(userRepo)
+	returnAPIData := interfaces.NewReturnAPIData()
+	ginServer := api.NewServer(authenticationService, returnAPIData)
 
-	gin_server.Start()
+	ginServer.Start()
 }
