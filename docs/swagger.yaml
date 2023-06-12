@@ -1,0 +1,164 @@
+definitions:
+  controllers.Ping:
+    properties:
+      ping:
+        example: pong
+        type: string
+    type: object
+  controllers.Welcome:
+    properties:
+      Title:
+        example: Gaia
+        type: string
+    type: object
+externalDocs:
+  description: OpenAPI
+  url: https://swagger.io/resources/open-api/
+host: plic-back-qp6wugltyq-ew.a.run.app/
+info:
+  contact:
+    email: gaiank2024@gmail.com
+    name: à compléter
+  description: This is a simple API for PLIC BACKEND
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: à compléter
+  title: PLIC BACKEND API
+  version: "1.0"
+paths:
+  /:
+    get:
+      consumes:
+      - application/json
+      description: 'Welcome function that returns a JSON with this structure : { "Title":
+        "Gaia" }'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.Welcome'
+      summary: Welcome message
+  /access_token/{password}/{refreshtoken}:
+    get:
+      consumes:
+      - application/json
+      description: Generates a new access token
+      parameters:
+      - description: Hashed User password
+        in: path
+        name: password
+        required: true
+        type: string
+      - description: Refresh token
+        in: path
+        name: refreshtoken
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Generates a new access token
+  /access_token/check/{token}:
+    get:
+      consumes:
+      - application/json
+      description: Check if access token is valid
+      parameters:
+      - description: Access token
+        in: path
+        name: token
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: boolean
+      summary: Checks token validity
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: 'Login function that returns a JSON with this structure : { "cnx_Token":
+        "token" }'
+      parameters:
+      - description: Login info
+        in: body
+        name: login
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Accepted
+          schema:
+            type: string
+      summary: Login
+  /ping:
+    get:
+      consumes:
+      - application/json
+      description: Checks if server is up
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.Ping'
+      summary: Ping message
+  /refresh_token/check/{token}:
+    get:
+      consumes:
+      - application/json
+      description: Check if refresh token is valid
+      parameters:
+      - description: Refresh token
+        in: path
+        name: token
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: boolean
+      summary: Checks token validity
+  /register:
+    post:
+      consumes:
+      - application/json
+      description: 'Register function that returns a JSON with this structure : {
+        "message": "User registered successfully" }'
+      parameters:
+      - description: User info
+        in: body
+        name: user
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Register
+securityDefinitions:
+  BasicAuth:
+    type: basic
+swagger: "2.0"
