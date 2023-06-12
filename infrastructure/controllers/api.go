@@ -1,10 +1,12 @@
 package controllers
 
 import (
+	"encoding/json"
 	"fmt"
 	"gaia-api/application/interfaces"
 	"gaia-api/domain/entities"
 	"gaia-api/domain/services"
+	"gaia-api/infrastructure/dto"
 	"net/http"
 
 	_ "github.com/golang-jwt/jwt/v5"
@@ -15,14 +17,15 @@ import (
 type Server struct {
 	authService          *services.AuthService
 	openFoodFactsService *services.OpenFoodFactsService
+	OpenFoodFactsAPI     *OpenFoodFactsAPI
 
 	returnAPIData *interfaces.ReturnAPIData
 	// TODO: Store the logs ?
 	//logger        *services.LoggerService
 }
 
-func NewServer(authService *services.AuthService, returnAPIData *interfaces.ReturnAPIData) *Server {
-	return &Server{authService: authService, returnAPIData: returnAPIData}
+func NewServer(authService *services.AuthService, returnAPIData *interfaces.ReturnAPIData, openFoodFactsService *services.OpenFoodFactsService, OpenFoodFactsAPI *OpenFoodFactsAPI) *Server {
+	return &Server{authService: authService, returnAPIData: returnAPIData, openFoodFactsService: openFoodFactsService, OpenFoodFactsAPI: OpenFoodFactsAPI}
 }
 
 func (server *Server) Start() {
@@ -48,12 +51,30 @@ func (server *Server) Start() {
 
 func (server *Server) retrieveProduct(context *gin.Context) {
 	var barcode = context.Param("barcode")
-	var productRepo = *server.openFoodFactsService.ProductRepo
-	nutrient, err := productRepo.GetProductByBarCode(barcode)
-	if nutrient == (entities.Nutrient{}) {
-		//CALL OPENFOODFACTS
-		//SAVE PRODUCT
+	//var productRepo = *server.openFoodFactsService.ProductRepo
+	//nutrient, err := productRepo.GetProductByBarCode(barcode)
+	//if err != nil {
+	//	context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, err.Error()))
+	//}
+	//if nutrient == (entities.Nutrient{}) {
+	//RETRIEVE PRODUCT FROM OPENFOODFACTS
+	client := server.OpenFoodFactsAPI.Client
+	rawProduct, err := client.Product(barcode)
+	fmt.Println(rawProduct)
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, err.Error()))
 	}
+	//map rawProduct to dto.ProductInfo
+	var productInfo dto.ProductInfo
+	rawProductJSON, err := json.Marshal(rawProduct)
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, err.Error()))
+	}
+	json.Unmarshal(rawProductJSON, productInfo)
+	//fmt.Println(productInfo)
+	//fmt.Println("ok")
+	//SAVE PRODUCT
+	//	}
 	//SEND THE PRODUCT TO FRONTEND
 }
 

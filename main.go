@@ -30,10 +30,11 @@ func main() {
 
 	userRepo := repositories.NewUserRepository(db)
 	productRepo := repositories.NewProductRepository(db)
-	_ = productRepo
 	authenticationService := services.NewAuthService(userRepo)
 	returnAPIData := interfaces.NewReturnAPIData()
-	ginServer := api.NewServer(authenticationService, returnAPIData)
+	OpenFoodFactsService := services.NewOpenFoodFactsService(productRepo)
+	OpenFoodFactsAPI := api.NewOpenFoodFactsAPI()
+	ginServer := api.NewServer(authenticationService, returnAPIData, OpenFoodFactsService, OpenFoodFactsAPI)
 
 	ginServer.Start()
 }
