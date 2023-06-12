@@ -13,7 +13,9 @@ import (
 )
 
 type Server struct {
-	authService   *services.AuthService
+	authService          *services.AuthService
+	openFoodFactsService *services.OpenFoodFactsService
+
 	returnAPIData *interfaces.ReturnAPIData
 	// TODO: Store the logs ?
 	//logger        *services.LoggerService
@@ -37,13 +39,25 @@ func (server *Server) Start() {
 	ginEngine.GET("/access_token/:password/:refreshtoken", server.getAccessToken)
 	ginEngine.GET("/access_token/check/:token", server.checkAccessToken)
 	ginEngine.GET("/refresh_token/check/:token", server.checkRefreshToken)
+	ginEngine.GET("/product/:barcode", server.retrieveProduct)
 	err := ginEngine.Run()
 	if err != nil {
 		return
 	}
 }
 
-func (Server *Server) getLogs(context *gin.Context) {
+func (server *Server) retrieveProduct(context *gin.Context) {
+	var barcode = context.Param("barcode")
+	var productRepo = *server.openFoodFactsService.ProductRepo
+	nutrient, err := productRepo.GetProductByBarCode(barcode)
+	if nutrient == (entities.Nutrient{}) {
+		//CALL OPENFOODFACTS
+		//SAVE PRODUCT
+	}
+	//SEND THE PRODUCT TO FRONTEND
+}
+
+func (server *Server) getLogs(context *gin.Context) {
 	var logs []entities.UserLogs
 	var color string
 	if err := context.BindJSON(&logs); err != nil {

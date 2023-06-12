@@ -29,6 +29,8 @@ func main() {
 	}
 
 	userRepo := repositories.NewUserRepository(db)
+	productRepo := repositories.NewProductRepository(db)
+	_ = productRepo
 	authenticationService := services.NewAuthService(userRepo)
 	returnAPIData := interfaces.NewReturnAPIData()
 	ginServer := api.NewServer(authenticationService, returnAPIData)
