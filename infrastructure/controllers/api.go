@@ -1,12 +1,10 @@
 package controllers
 
 import (
-	"encoding/json"
 	"fmt"
 	"gaia-api/application/interfaces"
 	"gaia-api/domain/entities"
 	"gaia-api/domain/services"
-	"gaia-api/infrastructure/dto"
 	"net/http"
 
 	_ "github.com/golang-jwt/jwt/v5"
@@ -42,14 +40,14 @@ func (server *Server) Start() {
 	ginEngine.GET("/access_token/:password/:refreshtoken", server.getAccessToken)
 	ginEngine.GET("/access_token/check/:token", server.checkAccessToken)
 	ginEngine.GET("/refresh_token/check/:token", server.checkRefreshToken)
-	ginEngine.GET("/product/:barcode", server.retrieveProduct)
+	ginEngine.GET("/product/:barcode", server.getAndMapAndSaveProduct)
 	err := ginEngine.Run()
 	if err != nil {
 		return
 	}
 }
 
-func (server *Server) retrieveProduct(context *gin.Context) {
+func (server *Server) getAndMapAndSaveProduct(context *gin.Context) {
 	var barcode = context.Param("barcode")
 	//var productRepo = *server.openFoodFactsService.ProductRepo
 	//nutrient, err := productRepo.GetProductByBarCode(barcode)
@@ -57,25 +55,17 @@ func (server *Server) retrieveProduct(context *gin.Context) {
 	//	context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, err.Error()))
 	//}
 	//if nutrient == (entities.Nutrient{}) {
+
 	//RETRIEVE PRODUCT FROM OPENFOODFACTS
-	client := server.OpenFoodFactsAPI.Client
-	rawProduct, err := client.Product(barcode)
-	fmt.Println(rawProduct)
+	openFoodFactAPI := server.OpenFoodFactsAPI
+	mappedProduct, err := openFoodFactAPI.retrieveAndMapProduct(barcode)
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, err.Error()))
 	}
-	//map rawProduct to dto.ProductInfo
-	var productInfo dto.ProductInfo
-	rawProductJSON, err := json.Marshal(rawProduct)
-	if err != nil {
-		context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, err.Error()))
-	}
-	json.Unmarshal(rawProductJSON, productInfo)
-	//fmt.Println(productInfo)
-	//fmt.Println("ok")
 	//SAVE PRODUCT
-	//	}
+
 	//SEND THE PRODUCT TO FRONTEND
+	context.JSON(http.StatusOK, mappedProduct)
 }
 
 func (server *Server) getLogs(context *gin.Context) {

@@ -1,15 +1,16 @@
 package entities
 
-type ProductInfo struct {
-	Name       string           `json:"name"`
-	Nutrients  ProductNutrients `json:"nutrients"`
-	ImageURL   string           `json:"image_url"`
-	NutriScore NutriScore       `json:"nutriscore"`
+type Product struct {
+	Name       string     `json:"name"`
+	Nutrients  Nutrients  `json:"nutrients"`
+	ImageURL   string     `json:"image_url"`
+	NutriScore NutriScore `json:"nutriscore"`
+	EcoScore   string     `json:"ecoscore"`
 }
 
-type ProductNutrients struct {
-	EnergyKj      int     `json:"energyKj"`
-	EnergyKcal    int     `json:"energyKcal"`
+type Nutrients struct {
+	EnergyKj      float64 `json:"energyKj"`
+	EnergyKcal    float64 `json:"energyKcal"`
 	Fat           float64 `json:"fat"`
 	SaturatedFat  float64 `json:"saturatedFat"`
 	Carbohydrates float64 `json:"carbohydrates"`
@@ -20,6 +21,6 @@ type ProductNutrients struct {
 }
 
 type NutriScore struct {
-	Score int    `json:"score"`
-	Grade string `json:"grade"`
+	Score float64 `json:"score"`
+	Grade string  `json:"grade"`
 }
