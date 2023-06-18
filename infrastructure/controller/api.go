@@ -1,10 +1,11 @@
-package controllers
+package controller
 
 import (
 	"fmt"
-	"gaia-api/application/interfaces"
-	"gaia-api/domain/entities"
-	"gaia-api/domain/services"
+	"gaia-api/application/interface"
+	"gaia-api/domain/entity"
+	"gaia-api/domain/service"
+	"gaia-api/infrastructure/error/openFoodFacts_api_error"
 	"net/http"
 
 	_ "github.com/golang-jwt/jwt/v5"
@@ -13,16 +14,16 @@ import (
 )
 
 type Server struct {
-	authService          *services.AuthService
-	openFoodFactsService *services.OpenFoodFactsService
+	authService          *service.AuthService
+	openFoodFactsService *service.OpenFoodFactsService
 	OpenFoodFactsAPI     *OpenFoodFactsAPI
 
 	returnAPIData *interfaces.ReturnAPIData
 	// TODO: Store the logs ?
-	//logger        *services.LoggerService
+	//logger        *service.LoggerService
 }
 
-func NewServer(authService *services.AuthService, returnAPIData *interfaces.ReturnAPIData, openFoodFactsService *services.OpenFoodFactsService, OpenFoodFactsAPI *OpenFoodFactsAPI) *Server {
+func NewServer(authService *service.AuthService, returnAPIData *interfaces.ReturnAPIData, openFoodFactsService *service.OpenFoodFactsService, OpenFoodFactsAPI *OpenFoodFactsAPI) *Server {
 	return &Server{authService: authService, returnAPIData: returnAPIData, openFoodFactsService: openFoodFactsService, OpenFoodFactsAPI: OpenFoodFactsAPI}
 }
 
@@ -49,27 +50,37 @@ func (server *Server) Start() {
 
 func (server *Server) getAndMapAndSaveProduct(context *gin.Context) {
 	var barcode = context.Param("barcode")
-	//var productRepo = *server.openFoodFactsService.ProductRepo
-	//nutrient, err := productRepo.GetProductByBarCode(barcode)
-	//if err != nil {
-	//	context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, err.Error()))
-	//}
-	//if nutrient == (entities.Nutrient{}) {
+	var productRepo = *server.openFoodFactsService.ProductRepo
+	product, dbError := productRepo.GetProductByBarCode(barcode)
 
-	//RETRIEVE PRODUCT FROM OPENFOODFACTS
-	openFoodFactAPI := server.OpenFoodFactsAPI
-	mappedProduct, err := openFoodFactAPI.retrieveAndMapProduct(barcode)
-	if err != nil {
-		context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, err.Error()))
+	if dbError != nil {
+		context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, dbError.Error()))
 	}
-	//SAVE PRODUCT
 
-	//SEND THE PRODUCT TO FRONTEND
-	context.JSON(http.StatusOK, mappedProduct)
+	if product == (entity.Product{}) {
+
+		openFoodFactAPI := server.OpenFoodFactsAPI
+		mappedProduct, err := openFoodFactAPI.retrieveAndMapProduct(barcode)
+
+		if _, productNotFound := err.(openFoodFacts_api_error.ProductNotFoundError); productNotFound {
+			context.JSON(http.StatusInternalServerError, server.returnAPIData.ProductNotAvailable(barcode))
+		}
+
+		productSaved, err := productRepo.SaveProduct(mappedProduct)
+
+		if productSaved {
+			context.JSON(http.StatusOK, server.returnAPIData.ProductFound(mappedProduct))
+		} else {
+			context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, err.Error()))
+		}
+
+	} else {
+		context.JSON(http.StatusOK, server.returnAPIData.ProductFound(product))
+	}
 }
 
 func (server *Server) getLogs(context *gin.Context) {
-	var logs []entities.UserLogs
+	var logs []entity.UserLogs
 	var color string
 	if err := context.BindJSON(&logs); err != nil {
 		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -140,7 +151,7 @@ func (server *Server) ping(context *gin.Context) {
 }
 
 func (server *Server) login(context *gin.Context) {
-	var login = entities.Login_info{}
+	var login = entity.Login_info{}
 	//binds Json Body to Entities.Login_info Class
 	if err := context.ShouldBindJSON(&login); err != nil {
 		context.JSON(http.StatusBadRequest, server.returnAPIData.Error(http.StatusBadRequest, err.Error()))
@@ -150,7 +161,7 @@ func (server *Server) login(context *gin.Context) {
 	if err != nil {
 		context.JSON(http.StatusUnauthorized, server.returnAPIData.Error(http.StatusUnauthorized, "Informations de connexion non valides"))
 	} else if loggedIn {
-		var user entities.User
+		var user entity.User
 		if login.Email == "" {
 			user, _ = userRepo.GetUserByUsername(login.Username)
 		} else {
@@ -165,7 +176,7 @@ func (server *Server) login(context *gin.Context) {
 }
 
 func (server *Server) register(context *gin.Context) {
-	var user = entities.User{}
+	var user = entity.User{}
 	//binds Json Body to Entities.User Class
 	if err := context.ShouldBindJSON(&user); err != nil {
 		context.JSON(http.StatusBadRequest, server.returnAPIData.Error(http.StatusBadRequest, err.Error()))

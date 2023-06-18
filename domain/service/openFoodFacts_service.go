@@ -1,7 +1,7 @@
-package services
+package service
 
 import (
-	ports "gaia-api/domain/interfaces"
+	ports "gaia-api/domain/port"
 )
 
 type OpenFoodFactsService struct {

@@ -1,7 +1,8 @@
-package controllers
+package controller
 
 import (
-	"gaia-api/domain/entities"
+	"gaia-api/domain/entity"
+	"gaia-api/infrastructure/error/openFoodFacts_api_error"
 	"github.com/openfoodfacts/openfoodfacts-go"
 )
 
@@ -14,29 +15,29 @@ func NewOpenFoodFactsAPI() *OpenFoodFactsAPI {
 	return &OpenFoodFactsAPI{&api}
 }
 
-func (openFoodFactsAPI *OpenFoodFactsAPI) retrieveAndMapProduct(barcode string) (entities.Product, error) {
+func (openFoodFactsAPI *OpenFoodFactsAPI) retrieveAndMapProduct(barcode string) (entity.Product, error) {
 	client := openFoodFactsAPI.Client
 	product, err := client.Product(barcode)
 
 	if err != nil {
-		return entities.Product{}, err
+		return entity.Product{}, openFoodFacts_api_error.ProductNotFoundError{Barcode: barcode}
 	}
 
 	mappedProduct, err := mapOpenFoodFactsProductToEntitiesProduct(product)
 
 	if err != nil {
-		return entities.Product{}, err
+		return entity.Product{}, err
 	}
 
 	return mappedProduct, nil
 }
 
-func mapOpenFoodFactsProductToEntitiesProduct(product *openfoodfacts.Product) (entities.Product, error) {
+func mapOpenFoodFactsProductToEntitiesProduct(product *openfoodfacts.Product) (entity.Product, error) {
 	nutrients := product.Nutriments
 
-	mappedNutriscore := entities.NutriScore{Score: product.Nutriments.NutritionScoreFr100G, Grade: product.NutritionGradeFr}
+	mappedNutriscore := entity.NutriScore{Score: product.Nutriments.NutritionScoreFr100G, Grade: product.NutritionGradeFr}
 
-	mappedNutrients := entities.Nutrients{
+	mappedNutrients := entity.Nutrients{
 		EnergyKj:      nutrients.Energy100G,
 		EnergyKcal:    nutrients.EnergyKcal100G,
 		Fat:           nutrients.Fat100G,
@@ -48,7 +49,7 @@ func mapOpenFoodFactsProductToEntitiesProduct(product *openfoodfacts.Product) (e
 		Salt:          nutrients.Salt100G,
 	}
 
-	mappedProduct := entities.Product{
+	mappedProduct := entity.Product{
 		Name:       product.ProductNameEn,
 		Nutrients:  mappedNutrients,
 		ImageURL:   product.ImageURL.URL.String(),

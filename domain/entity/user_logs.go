@@ -1,4 +1,4 @@
-package entities
+package entity
 
 type UserLogs struct {
 	Level   string `json:"level"`

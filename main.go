@@ -2,10 +2,10 @@ package main
 
 import (
 	"flag"
-	"gaia-api/application/interfaces"
-	"gaia-api/domain/services"
-	api "gaia-api/infrastructure/controllers"
-	"gaia-api/infrastructure/repositories"
+	"gaia-api/application/interface"
+	"gaia-api/domain/service"
+	api "gaia-api/infrastructure/controller"
+	"gaia-api/infrastructure/repository"
 
 	_ "github.com/golang-jwt/jwt/v5"
 	_ "github.com/jackc/pgx/v4/stdlib"
@@ -17,22 +17,22 @@ func main() {
 	dbURI := flag.String("dburi", "", "database URI")
 
 	flag.Parse()
-	var db *repositories.Database
+	var db *repository.Database
 	var err error
 	if *useLocalDB {
-		db, err = repositories.NewDatabase(*dbURI)
+		db, err = repository.NewDatabase(*dbURI)
 	} else {
-		db, err = repositories.NewDatabase()
+		db, err = repository.NewDatabase()
 	}
 	if err != nil {
 		panic(err)
 	}
 
-	userRepo := repositories.NewUserRepository(db)
-	productRepo := repositories.NewProductRepository(db)
-	authenticationService := services.NewAuthService(userRepo)
+	userRepo := repository.NewUserRepository(db)
+	productRepo := repository.NewProductRepository(db)
+	authenticationService := service.NewAuthService(userRepo)
 	returnAPIData := interfaces.NewReturnAPIData()
-	OpenFoodFactsService := services.NewOpenFoodFactsService(productRepo)
+	OpenFoodFactsService := service.NewOpenFoodFactsService(productRepo)
 	OpenFoodFactsAPI := api.NewOpenFoodFactsAPI()
 	ginServer := api.NewServer(authenticationService, returnAPIData, OpenFoodFactsService, OpenFoodFactsAPI)
 
