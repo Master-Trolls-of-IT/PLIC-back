@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"database/sql"
 	"fmt"
 	"gaia-api/application/interface"
 	"gaia-api/domain/entity"
@@ -52,26 +53,26 @@ func (server *Server) getAndMapAndSaveProduct(context *gin.Context) {
 	var barcode = context.Param("barcode")
 	var productRepo = *server.openFoodFactsService.ProductRepo
 	product, dbError := productRepo.GetProductByBarCode(barcode)
+	fmt.Print(product)
 
-	if dbError != nil {
+	if dbError != nil && dbError != sql.ErrNoRows {
 		context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, dbError.Error()))
-	}
 
-	if product == (entity.Product{}) {
+	} else if product == (entity.Product{}) {
 
 		openFoodFactAPI := server.OpenFoodFactsAPI
 		mappedProduct, err := openFoodFactAPI.retrieveAndMapProduct(barcode)
 
 		if _, productNotFound := err.(openFoodFacts_api_error.ProductNotFoundError); productNotFound {
 			context.JSON(http.StatusInternalServerError, server.returnAPIData.ProductNotAvailable(barcode))
-		}
 
-		productSaved, err := productRepo.SaveProduct(mappedProduct)
-
-		if productSaved {
-			context.JSON(http.StatusOK, server.returnAPIData.ProductFound(mappedProduct))
 		} else {
-			context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, err.Error()))
+			productSaved, err := productRepo.SaveProduct(mappedProduct, barcode)
+			if productSaved {
+				context.JSON(http.StatusOK, server.returnAPIData.ProductFound(mappedProduct))
+			} else {
+				context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, err.Error()))
+			}
 		}
 
 	} else {
