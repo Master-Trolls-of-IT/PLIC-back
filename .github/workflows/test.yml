@@ -26,7 +26,6 @@ jobs:
           curl -H "Content-Type: application/json" -X POST -d '{"content": "Build failed! Check the workflow logs for details."}' $DISCORD_WEBHOOK_URL
 
   test:
-    needs: build
     runs-on: ubuntu-latest
     steps:
       - name: Test
