@@ -13,8 +13,8 @@
 
 //	@securityDefinitions.basic	BasicAuth
 
-//	@externalDocs.description	OpenAPI
-//	@externalDocs.url			https://swagger.io/resources/open-api/
+// @externalDocs.description	OpenAPI
+// @externalDocs.url			https://swagger.io/resources/open-api/
 package controllers
 
 import (
@@ -82,6 +82,7 @@ func (Server *Server) getLogs(context *gin.Context) {
 }
 
 // checkAccessToken godoc
+//
 //	@Summary		Checks token validity
 //	@Description	Check if access token is valid
 //	@Accept			json
@@ -99,6 +100,7 @@ func (server *Server) checkAccessToken(context *gin.Context) {
 }
 
 // checkRefreshToken godoc
+//
 //	@Summary		Checks token validity
 //	@Description	Check if refresh token is valid
 //	@Accept			json
@@ -116,6 +118,7 @@ func (server *Server) checkRefreshToken(context *gin.Context) {
 }
 
 // getAccessToken godoc
+//
 //	@Summary		Generates a new access token
 //	@Description	Generates a new access token
 //	@Accept			json
@@ -151,11 +154,12 @@ func (server *Server) getRefreshToken(context *gin.Context) {
 	context.JSON(http.StatusOK, server.returnAPIData.GetToken(refreshToken))
 }
 
-
 type Welcome struct {
 	Title string `json:"Title" example:"Gaia"`
 }
+
 // welcome godoc
+//
 //	@Summary		Welcome message
 //	@Description	Welcome function that returns a JSON with this structure : { "Title": "Gaia" }
 //	@Accept			json
@@ -169,18 +173,21 @@ func (server *Server) welcome(context *gin.Context) {
 type Ping struct {
 	Title string `json:"ping" example:"pong"`
 }
+
 // ping godoc
-// 	@Summary		Ping message
-// 	@Description	Checks if server is up
-// 	@Accept			json
-// 	@Produce		json
-// 	@Success		200	{object}	Ping
-// 	@Router			/ping [get]
+//
+//	@Summary		Ping message
+//	@Description	Checks if server is up
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	Ping
+//	@Router			/ping [get]
 func (server *Server) ping(context *gin.Context) {
 	context.JSON(http.StatusOK, server.returnAPIData.Ping())
 }
 
 // login godoc
+//
 //	@Summary		Login
 //	@Description	Login function that returns a JSON with this structure : { "cnx_Token": "token" }
 //	@Accept			json
@@ -214,6 +221,7 @@ func (server *Server) login(context *gin.Context) {
 }
 
 // register godoc
+//
 //	@Summary		Register
 //	@Description	Register function that returns a JSON with this structure : { "message": "User registered successfully" }
 //	@Accept			json
