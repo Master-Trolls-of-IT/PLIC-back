@@ -5,7 +5,6 @@ on:
     branches: [ "tests-back-login" ]
 
 jobs:
-
   build:
     runs-on: ubuntu-latest
     steps:
@@ -19,9 +18,18 @@ jobs:
       - name: Build
         run: go build -v ./...
 
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
       - name: Test
         run: go test -v ./...
 
+  notify-on-failure:
+    needs: test
+    runs-on: ubuntu-latest
+    if: ${{ always() && job.status != 'success' }}
+    steps:
       - name: Notify on Discord
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
