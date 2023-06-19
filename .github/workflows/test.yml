@@ -21,3 +21,9 @@ jobs:
 
       - name: Test
         run: go test -v ./...
+
+      - name: Notify on Discord
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          curl -H "Content-Type: application/json" -X POST -d '{"content": "Build or test failed! Check the workflow logs for details."}' $DISCORD_WEBHOOK_URL
