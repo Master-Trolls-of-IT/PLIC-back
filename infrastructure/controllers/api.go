@@ -130,7 +130,6 @@ func (server *Server) checkRefreshToken(context *gin.Context) {
 func (server *Server) getAccessToken(context *gin.Context) {
 	// Use GenerateAccessToken function to generate a new access token
 	accessToken, err := generateAccessToken(context.Param("password"), []byte(context.Param("refreshtoken")))
-	prout test
 	if err != nil {
 		context.JSON(http.StatusBadRequest, server.returnAPIData.Error(http.StatusBadRequest, err.Error()))
 	}
