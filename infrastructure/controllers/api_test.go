@@ -77,6 +77,7 @@ func TestRegisterUser(t *testing.T) {
 	}`
 
 	user := entities.User{}
+	user := entities.User{}
 	invalidUser := entities.User{}
 	//Bind the JSON data to the entities.User struct
 	err := json.Unmarshal([]byte(validUserJSON), &user)
