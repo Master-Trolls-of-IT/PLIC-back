@@ -33,23 +33,28 @@ func (server *Server) Start() {
 
 	ginEngine.GET("/", server.welcome)
 	ginEngine.GET("/ping", server.ping)
+
+	ginEngine.POST("/logs", server.printLogs)
+
 	ginEngine.POST("/login", server.login)
 	ginEngine.POST("/register", server.register)
-	ginEngine.POST("/logs", server.getLogs)
-	ginEngine.PUT("/users/:id", server.update)
-	ginEngine.DELETE("/users/:id", server.delete)
+	ginEngine.PUT("/users/:id", server.updateProfile)
+	ginEngine.DELETE("/users/:id", server.deleteAccount)
+
 	ginEngine.GET("/refresh_token/:password", server.getRefreshToken)
 	ginEngine.GET("/access_token/:password/:refreshtoken", server.getAccessToken)
 	ginEngine.GET("/access_token/check/:token", server.checkAccessToken)
 	ginEngine.GET("/refresh_token/check/:token", server.checkRefreshToken)
-	ginEngine.GET("/product/:barcode", server.getAndMapAndSaveProduct)
+
+	ginEngine.GET("/product/:barcode", server.mapAndSaveAndGetProduct)
+
 	err := ginEngine.Run()
 	if err != nil {
 		return
 	}
 }
 
-func (server *Server) getAndMapAndSaveProduct(context *gin.Context) {
+func (server *Server) mapAndSaveAndGetProduct(context *gin.Context) {
 	var barcode = context.Param("barcode")
 	var productRepo = *server.openFoodFactsService.ProductRepo
 	product, dbError := productRepo.GetProductByBarCode(barcode)
@@ -80,7 +85,7 @@ func (server *Server) getAndMapAndSaveProduct(context *gin.Context) {
 	}
 }
 
-func (server *Server) getLogs(context *gin.Context) {
+func (server *Server) printLogs(context *gin.Context) {
 	var logs []entity.UserLogs
 	var color string
 	if err := context.BindJSON(&logs); err != nil {
@@ -196,10 +201,10 @@ func (server *Server) register(context *gin.Context) {
 	}
 }
 
-func (server *Server) update(context *gin.Context) {
-	// Implementation here
+func (server *Server) updateProfile(context *gin.Context) {
+	// TODO: Update user profile
 }
 
-func (server *Server) delete(context *gin.Context) {
-	// Implementation here
+func (server *Server) deleteAccount(context *gin.Context) {
+	// TODO: Delete account
 }
