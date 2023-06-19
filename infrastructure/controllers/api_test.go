@@ -3,6 +3,7 @@ package controllers
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"gaia-api/application/interfaces"
 	"gaia-api/domain/entities"
 	"gaia-api/domain/mocks"
@@ -107,5 +108,90 @@ func TestRegisterUser(t *testing.T) {
 	// Verify the expected response code
 	if w.Code != http.StatusOK {
 		t.Errorf("Expected response code for the register test: %d, obtained: %d", http.StatusOK, w.Code)
+	}
+}
+
+func TestLoginUserWithInvalidCredentials(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	// Create a mock user repository
+	mockUserRepo := mocks.NewMockUserInterface(ctrl)
+	//Create expectations on the mock user and password
+	//mockUserRepo.EXPECT().GetUserByEmail(gomock.Any()).Return(entities.User{}, nil) // Create an instance of the AuthService using the mock user repository
+	// the Check Login method should return nil error
+	mockUserRepo.EXPECT().CheckLogin(gomock.Any()).Return(false, errors.New("invalid login credentials"))
+	//mockUserRepo.EXPECT().CheckLogin(gomock.Any()).Return(error(), nil)
+	authService := services.NewAuthService(mockUserRepo)
+
+	// Create a mock ReturnAPIData
+	returnAPIData := &interfaces.ReturnAPIData{}
+
+	// Create a Server instance with the mock dependencies
+	server := &Server{
+		authService:   authService,
+		returnAPIData: returnAPIData,
+	}
+	// Create a mock context
+	w := httptest.NewRecorder()
+	invalidUserJSON := `{
+		"Email": "invalid@example.com",
+		"Password": "invalidpassword"
+	}`
+	req, err := http.NewRequest("POST", "/login", bytes.NewBuffer([]byte(invalidUserJSON)))
+	if err != nil {
+		t.Errorf("Error during the login test: %s", err)
+	}
+	c, _ := gin.CreateTestContext(w)
+	c.Request = req
+
+	// Call the test function and verify the expected response code (e.g., unauthorized)
+	server.login(c)
+
+	// Verify the expected response code (e.g., unauthorized)
+	if w.Code != http.StatusUnauthorized {
+		t.Errorf("Expected response code for the login test: %d, obtained: %d", http.StatusUnauthorized, w.Code)
+	}
+}
+
+func TestLoginUserSuccess(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	// Create a mock user repository
+	mockUserRepo := mocks.NewMockUserInterface(ctrl)
+	//Create expectations on the mock user and password
+	mockUserRepo.EXPECT().GetUserByEmail(gomock.Any()).Return(entities.User{}, nil) // Create an instance of the AuthService using the mock user repository
+	// the Check Login method should return nil error
+	mockUserRepo.EXPECT().CheckLogin(gomock.Any()).Return(true, nil) //mockUserRepo.EXPECT().CheckLogin(gomock.Any()).Return(error(), nil)
+	// Create an instance of the AuthService using the mock user repository
+	authService := services.NewAuthService(mockUserRepo)
+
+	// Create a mock ReturnAPIData
+	returnAPIData := &interfaces.ReturnAPIData{}
+
+	// Create a Server instance with the mock dependencies
+	server := &Server{
+		authService:   authService,
+		returnAPIData: returnAPIData,
+	}
+
+	// Create a mock context
+	w := httptest.NewRecorder()
+	validUserJSON := `{
+		"Email": "valid@example.com",
+		"Password": "validpassword"
+	}`
+	req, err := http.NewRequest("POST", "/login", bytes.NewBuffer([]byte(validUserJSON)))
+	if err != nil {
+		t.Errorf("Error during the login test: %s", err)
+	}
+	c, _ := gin.CreateTestContext(w)
+	c.Request = req
+
+	// Call the test function
+	server.login(c)
+
+	// Verify the expected response code (e.g., accepted)
+	if w.Code != http.StatusAccepted {
+		t.Errorf("Expected response code for the login test: %d, obtained: %d", http.StatusAccepted, w.Code)
 	}
 }
