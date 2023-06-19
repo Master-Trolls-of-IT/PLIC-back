@@ -1,3 +1,21 @@
+//	@title			PLIC BACKEND API
+//	@version		1.0
+//	@description	This is a simple API for PLIC BACKEND
+//	@termsOfService	à compléter
+
+//	@contact.name	à compléter
+//	@contact.email	gaiank2024@gmail.com
+
+//	@license.name	Apache 2.0
+//	@license.url	http://www.apache.org/licenses/LICENSE-2.0.html
+
+//	@host		plic-back-qp6wugltyq-ew.a.run.app/
+
+//	@securityDefinitions.basic	BasicAuth
+
+// @externalDocs.description	OpenAPI
+// @externalDocs.url			https://swagger.io/resources/open-api/
+
 package controller
 
 import (
@@ -106,7 +124,15 @@ func (server *Server) printLogs(context *gin.Context) {
 	}
 }
 
-// Function that checks if the access token is valid, it takes an access token as parameter and returns a JSON with this structure: {"valid": true}
+// checkAccessToken godoc
+//
+//	@Summary		Checks token validity
+//	@Description	Check if access token is valid
+//	@Accept			json
+//	@Produce		json
+//	@Param			token	path		int	true	"Access token"
+//	@Success		200	{object}	bool
+//	@Router			/access_token/check/{token} [get]
 func (server *Server) checkAccessToken(context *gin.Context) {
 	isTokenValid, err := verifyAccessToken(context.Param("token"))
 	if err != nil {
@@ -116,7 +142,15 @@ func (server *Server) checkAccessToken(context *gin.Context) {
 	}
 }
 
-// Function that checks if the refresh token is valid, it takes a refresh token as parameter and returns a JSON with this structure: {"valid": true}
+// checkRefreshToken godoc
+//
+//	@Summary		Checks token validity
+//	@Description	Check if refresh token is valid
+//	@Accept			json
+//	@Produce		json
+//	@Param			token	path		int	true	"Refresh token"
+//	@Success		200	{object}	bool
+//	@Router			/refresh_token/check/{token} [get]
 func (server *Server) checkRefreshToken(context *gin.Context) {
 	isTokenValid, err := verifyRefreshToken(context.Param("token"))
 	if err != nil {
@@ -126,7 +160,16 @@ func (server *Server) checkRefreshToken(context *gin.Context) {
 	}
 }
 
-// Function that generates an access token, it takes a password and a refreshtoken as parameter and returns a JSON with this structure : { "token": generatedToken }
+// getAccessToken godoc
+//
+//	@Summary		Generates a new access token
+//	@Description	Generates a new access token
+//	@Accept			json
+//	@Produce		json
+//	@Param			password	path		string	true	"Hashed User password"
+//	@Param			refreshtoken	path		string	true	"Refresh token"
+//	@Success		200	{object}	string
+//	@Router			/access_token/{password}/{refreshtoken} [get]
 func (server *Server) getAccessToken(context *gin.Context) {
 	// Use GenerateAccessToken function to generate a new access token
 	accessToken, err := generateAccessToken(context.Param("password"), []byte(context.Param("refreshtoken")))
@@ -136,7 +179,15 @@ func (server *Server) getAccessToken(context *gin.Context) {
 	context.JSON(http.StatusOK, server.returnAPIData.GetToken(accessToken))
 }
 
-// Function that generates a refresh token, it takes a password as parameter and returns a JSON with this structure : { "token": generatedToken }
+// getRefreshToken godoc
+//	@Summary		Generates a new refresh token
+//	@Description	Generates a new refresh token
+//	@Accept			json
+//	@Produce		json
+//	@Param			password	path		string	true	"Hashed User password"
+//	@Success		200	{object}	string
+//	@Router			/refresh_token/{password} [get]
+
 func (server *Server) getRefreshToken(context *gin.Context) {
 	// Use GenerateRefreshToken function to generate a new refresh token
 	refreshToken, err := generateRefreshToken([]byte(context.Param("password")))
@@ -146,16 +197,47 @@ func (server *Server) getRefreshToken(context *gin.Context) {
 	context.JSON(http.StatusOK, server.returnAPIData.GetToken(refreshToken))
 }
 
-// Welcome function that returns a JSON with this structure : { "Title": "Gaia" }
+type Welcome struct {
+	Title string `json:"Title" example:"Gaia"`
+}
+
+// welcome godoc
+//
+//	@Summary		Welcome message
+//	@Description	Welcome function that returns a JSON with this structure : { "Title": "Gaia" }
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	Welcome
+//	@Router			/ [get]
 func (server *Server) welcome(context *gin.Context) {
 	context.JSON(http.StatusOK, gin.H{"Title": "Gaia"})
 }
 
-// Ping function that returns a JSON with this structure : { "ping": "pong" }
+type Ping struct {
+	Title string `json:"ping" example:"pong"`
+}
+
+// ping godoc
+//
+//	@Summary		Ping message
+//	@Description	Checks if server is up
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	Ping
+//	@Router			/ping [get]
 func (server *Server) ping(context *gin.Context) {
 	context.JSON(http.StatusOK, server.returnAPIData.Ping())
 }
 
+// login godoc
+//
+//	@Summary		Login
+//	@Description	Login function that returns a JSON with this structure : { "cnx_Token": "token" }
+//	@Accept			json
+//	@Produce		json
+//	@Param			login	body		object	true	"Login info"
+//	@Success		202	{object}	string
+//	@Router			/login [post]
 func (server *Server) login(context *gin.Context) {
 	var login = entity.Login_info{}
 	//binds Json Body to Entities.Login_info Class
@@ -181,6 +263,15 @@ func (server *Server) login(context *gin.Context) {
 	}
 }
 
+// register godoc
+//
+//	@Summary		Register
+//	@Description	Register function that returns a JSON with this structure : { "message": "User registered successfully" }
+//	@Accept			json
+//	@Produce		json
+//	@Param			user	body		object	true	"User info"
+//	@Success		200	{object}	string
+//	@Router			/register [post]
 func (server *Server) register(context *gin.Context) {
 	var user = entity.User{}
 	//binds Json Body to Entities.User Class
