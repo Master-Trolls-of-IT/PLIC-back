@@ -28,7 +28,7 @@ jobs:
   notify-on-failure:
     needs: test
     runs-on: ubuntu-latest
-    if: ${{ always() && job.status != 'success' }}
+    if: always() && ${{ needs.test.result != 'success' }}
     steps:
       - name: Notify on Discord
         env:
