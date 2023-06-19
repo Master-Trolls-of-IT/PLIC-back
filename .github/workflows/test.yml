@@ -18,20 +18,16 @@ jobs:
       - name: Build
         run: go build -v ./...
 
+      - name: Notify on Failure
+        if: ${{ failure() }}
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          curl -H "Content-Type: application/json" -X POST -d '{"content": "Build failed! Check the workflow logs for details."}' $DISCORD_WEBHOOK_URL
+
   test:
     needs: build
     runs-on: ubuntu-latest
     steps:
       - name: Test
         run: go test -v ./...
-
-  notify-on-failure:
-    needs: test
-    runs-on: ubuntu-latest
-    if: always() && ${{ needs.test.result != 'success' }}
-    steps:
-      - name: Notify on Discord
-        env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-        run: |
-          curl -H "Content-Type: application/json" -X POST -d '{"content": "Build or test failed! Check the workflow logs for details."}' $DISCORD_WEBHOOK_URL
