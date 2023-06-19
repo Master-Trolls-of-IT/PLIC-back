@@ -50,7 +50,7 @@ func TestRegisterUser(t *testing.T) {
 		"BasalMetabolism": 1500
 	}`*/
 	validUserJSON := `{
-		"Id": "prout",
+		"Id": 1,
 		"Email": "henry.sargerson@hotmail.fr",
 		"Username": "example",
 		"Password": "password123",
@@ -62,14 +62,32 @@ func TestRegisterUser(t *testing.T) {
 		"Sportiveness": 1,
 		"BasalMetabolism": 1500
 	}`
+	invalidUserJSON := `{
+		"Id": 1,
+		"Email": 2334,
+		"Username": "example",
+		"Password": "password123",
+		"Pseudo": "user123",
+		"Birthdate": "1990-01-01",
+		"Weight": 70.5,
+		"Height": 180,
+		"Gender": 0,
+		"Sportiveness": 1,
+		"BasalMetabolism": 1500
+	}`
+
 	user := entities.User{}
+	invalidUser := entities.User{}
 	//Bind the JSON data to the entities.User struct
 	err := json.Unmarshal([]byte(validUserJSON), &user)
 	if err != nil {
 		t.Errorf("Error during the register test: %s", err)
 	}
+	err = json.Unmarshal([]byte(invalidUserJSON), &invalidUser)
+	if err == nil {
+		t.Errorf("Error during the register test: Invalid user data should not be unmarshalled")
+	}
 	jsonData, err := json.Marshal(user)
-
 	if err != nil {
 		t.Errorf("Error during the register test: %s", err)
 	}
