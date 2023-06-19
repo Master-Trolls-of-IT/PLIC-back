@@ -23,10 +23,6 @@ jobs:
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: |
-          curl -H "Content-Type: application/json" -X POST -d '{"content": "Build failed! Check the workflow logs for details."}' $DISCORD_WEBHOOK_URL
-
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Test
+          curl -H "Content-Type: application/json" -X POST -d '{"content": "Une erreur de code s'est produite lors du build","name": "test webhook","type": 1,"avatar": null,"user": {"username": "test"}}' $DISCORD_WEBHOOK_URL
+      - name: test
         run: go test -v ./...
