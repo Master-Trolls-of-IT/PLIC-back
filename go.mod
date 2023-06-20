@@ -5,6 +5,7 @@ go 1.20
 require (
 	github.com/gin-gonic/gin v1.9.0
 	github.com/golang-jwt/jwt/v5 v5.0.0
+	github.com/golang/mock v1.6.0
 	github.com/openfoodfacts/openfoodfacts-go v1.0.0
 	github.com/swaggo/swag v1.16.1
 )
