@@ -1,4 +1,4 @@
-package entities
+package entity
 
 type Nutrient struct {
 	Id   int    `json:"id"`
