@@ -1,15 +1,18 @@
 package interfaces
 
 import (
-	"gaia-api/domain/entities"
+	"fmt"
+	"gaia-api/domain/entity"
 )
 
 type IReturnAPIData interface {
 	Error(errorStatus int, errorMessage string)
-	LoginSuccess(user entities.User)
-	RegisterSucces(user entities.User)
+	LoginSuccess(user entity.User)
+	RegisterSucces(user entity.User)
 	GetToken(token string)
 	CheckToken(isTokenValid bool)
+	ProductFound(product entity.Product)
+	ProductNotAvailable(barcode string)
 	Ping()
 }
 
@@ -23,7 +26,7 @@ func NewReturnAPIData() *ReturnAPIData {
 type JSONObject map[string]any
 type JSONList []map[string]any
 
-func (ReturnAPIData *ReturnAPIData) Error(errorStatus int, errorMessage string) JSONObject {
+func (returnAPIData *ReturnAPIData) Error(errorStatus int, errorMessage string) JSONObject {
 	return JSONObject{
 		"status":  errorStatus,
 		"message": errorMessage,
@@ -31,7 +34,7 @@ func (ReturnAPIData *ReturnAPIData) Error(errorStatus int, errorMessage string) 
 	}
 }
 
-func (ReturnAPIData *ReturnAPIData) LoginSuccess(user entities.User) JSONObject {
+func (returnAPIData *ReturnAPIData) LoginSuccess(user entity.User) JSONObject {
 	return JSONObject{
 		"status":  202,
 		"message": "Connecté avec succès",
@@ -50,7 +53,7 @@ func (ReturnAPIData *ReturnAPIData) LoginSuccess(user entities.User) JSONObject 
 	}
 }
 
-func (ReturnAPIData *ReturnAPIData) RegisterSuccess(user entities.User) JSONObject {
+func (returnAPIData *ReturnAPIData) RegisterSuccess(user entity.User) JSONObject {
 	return JSONObject{
 		"status":  200,
 		"message": "Enregistré avec succès",
@@ -69,7 +72,7 @@ func (ReturnAPIData *ReturnAPIData) RegisterSuccess(user entities.User) JSONObje
 	}
 }
 
-func (ReturnAPIData *ReturnAPIData) GetToken(token string) JSONObject {
+func (returnAPIData *ReturnAPIData) GetToken(token string) JSONObject {
 	return JSONObject{
 		"status":  200,
 		"message": "Token généré avec succès",
@@ -79,7 +82,7 @@ func (ReturnAPIData *ReturnAPIData) GetToken(token string) JSONObject {
 	}
 }
 
-func (ReturnAPIData *ReturnAPIData) CheckToken(isTokenValid bool) JSONObject {
+func (returnAPIData *ReturnAPIData) CheckToken(isTokenValid bool) JSONObject {
 	getMessage := func(messageBool bool) string {
 		if messageBool {
 			return "Le token est valide"
@@ -96,7 +99,23 @@ func (ReturnAPIData *ReturnAPIData) CheckToken(isTokenValid bool) JSONObject {
 	}
 }
 
-func (ReturnAPIData *ReturnAPIData) Ping() JSONObject {
+func (returnAPIData *ReturnAPIData) ProductFound(product entity.Product) JSONObject {
+	return JSONObject{
+		"status":  200,
+		"message": "Les informations du produit ont été trouvées avec succès",
+		"data":    product,
+	}
+}
+
+func (returnAPIData *ReturnAPIData) ProductNotAvailable(barcode string) JSONObject {
+	return JSONObject{
+		"status":  404,
+		"message": fmt.Sprintf("Le produit de barcode: %s n'est pas disponible", barcode),
+		"data":    "",
+	}
+}
+
+func (returnAPIData *ReturnAPIData) Ping() JSONObject {
 	return JSONObject{
 		"status":  200,
 		"message": "Pong",

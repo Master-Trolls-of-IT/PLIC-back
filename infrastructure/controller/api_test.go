@@ -1,13 +1,13 @@
-package controllers
+package controller
 
 import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"gaia-api/application/interfaces"
-	"gaia-api/domain/entities"
-	"gaia-api/domain/mocks"
-	"gaia-api/domain/services"
+	"gaia-api/application/interface"
+	"gaia-api/domain/entity"
+	"gaia-api/domain/mock"
+	"gaia-api/domain/service"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
 	"net/http"
@@ -21,10 +21,10 @@ func TestRegisterUser(t *testing.T) {
 	defer ctrl.Finish()
 
 	// Create a mock user repository
-	mockUserRepo := mocks.NewMockUserInterface(ctrl)
+	mockUserRepo := mock.NewMockUserInterface(ctrl)
 
 	// Create an instance of the AuthService using the mock user repository
-	authService := services.NewAuthService(mockUserRepo)
+	authService := service.NewAuthService(mockUserRepo)
 
 	// Create a mock ReturnAPIData
 	returnAPIData := &interfaces.ReturnAPIData{}
@@ -77,8 +77,8 @@ func TestRegisterUser(t *testing.T) {
 		"BasalMetabolism": 1500
 	}`
 
-	user := entities.User{}
-	invalidUser := entities.User{}
+	user := entity.User{}
+	invalidUser := entity.User{}
 	//Bind the JSON data to the entities.User struct
 	err := json.Unmarshal([]byte(validUserJSON), &user)
 	if err != nil {
@@ -115,13 +115,13 @@ func TestLoginUserWithInvalidCredentials(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	// Create a mock user repository
-	mockUserRepo := mocks.NewMockUserInterface(ctrl)
+	mockUserRepo := mock.NewMockUserInterface(ctrl)
 	//Create expectations on the mock user and password
 	//mockUserRepo.EXPECT().GetUserByEmail(gomock.Any()).Return(entities.User{}, nil) // Create an instance of the AuthService using the mock user repository
 	// the Check Login method should return nil error
 	mockUserRepo.EXPECT().CheckLogin(gomock.Any()).Return(false, errors.New("invalid login credentials"))
 	//mockUserRepo.EXPECT().CheckLogin(gomock.Any()).Return(error(), nil)
-	authService := services.NewAuthService(mockUserRepo)
+	authService := service.NewAuthService(mockUserRepo)
 
 	// Create a mock ReturnAPIData
 	returnAPIData := &interfaces.ReturnAPIData{}
@@ -157,13 +157,13 @@ func TestLoginUserSuccess(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	// Create a mock user repository
-	mockUserRepo := mocks.NewMockUserInterface(ctrl)
+	mockUserRepo := mock.NewMockUserInterface(ctrl)
 	//Create expectations on the mock user and password
-	mockUserRepo.EXPECT().GetUserByEmail(gomock.Any()).Return(entities.User{}, nil) // Create an instance of the AuthService using the mock user repository
+	mockUserRepo.EXPECT().GetUserByEmail(gomock.Any()).Return(entity.User{}, nil) // Create an instance of the AuthService using the mock user repository
 	// the Check Login method should return nil error
 	mockUserRepo.EXPECT().CheckLogin(gomock.Any()).Return(true, nil) //mockUserRepo.EXPECT().CheckLogin(gomock.Any()).Return(error(), nil)
 	// Create an instance of the AuthService using the mock user repository
-	authService := services.NewAuthService(mockUserRepo)
+	authService := service.NewAuthService(mockUserRepo)
 
 	// Create a mock ReturnAPIData
 	returnAPIData := &interfaces.ReturnAPIData{}
