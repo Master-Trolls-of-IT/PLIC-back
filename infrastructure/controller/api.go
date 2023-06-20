@@ -13,15 +13,18 @@
 
 //	@securityDefinitions.basic	BasicAuth
 
-//	@externalDocs.description	OpenAPI
-//	@externalDocs.url			https://swagger.io/resources/open-api/
-package controllers
+// @externalDocs.description	OpenAPI
+// @externalDocs.url			https://swagger.io/resources/open-api/
+
+package controller
 
 import (
+	"database/sql"
 	"fmt"
-	"gaia-api/application/interfaces"
-	"gaia-api/domain/entities"
-	"gaia-api/domain/services"
+	"gaia-api/application/interface"
+	"gaia-api/domain/entity"
+	"gaia-api/domain/service"
+	"gaia-api/infrastructure/error/openFoodFacts_api_error"
 	"net/http"
 
 	_ "github.com/golang-jwt/jwt/v5"
@@ -30,14 +33,17 @@ import (
 )
 
 type Server struct {
-	authService   *services.AuthService
+	authService          *service.AuthService
+	openFoodFactsService *service.OpenFoodFactsService
+	OpenFoodFactsAPI     *OpenFoodFactsAPI
+
 	returnAPIData *interfaces.ReturnAPIData
 	// TODO: Store the logs ?
-	//logger        *services.LoggerService
+	//logger        *service.LoggerService
 }
 
-func NewServer(authService *services.AuthService, returnAPIData *interfaces.ReturnAPIData) *Server {
-	return &Server{authService: authService, returnAPIData: returnAPIData}
+func NewServer(authService *service.AuthService, returnAPIData *interfaces.ReturnAPIData, openFoodFactsService *service.OpenFoodFactsService, OpenFoodFactsAPI *OpenFoodFactsAPI) *Server {
+	return &Server{authService: authService, returnAPIData: returnAPIData, openFoodFactsService: openFoodFactsService, OpenFoodFactsAPI: OpenFoodFactsAPI}
 }
 
 func (server *Server) Start() {
@@ -45,23 +51,60 @@ func (server *Server) Start() {
 
 	ginEngine.GET("/", server.welcome)
 	ginEngine.GET("/ping", server.ping)
+
+	ginEngine.POST("/logs", server.printLogs)
+
 	ginEngine.POST("/login", server.login)
 	ginEngine.POST("/register", server.register)
-	ginEngine.POST("/logs", server.getLogs)
-	ginEngine.PUT("/users/:id", server.update)
-	ginEngine.DELETE("/users/:id", server.delete)
+	ginEngine.PUT("/users/:id", server.updateProfile)
+	ginEngine.DELETE("/users/:id", server.deleteAccount)
+
 	ginEngine.GET("/refresh_token/:password", server.getRefreshToken)
 	ginEngine.GET("/access_token/:password/:refreshtoken", server.getAccessToken)
 	ginEngine.GET("/access_token/check/:token", server.checkAccessToken)
 	ginEngine.GET("/refresh_token/check/:token", server.checkRefreshToken)
+
+	ginEngine.GET("/product/:barcode", server.mapAndSaveAndGetProduct)
+
 	err := ginEngine.Run()
 	if err != nil {
 		return
 	}
 }
 
-func (Server *Server) getLogs(context *gin.Context) {
-	var logs []entities.UserLogs
+func (server *Server) mapAndSaveAndGetProduct(context *gin.Context) {
+	var barcode = context.Param("barcode")
+	var productRepo = *server.openFoodFactsService.ProductRepo
+	product, dbError := productRepo.GetProductByBarCode(barcode)
+	fmt.Print(product)
+
+	if dbError != nil && dbError != sql.ErrNoRows {
+		context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, dbError.Error()))
+
+	} else if product == (entity.Product{}) {
+
+		openFoodFactAPI := server.OpenFoodFactsAPI
+		mappedProduct, err := openFoodFactAPI.retrieveAndMapProduct(barcode)
+
+		if _, productNotFound := err.(openFoodFacts_api_error.ProductNotFoundError); productNotFound {
+			context.JSON(http.StatusInternalServerError, server.returnAPIData.ProductNotAvailable(barcode))
+
+		} else {
+			productSaved, err := productRepo.SaveProduct(mappedProduct, barcode)
+			if productSaved {
+				context.JSON(http.StatusOK, server.returnAPIData.ProductFound(mappedProduct))
+			} else {
+				context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, err.Error()))
+			}
+		}
+
+	} else {
+		context.JSON(http.StatusOK, server.returnAPIData.ProductFound(product))
+	}
+}
+
+func (server *Server) printLogs(context *gin.Context) {
+	var logs []entity.UserLogs
 	var color string
 	if err := context.BindJSON(&logs); err != nil {
 		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -82,6 +125,7 @@ func (Server *Server) getLogs(context *gin.Context) {
 }
 
 // checkAccessToken godoc
+//
 //	@Summary		Checks token validity
 //	@Description	Check if access token is valid
 //	@Accept			json
@@ -99,6 +143,7 @@ func (server *Server) checkAccessToken(context *gin.Context) {
 }
 
 // checkRefreshToken godoc
+//
 //	@Summary		Checks token validity
 //	@Description	Check if refresh token is valid
 //	@Accept			json
@@ -116,6 +161,7 @@ func (server *Server) checkRefreshToken(context *gin.Context) {
 }
 
 // getAccessToken godoc
+//
 //	@Summary		Generates a new access token
 //	@Description	Generates a new access token
 //	@Accept			json
@@ -151,11 +197,12 @@ func (server *Server) getRefreshToken(context *gin.Context) {
 	context.JSON(http.StatusOK, server.returnAPIData.GetToken(refreshToken))
 }
 
-
 type Welcome struct {
 	Title string `json:"Title" example:"Gaia"`
 }
+
 // welcome godoc
+//
 //	@Summary		Welcome message
 //	@Description	Welcome function that returns a JSON with this structure : { "Title": "Gaia" }
 //	@Accept			json
@@ -169,18 +216,21 @@ func (server *Server) welcome(context *gin.Context) {
 type Ping struct {
 	Title string `json:"ping" example:"pong"`
 }
+
 // ping godoc
-// 	@Summary		Ping message
-// 	@Description	Checks if server is up
-// 	@Accept			json
-// 	@Produce		json
-// 	@Success		200	{object}	Ping
-// 	@Router			/ping [get]
+//
+//	@Summary		Ping message
+//	@Description	Checks if server is up
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	Ping
+//	@Router			/ping [get]
 func (server *Server) ping(context *gin.Context) {
 	context.JSON(http.StatusOK, server.returnAPIData.Ping())
 }
 
 // login godoc
+//
 //	@Summary		Login
 //	@Description	Login function that returns a JSON with this structure : { "cnx_Token": "token" }
 //	@Accept			json
@@ -189,7 +239,7 @@ func (server *Server) ping(context *gin.Context) {
 //	@Success		202	{object}	string
 //	@Router			/login [post]
 func (server *Server) login(context *gin.Context) {
-	var login = entities.Login_info{}
+	var login = entity.Login_info{}
 	//binds Json Body to Entities.Login_info Class
 	if err := context.ShouldBindJSON(&login); err != nil {
 		context.JSON(http.StatusBadRequest, server.returnAPIData.Error(http.StatusBadRequest, err.Error()))
@@ -199,7 +249,7 @@ func (server *Server) login(context *gin.Context) {
 	if err != nil {
 		context.JSON(http.StatusUnauthorized, server.returnAPIData.Error(http.StatusUnauthorized, "Informations de connexion non valides"))
 	} else if loggedIn {
-		var user entities.User
+		var user entity.User
 		if login.Email == "" {
 			user, _ = userRepo.GetUserByUsername(login.Username)
 		} else {
@@ -214,6 +264,7 @@ func (server *Server) login(context *gin.Context) {
 }
 
 // register godoc
+//
 //	@Summary		Register
 //	@Description	Register function that returns a JSON with this structure : { "message": "User registered successfully" }
 //	@Accept			json
@@ -222,7 +273,7 @@ func (server *Server) login(context *gin.Context) {
 //	@Success		200	{object}	string
 //	@Router			/register [post]
 func (server *Server) register(context *gin.Context) {
-	var user = entities.User{}
+	var user = entity.User{}
 	//binds Json Body to Entities.User Class
 	if err := context.ShouldBindJSON(&user); err != nil {
 		context.JSON(http.StatusBadRequest, server.returnAPIData.Error(http.StatusBadRequest, err.Error()))
@@ -241,10 +292,10 @@ func (server *Server) register(context *gin.Context) {
 	}
 }
 
-func (server *Server) update(context *gin.Context) {
-	// Implementation here
+func (server *Server) updateProfile(context *gin.Context) {
+	// TODO: Update user profile
 }
 
-func (server *Server) delete(context *gin.Context) {
-	// Implementation here
+func (server *Server) deleteAccount(context *gin.Context) {
+	// TODO: Delete account
 }
