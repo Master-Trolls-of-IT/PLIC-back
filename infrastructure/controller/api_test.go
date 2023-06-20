@@ -37,19 +37,6 @@ func TestRegisterUser(t *testing.T) {
 
 	// Create a mock context
 	w := httptest.NewRecorder()
-	/*invalidUserJSON := `{
-		"Id": "invalid",
-		"Email": "invalid_email",
-		"Username": "example",
-		"Password": "password123",
-		"Pseudo": "user123",
-		"Birthdate": "1990-01-01",
-		"Weight": 70.5,
-		"Height": 180,
-		"Gender": 0,
-		"Sportiveness": 1,
-		"BasalMetabolism": 1500
-	}`*/
 	validUserJSON := `{
 		"Id": 1,
 		"Email": "henry.sargerson@hotmail.fr",
