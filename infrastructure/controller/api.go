@@ -65,7 +65,8 @@ func (server *Server) Start() {
 	ginEngine.GET("/refresh_token/check/:token", server.checkRefreshToken)
 
 	ginEngine.GET("/product/:barcode", server.mapAndSaveAndGetProduct)
-
+	ginEngine.GET("/product/consumed", server.getConsumedProducts)
+	ginEngine.POST("/product/consumed", server.addConsumedProduct)
 	err := ginEngine.Run()
 	if err != nil {
 		return
@@ -298,4 +299,47 @@ func (server *Server) updateProfile(context *gin.Context) {
 
 func (server *Server) deleteAccount(context *gin.Context) {
 	// TODO: Delete account
+}
+
+func (server *Server) getConsumedProducts(context *gin.Context) {
+
+}
+
+func (server *Server) addConsumedProduct(context *gin.Context) {
+	type MyRequestBody struct {
+		Email   string `json:"email"`
+		Barcode string `json:"barcode"`
+	}
+	var requestBody MyRequestBody
+	// Parse the request body
+	if err := context.ShouldBindJSON(&requestBody); err != nil {
+		context.JSON(http.StatusBadRequest, server.returnAPIData.Error(http.StatusBadRequest, err.Error()))
+		return
+	}
+
+	// Retrieve values from the request body
+	email := requestBody.Email
+	barcode := requestBody.Barcode
+	var productRepo = *server.openFoodFactsService.ProductRepo
+	var userRepo = *server.authService.UserRepo
+	fmt.Print(email, barcode)
+	product, dbError := productRepo.GetProductByBarCode(barcode)
+	fmt.Print("produit = ", product)
+	user, dbError := userRepo.GetUserByEmail(email)
+	var userId = user.Id
+
+	if dbError != nil && dbError != sql.ErrNoRows {
+		context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, dbError.Error()))
+
+	} else if product == (entity.Product{}) {
+		context.JSON(http.StatusNotFound, server.returnAPIData.Error(http.StatusNotFound, "Produit non existant dans la base de données"))
+
+	} else {
+		productSaved, err := productRepo.SaveConsumedProduct(product, userId)
+		if productSaved {
+			context.JSON(http.StatusOK, server.returnAPIData.ProductAddedToConsumed(product))
+		} else {
+			context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, err.Error()))
+		}
+	}
 }

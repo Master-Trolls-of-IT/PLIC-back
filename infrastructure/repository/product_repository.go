@@ -2,6 +2,7 @@ package repository
 
 import (
 	"gaia-api/domain/entity"
+	"time"
 )
 
 type ProductRepo struct {
@@ -18,7 +19,7 @@ func (productRepo *ProductRepo) getProduct(query string, args ...interface{}) (e
 		return entity.Product{}, err
 	}
 	var product entity.Product
-	err = stmt.QueryRow(args...).Scan(&product.Name, &product.Nutrients.EnergyKj, &product.Nutrients.EnergyKcal,
+	err = stmt.QueryRow(args...).Scan(&product.ID, &product.Name, &product.Nutrients.EnergyKj, &product.Nutrients.EnergyKcal,
 		&product.Nutrients.Fat, &product.Nutrients.SaturatedFat, &product.Nutrients.Sugar, &product.Nutrients.Fiber,
 		&product.Nutrients.Proteins, &product.Nutrients.Salt, &product.ImageURL, &product.NutriScore.Score,
 		&product.NutriScore.Grade)
@@ -29,7 +30,7 @@ func (productRepo *ProductRepo) getProduct(query string, args ...interface{}) (e
 }
 
 func (productRepo *ProductRepo) GetProductByBarCode(barcode string) (entity.Product, error) {
-	return productRepo.getProduct("SELECT name, energy_kj, energy_kcal, fat, saturated_fat, sugar, fiber, "+
+	return productRepo.getProduct("SELECT id, name, energy_kj, energy_kcal, fat, saturated_fat, sugar, fiber, "+
 		"proteins, salt, image_url,  nutriscore_score, nutriscore_grade FROM product WHERE barcode = $1", barcode)
 }
 
@@ -44,5 +45,19 @@ func (productRepo *ProductRepo) SaveProduct(product entity.Product, barcode stri
 	if err != nil {
 		return false, err
 	}
+	return true, nil
+}
+
+func (productRepo *ProductRepo) SaveConsumedProduct(product entity.Product, userID int) (bool, error) {
+	// Prepare the insert statement
+	var database = productRepo.data.DB
+	// Execute the insert statement
+	_, err := database.Exec("INSERT INTO consumed_products (product_id, user_id, consumed_date)\n    VALUES ($1, $2, $3)", product.ID, userID, time.Now().UTC().Format("2006-01-02"))
+
+	if err != nil {
+		// Return an error if the insert operation fails
+		return false, err
+	}
+
 	return true, nil
 }

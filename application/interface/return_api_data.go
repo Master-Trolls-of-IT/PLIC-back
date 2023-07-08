@@ -107,6 +107,14 @@ func (returnAPIData *ReturnAPIData) ProductFound(product entity.Product) JSONObj
 	}
 }
 
+func (ReturnAPIData *ReturnAPIData) ProductAddedToConsumed(product entity.Product) JSONObject {
+	return JSONObject{
+		"status":  200,
+		"message": "Le produit a été ajouté avec succès",
+		"data":    product,
+	}
+}
+
 func (returnAPIData *ReturnAPIData) ProductNotAvailable(barcode string) JSONObject {
 	return JSONObject{
 		"status":  404,
