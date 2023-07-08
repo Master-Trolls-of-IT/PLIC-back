@@ -26,6 +26,7 @@ import (
 	"gaia-api/domain/service"
 	"gaia-api/infrastructure/error/openFoodFacts_api_error"
 	"net/http"
+	"strconv"
 
 	_ "github.com/golang-jwt/jwt/v5"
 
@@ -67,6 +68,7 @@ func (server *Server) Start() {
 	ginEngine.GET("/product/:barcode", server.mapAndSaveAndGetProduct)
 	ginEngine.GET("/product/consumed", server.getConsumedProducts)
 	ginEngine.POST("/product/consumed", server.addConsumedProduct)
+	ginEngine.DELETE("/product/consumed/:id", server.deleteConsumedProduct)
 	err := ginEngine.Run()
 	if err != nil {
 		return
@@ -365,4 +367,35 @@ func (server *Server) addConsumedProduct(context *gin.Context) {
 			context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, err.Error()))
 		}
 	}
+}
+
+func (server *Server) deleteConsumedProduct(context *gin.Context) {
+	type MyRequestBody struct {
+		Email string `json:"email"`
+	}
+	var requestBody MyRequestBody
+	// Parse the request body
+	if err := context.ShouldBindJSON(&requestBody); err != nil {
+		context.JSON(http.StatusBadRequest, server.returnAPIData.Error(http.StatusBadRequest, err.Error()))
+		return
+	}
+	email := requestBody.Email
+	var userRepo = *server.authService.UserRepo
+	user, dbError := userRepo.GetUserByEmail(email)
+	if dbError != nil && dbError != sql.ErrNoRows {
+		context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, dbError.Error()))
+	}
+	var userId = user.Id
+	var id, _ = strconv.Atoi(context.Param("id"))
+	var productRepo = *server.openFoodFactsService.ProductRepo
+
+	productDeleted, dbError := productRepo.DeleteConsumedProduct(id, userId)
+	if dbError != nil && dbError != sql.ErrNoRows {
+		context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, dbError.Error()))
+	} else if productDeleted {
+		context.JSON(http.StatusOK, server.returnAPIData.ProductDeletedFromConsumed(id))
+	} else {
+		context.JSON(http.StatusNotFound, server.returnAPIData.Error(http.StatusNotFound, "Produit non existant dans la base de données"))
+	}
+
 }
