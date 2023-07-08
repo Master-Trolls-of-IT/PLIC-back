@@ -302,6 +302,29 @@ func (server *Server) deleteAccount(context *gin.Context) {
 }
 
 func (server *Server) getConsumedProducts(context *gin.Context) {
+	type MyRequestBody struct {
+		Email string `json:"email"`
+	}
+	var requestBody MyRequestBody
+	// Parse the request body
+	if err := context.ShouldBindJSON(&requestBody); err != nil {
+		context.JSON(http.StatusBadRequest, server.returnAPIData.Error(http.StatusBadRequest, err.Error()))
+		return
+	}
+	email := requestBody.Email
+	var userRepo = *server.authService.UserRepo
+	user, dbError := userRepo.GetUserByEmail(email)
+	if dbError != nil && dbError != sql.ErrNoRows {
+		context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, dbError.Error()))
+	}
+	var userId = user.Id
+
+	var productRepo = *server.openFoodFactsService.ProductRepo
+	products, dbError := productRepo.GetConsumedProductsByUserId(userId)
+	if dbError != nil && dbError != sql.ErrNoRows {
+		context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, dbError.Error()))
+	}
+	context.JSON(http.StatusOK, server.returnAPIData.GetConsumedProductsSuccess(products))
 
 }
 
@@ -322,7 +345,7 @@ func (server *Server) addConsumedProduct(context *gin.Context) {
 	barcode := requestBody.Barcode
 	var productRepo = *server.openFoodFactsService.ProductRepo
 	var userRepo = *server.authService.UserRepo
-	fmt.Print(email, barcode)
+
 	product, dbError := productRepo.GetProductByBarCode(barcode)
 	fmt.Print("produit = ", product)
 	user, dbError := userRepo.GetUserByEmail(email)

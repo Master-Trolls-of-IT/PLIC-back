@@ -130,3 +130,11 @@ func (returnAPIData *ReturnAPIData) Ping() JSONObject {
 		"data":    JSONObject{},
 	}
 }
+
+func (returnAPIData *ReturnAPIData) GetConsumedProductsSuccess(products []entity.Product) any {
+	return JSONObject{
+		"status":  200,
+		"message": "Les produits consommés ont été récupérés avec succès",
+		"data":    products,
+	}
+}

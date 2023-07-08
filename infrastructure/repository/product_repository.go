@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"database/sql"
 	"gaia-api/domain/entity"
 	"time"
 )
@@ -60,4 +61,31 @@ func (productRepo *ProductRepo) SaveConsumedProduct(product entity.Product, user
 	}
 
 	return true, nil
+}
+
+func (productRepo *ProductRepo) GetConsumedProductsByUserId(userID int) ([]entity.Product, error) {
+	var database = productRepo.data.DB
+	var products []entity.Product
+	rows, err := database.Query("SELECT p.id, p.name, p.energy_kj, p.energy_kcal, p.fat, p.saturated_fat, p.sugar, p.fiber, p.proteins, p.salt, p.image_url, p.nutriscore_score, p.nutriscore_grade FROM consumed_products cp INNER JOIN product p ON cp.product_id = p.id WHERE cp.user_id = $1", userID)
+	if err != nil {
+		return products, err
+	}
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+
+		}
+	}(rows)
+	for rows.Next() {
+		var product entity.Product
+		err := rows.Scan(&product.ID, &product.Name, &product.Nutrients.EnergyKj, &product.Nutrients.EnergyKcal,
+			&product.Nutrients.Fat, &product.Nutrients.SaturatedFat, &product.Nutrients.Sugar, &product.Nutrients.Fiber,
+			&product.Nutrients.Proteins, &product.Nutrients.Salt, &product.ImageURL, &product.NutriScore.Score,
+			&product.NutriScore.Grade)
+		if err != nil {
+			return products, err
+		}
+		products = append(products, product)
+	}
+	return products, nil
 }
