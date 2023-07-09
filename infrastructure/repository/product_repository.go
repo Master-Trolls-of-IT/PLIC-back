@@ -37,10 +37,10 @@ func (productRepo *ProductRepo) SaveProduct(product entity.Product, barcode stri
 	var database = productRepo.data.DB
 
 	_, err := database.Exec("INSERT INTO product (name, energy_kj, energy_kcal, fat, saturated_fat, sugar,"+
-		" fiber, proteins, salt, image_url,  nutriscore_score, nutriscore_grade, barcode) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) ",
+		" fiber, proteins, salt, image_url,  nutriscore_score, nutriscore_grade, barcode, isWater) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) ",
 		product.Name, product.Nutrients.EnergyKj, product.Nutrients.EnergyKcal, product.Nutrients.Fat,
 		product.Nutrients.SaturatedFat, product.Nutrients.Sugar, product.Nutrients.Fiber, product.Nutrients.Proteins,
-		product.Nutrients.Salt, product.ImageURL, product.NutriScore.Score, product.NutriScore.Grade, barcode)
+		product.Nutrients.Salt, product.ImageURL, product.NutriScore.Score, product.NutriScore.Grade, barcode, product.IsWater)
 	if err != nil {
 		return false, err
 	}

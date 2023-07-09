@@ -76,7 +76,6 @@ func (server *Server) mapAndSaveAndGetProduct(context *gin.Context) {
 	var barcode = context.Param("barcode")
 	var productRepo = *server.openFoodFactsService.ProductRepo
 	product, dbError := productRepo.GetProductByBarCode(barcode)
-	fmt.Print(product)
 
 	if dbError != nil && dbError != sql.ErrNoRows {
 		context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, dbError.Error()))

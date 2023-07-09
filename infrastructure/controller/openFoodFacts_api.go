@@ -4,6 +4,7 @@ import (
 	"gaia-api/domain/entity"
 	"gaia-api/infrastructure/error/openFoodFacts_api_error"
 	"github.com/openfoodfacts/openfoodfacts-go"
+	"golang.org/x/exp/slices"
 )
 
 type OpenFoodFactsAPI struct {
@@ -34,8 +35,11 @@ func (openFoodFactsAPI *OpenFoodFactsAPI) retrieveAndMapProduct(barcode string) 
 
 func mapOpenFoodFactsProductToEntitiesProduct(product *openfoodfacts.Product) (entity.Product, error) {
 	nutrients := product.Nutriments
-
 	mappedNutriscore := entity.NutriScore{Score: product.Nutriments.NutritionScoreFr100G, Grade: product.NutritionGradeFr}
+	isWater := false
+	if slices.Contains(product.Keywords, "eau") && slices.Contains(product.Keywords, "minerale") {
+		isWater = true
+	}
 
 	mappedNutrients := entity.Nutrients{
 		EnergyKj:      nutrients.Energy100G,
@@ -52,9 +56,10 @@ func mapOpenFoodFactsProductToEntitiesProduct(product *openfoodfacts.Product) (e
 	mappedProduct := entity.Product{
 		Name:       product.ProductName,
 		Nutrients:  mappedNutrients,
-		ImageURL:   product.ImageURL.URL.String(),
+		ImageURL:   product.ImageFrontURL.URL.String(),
 		NutriScore: mappedNutriscore,
 		EcoScore:   product.EcoscoreGrade,
+		IsWater:    isWater,
 	}
 
 	return mappedProduct, nil
