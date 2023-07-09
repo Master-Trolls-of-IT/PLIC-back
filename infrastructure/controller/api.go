@@ -66,7 +66,7 @@ func (server *Server) Start() {
 	ginEngine.GET("/refresh_token/check/:token", server.checkRefreshToken)
 
 	ginEngine.GET("/product/:barcode", server.mapAndSaveAndGetProduct)
-	ginEngine.GET("/product/consumed", server.getConsumedProducts)
+	ginEngine.GET("/product/consumed/user/:email", server.getConsumedProducts)
 	ginEngine.POST("/product/consumed", server.addConsumedProduct)
 	ginEngine.DELETE("/product/consumed/:id", server.deleteConsumedProduct)
 	err := ginEngine.Run()
@@ -304,22 +304,15 @@ func (server *Server) deleteAccount(context *gin.Context) {
 }
 
 func (server *Server) getConsumedProducts(context *gin.Context) {
-	type MyRequestBody struct {
-		Email string `json:"email"`
-	}
-	var requestBody MyRequestBody
-	// Parse the request body
-	if err := context.ShouldBindJSON(&requestBody); err != nil {
-		context.JSON(http.StatusBadRequest, server.returnAPIData.Error(http.StatusBadRequest, err.Error()))
-		return
-	}
-	email := requestBody.Email
+	email := context.Param("email")
+
 	var userRepo = *server.authService.UserRepo
 	user, dbError := userRepo.GetUserByEmail(email)
 	if dbError != nil && dbError != sql.ErrNoRows {
 		context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, dbError.Error()))
 	}
 	var userId = user.Id
+	fmt.Print(userId)
 
 	var productRepo = *server.openFoodFactsService.ProductRepo
 	products, dbError := productRepo.GetConsumedProductsByUserId(userId)
