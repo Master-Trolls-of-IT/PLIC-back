@@ -8,6 +8,7 @@ require (
 	github.com/golang/mock v1.6.0
 	github.com/openfoodfacts/openfoodfacts-go v1.0.0
 	github.com/swaggo/swag v1.16.1
+	golang.org/x/exp v0.0.0-20230626212559-97b1e661b5df
 )
 
 require (

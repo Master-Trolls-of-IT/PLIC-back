@@ -6,6 +6,7 @@ type Product struct {
 	ImageURL   string     `json:"image_url"`
 	NutriScore NutriScore `json:"nutriscore"`
 	EcoScore   string     `json:"ecoscore"`
+	IsWater    bool       `json:"iswater"`
 }
 
 type Nutrients struct {
