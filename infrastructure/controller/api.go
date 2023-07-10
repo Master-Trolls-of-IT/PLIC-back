@@ -67,8 +67,8 @@ func (server *Server) Start() {
 
 	ginEngine.GET("/product/:barcode", server.mapAndSaveAndGetProduct)
 	ginEngine.GET("/product/consumed/user/:email", server.getConsumedProducts)
-	ginEngine.POST("/product/consumed", server.addConsumedProduct)
-	ginEngine.DELETE("/product/consumed/:id", server.deleteConsumedProduct)
+	ginEngine.POST("/product/consumed/user/:email", server.addConsumedProduct)
+	ginEngine.DELETE("/product/consumed/:id/user/:email", server.deleteConsumedProduct)
 	err := ginEngine.Run()
 	if err != nil {
 		return
@@ -325,9 +325,9 @@ func (server *Server) getConsumedProducts(context *gin.Context) {
 
 func (server *Server) addConsumedProduct(context *gin.Context) {
 	type MyRequestBody struct {
-		Email   string `json:"email"`
 		Barcode string `json:"barcode"`
 	}
+
 	var requestBody MyRequestBody
 	// Parse the request body
 	if err := context.ShouldBindJSON(&requestBody); err != nil {
@@ -336,7 +336,7 @@ func (server *Server) addConsumedProduct(context *gin.Context) {
 	}
 
 	// Retrieve values from the request body
-	email := requestBody.Email
+	email := context.Param("email")
 	barcode := requestBody.Barcode
 	var productRepo = *server.openFoodFactsService.ProductRepo
 	var userRepo = *server.authService.UserRepo
@@ -363,16 +363,7 @@ func (server *Server) addConsumedProduct(context *gin.Context) {
 }
 
 func (server *Server) deleteConsumedProduct(context *gin.Context) {
-	type MyRequestBody struct {
-		Email string `json:"email"`
-	}
-	var requestBody MyRequestBody
-	// Parse the request body
-	if err := context.ShouldBindJSON(&requestBody); err != nil {
-		context.JSON(http.StatusBadRequest, server.returnAPIData.Error(http.StatusBadRequest, err.Error()))
-		return
-	}
-	email := requestBody.Email
+	email := context.Param("email")
 	var userRepo = *server.authService.UserRepo
 	user, dbError := userRepo.GetUserByEmail(email)
 	if dbError != nil && dbError != sql.ErrNoRows {
