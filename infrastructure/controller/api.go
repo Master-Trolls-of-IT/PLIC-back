@@ -67,7 +67,7 @@ func (server *Server) Start() {
 
 	ginEngine.GET("/product/:barcode", server.mapAndSaveAndGetProduct)
 	ginEngine.GET("/product/consumed/user/:email", server.getConsumedProducts)
-	ginEngine.POST("/product/consumed/user/:email", server.addConsumedProduct)
+	ginEngine.POST("/product/consumed", server.addConsumedProduct)
 	ginEngine.DELETE("/product/consumed/:id/user/:email", server.deleteConsumedProduct)
 	err := ginEngine.Run()
 	if err != nil {
@@ -326,6 +326,7 @@ func (server *Server) getConsumedProducts(context *gin.Context) {
 func (server *Server) addConsumedProduct(context *gin.Context) {
 	type MyRequestBody struct {
 		Barcode string `json:"barcode"`
+		Email   string `json:"email"`
 	}
 
 	var requestBody MyRequestBody
@@ -336,7 +337,7 @@ func (server *Server) addConsumedProduct(context *gin.Context) {
 	}
 
 	// Retrieve values from the request body
-	email := context.Param("email")
+	email := requestBody.Email
 	barcode := requestBody.Barcode
 	var productRepo = *server.openFoodFactsService.ProductRepo
 	var userRepo = *server.authService.UserRepo
