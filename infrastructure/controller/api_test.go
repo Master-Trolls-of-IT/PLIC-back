@@ -105,7 +105,6 @@ func TestLoginUserWithInvalidCredentials(t *testing.T) {
 	mockUserRepo := mock.NewMockUserInterface(ctrl)
 	//Create expectations on the mock user and password
 	//mockUserRepo.EXPECT().GetUserByEmail(gomock.Any()).Return(entities.User{}, nil) // Create an instance of the AuthService using the mock user repository
-	// the Check Login method should return nil error
 	mockUserRepo.EXPECT().CheckLogin(gomock.Any()).Return(false, errors.New("invalid login credentials"))
 	//mockUserRepo.EXPECT().CheckLogin(gomock.Any()).Return(error(), nil)
 	authService := service.NewAuthService(mockUserRepo)

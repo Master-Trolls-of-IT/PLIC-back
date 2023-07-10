@@ -26,6 +26,7 @@ import (
 	"gaia-api/domain/service"
 	"gaia-api/infrastructure/error/openFoodFacts_api_error"
 	"net/http"
+	"strconv"
 
 	_ "github.com/golang-jwt/jwt/v5"
 
@@ -65,7 +66,9 @@ func (server *Server) Start() {
 	ginEngine.GET("/refresh_token/check/:token", server.checkRefreshToken)
 
 	ginEngine.GET("/product/:barcode", server.mapAndSaveAndGetProduct)
-
+	ginEngine.GET("/product/consumed/user/:email", server.getConsumedProducts)
+	ginEngine.POST("/product/consumed", server.addConsumedProduct)
+	ginEngine.DELETE("/product/consumed/:id/user/:email", server.deleteConsumedProduct)
 	err := ginEngine.Run()
 	if err != nil {
 		return
@@ -297,4 +300,86 @@ func (server *Server) updateProfile(context *gin.Context) {
 
 func (server *Server) deleteAccount(context *gin.Context) {
 	// TODO: Delete account
+}
+
+func (server *Server) getConsumedProducts(context *gin.Context) {
+	email := context.Param("email")
+
+	var userRepo = *server.authService.UserRepo
+	user, dbError := userRepo.GetUserByEmail(email)
+	if dbError != nil && dbError != sql.ErrNoRows {
+		context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, dbError.Error()))
+	}
+	var userId = user.Id
+	fmt.Print(userId)
+
+	var productRepo = *server.openFoodFactsService.ProductRepo
+	products, dbError := productRepo.GetConsumedProductsByUserId(userId)
+	if dbError != nil && dbError != sql.ErrNoRows {
+		context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, dbError.Error()))
+	}
+	context.JSON(http.StatusOK, server.returnAPIData.GetConsumedProductsSuccess(products))
+
+}
+
+func (server *Server) addConsumedProduct(context *gin.Context) {
+	type MyRequestBody struct {
+		Barcode string `json:"barcode"`
+		Email   string `json:"email"`
+	}
+
+	var requestBody MyRequestBody
+	// Parse the request body
+	if err := context.ShouldBindJSON(&requestBody); err != nil {
+		context.JSON(http.StatusBadRequest, server.returnAPIData.Error(http.StatusBadRequest, err.Error()))
+		return
+	}
+
+	// Retrieve values from the request body
+	email := requestBody.Email
+	barcode := requestBody.Barcode
+	var productRepo = *server.openFoodFactsService.ProductRepo
+	var userRepo = *server.authService.UserRepo
+
+	product, dbError := productRepo.GetProductByBarCode(barcode)
+	fmt.Print("produit = ", product)
+	user, dbError := userRepo.GetUserByEmail(email)
+	var userId = user.Id
+
+	if dbError != nil && dbError != sql.ErrNoRows {
+		context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, dbError.Error()))
+
+	} else if product == (entity.Product{}) {
+		context.JSON(http.StatusNotFound, server.returnAPIData.Error(http.StatusNotFound, "Produit non existant dans la base de données"))
+
+	} else {
+		productSaved, err := productRepo.SaveConsumedProduct(product, userId)
+		if productSaved {
+			context.JSON(http.StatusOK, server.returnAPIData.ProductAddedToConsumed(product))
+		} else {
+			context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, err.Error()))
+		}
+	}
+}
+
+func (server *Server) deleteConsumedProduct(context *gin.Context) {
+	email := context.Param("email")
+	var userRepo = *server.authService.UserRepo
+	user, dbError := userRepo.GetUserByEmail(email)
+	if dbError != nil && dbError != sql.ErrNoRows {
+		context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, dbError.Error()))
+	}
+	var userId = user.Id
+	var id, _ = strconv.Atoi(context.Param("id"))
+	var productRepo = *server.openFoodFactsService.ProductRepo
+
+	productDeleted, dbError := productRepo.DeleteConsumedProduct(id, userId)
+	if dbError != nil && dbError != sql.ErrNoRows {
+		context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, dbError.Error()))
+	} else if productDeleted {
+		context.JSON(http.StatusOK, server.returnAPIData.ProductDeletedFromConsumed(id))
+	} else {
+		context.JSON(http.StatusNotFound, server.returnAPIData.Error(http.StatusNotFound, "Produit non existant dans la base de données"))
+	}
+
 }

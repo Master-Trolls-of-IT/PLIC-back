@@ -1,6 +1,7 @@
 package entity
 
 type Product struct {
+	ID         int        `json:"id"`
 	Name       string     `json:"name"`
 	Nutrients  Nutrients  `json:"nutrients"`
 	ImageURL   string     `json:"image_url"`

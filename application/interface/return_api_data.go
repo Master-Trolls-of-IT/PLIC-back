@@ -107,6 +107,14 @@ func (returnAPIData *ReturnAPIData) ProductFound(product entity.Product) JSONObj
 	}
 }
 
+func (ReturnAPIData *ReturnAPIData) ProductAddedToConsumed(product entity.Product) JSONObject {
+	return JSONObject{
+		"status":  200,
+		"message": "Le produit a été ajouté avec succès",
+		"data":    product,
+	}
+}
+
 func (returnAPIData *ReturnAPIData) ProductNotAvailable(barcode string) JSONObject {
 	return JSONObject{
 		"status":  404,
@@ -120,5 +128,21 @@ func (returnAPIData *ReturnAPIData) Ping() JSONObject {
 		"status":  200,
 		"message": "Pong",
 		"data":    JSONObject{},
+	}
+}
+
+func (returnAPIData *ReturnAPIData) GetConsumedProductsSuccess(products []entity.Product) any {
+	return JSONObject{
+		"status":  200,
+		"message": "Les produits consommés ont été récupérés avec succès",
+		"data":    products,
+	}
+}
+
+func (returnAPIData *ReturnAPIData) ProductDeletedFromConsumed(id int) any {
+	return JSONObject{
+		"status":  200,
+		"message": "Le produit a été supprimé avec succès",
+		"data":    id,
 	}
 }
