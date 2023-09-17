@@ -54,6 +54,7 @@ func mapOpenFoodFactsProductToEntitiesProduct(product *openfoodfacts.Product) (e
 	}
 
 	mappedProduct := entity.Product{
+		Brand:      product.Brands,
 		Name:       product.ProductName,
 		Nutrients:  mappedNutrients,
 		ImageURL:   product.ImageFrontURL.URL.String(),
