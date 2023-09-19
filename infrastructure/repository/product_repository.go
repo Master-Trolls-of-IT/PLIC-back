@@ -58,6 +58,7 @@ func (productRepo *ProductRepo) getConsumedProducts(query string, args ...interf
 		var consumedProduct entity.ConsumedProduct
 		err := rows.Scan(&consumedProduct.Product.ID,
 			&consumedProduct.Product.Name,
+			&consumedProduct.Product.Brand,
 			&consumedProduct.Product.Nutrients.EnergyKj,
 			&consumedProduct.Product.Nutrients.EnergyKcal,
 			&consumedProduct.Product.Nutrients.Fat,
@@ -113,7 +114,7 @@ func (productRepo *ProductRepo) SaveConsumedProduct(product entity.Product, user
 }
 
 func (productRepo *ProductRepo) GetConsumedProductsByUserId(userID int) ([]entity.ConsumedProduct, error) {
-	query := "SELECT p.id, p.name, p.energy_kj, p.energy_kcal, p.fat, p.saturated_fat, p.sugar, p.fiber, p.proteins, p.salt, p.image_url, p.nutriscore_score, p.nutriscore_grade, cp.quantity FROM consumed_products cp INNER JOIN product p ON cp.product_id = p.id WHERE cp.user_id = $1"
+	query := "SELECT p.id, p.name ,p.brand, p.energy_kj, p.energy_kcal, p.fat, p.saturated_fat, p.sugar, p.fiber, p.proteins, p.salt, p.image_url, p.nutriscore_score, p.nutriscore_grade, cp.quantity FROM consumed_products cp INNER JOIN product p ON cp.product_id = p.id WHERE cp.user_id = $1"
 	return productRepo.getConsumedProducts(query, userID)
 }
 
