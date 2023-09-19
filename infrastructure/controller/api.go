@@ -309,15 +309,18 @@ func (server *Server) getConsumedProducts(context *gin.Context) {
 	user, dbError := userRepo.GetUserByEmail(email)
 	if dbError != nil && dbError != sql.ErrNoRows {
 		context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, dbError.Error()))
-	}
-	var userId = user.Id
+	} else {
+		var userId = user.Id
 
-	var productRepo = *server.openFoodFactsService.ProductRepo
-	consumedProducts, dbError := productRepo.GetConsumedProductsByUserId(userId)
-	if dbError != nil && dbError != sql.ErrNoRows {
-		context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, dbError.Error()))
+		var productRepo = *server.openFoodFactsService.ProductRepo
+		consumedProducts, dbError := productRepo.GetConsumedProductsByUserId(userId)
+		if dbError != nil && dbError != sql.ErrNoRows {
+			context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, dbError.Error()))
+		} else {
+			context.JSON(http.StatusOK, server.returnAPIData.GetConsumedProductsSuccess(consumedProducts))
+
+		}
 	}
-	context.JSON(http.StatusOK, server.returnAPIData.GetConsumedProductsSuccess(consumedProducts))
 
 }
 
@@ -343,7 +346,6 @@ func (server *Server) addConsumedProduct(context *gin.Context) {
 	var userRepo = *server.authService.UserRepo
 
 	product, dbError := productRepo.GetProductByBarCode(barcode)
-	fmt.Print("produit = ", product)
 	user, dbError := userRepo.GetUserByEmail(email)
 	var userId = user.Id
 
