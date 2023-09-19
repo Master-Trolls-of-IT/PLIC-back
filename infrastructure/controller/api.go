@@ -311,25 +311,25 @@ func (server *Server) getConsumedProducts(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, dbError.Error()))
 	}
 	var userId = user.Id
-	fmt.Print(userId)
 
 	var productRepo = *server.openFoodFactsService.ProductRepo
-	products, dbError := productRepo.GetConsumedProductsByUserId(userId)
+	consumedProducts, dbError := productRepo.GetConsumedProductsByUserId(userId)
 	if dbError != nil && dbError != sql.ErrNoRows {
 		context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, dbError.Error()))
 	}
-	context.JSON(http.StatusOK, server.returnAPIData.GetConsumedProductsSuccess(products))
+	context.JSON(http.StatusOK, server.returnAPIData.GetConsumedProductsSuccess(consumedProducts))
 
 }
 
 func (server *Server) addConsumedProduct(context *gin.Context) {
 	type MyRequestBody struct {
-		Barcode string `json:"barcode"`
-		Email   string `json:"email"`
+		Barcode  string `json:"barcode"`
+		Email    string `json:"email"`
+		Quantity string `json:"quantity"`
 	}
 
 	var requestBody MyRequestBody
-	// Parse the request body
+	// Bind the request body
 	if err := context.ShouldBindJSON(&requestBody); err != nil {
 		context.JSON(http.StatusBadRequest, server.returnAPIData.Error(http.StatusBadRequest, err.Error()))
 		return
@@ -338,6 +338,7 @@ func (server *Server) addConsumedProduct(context *gin.Context) {
 	// Retrieve values from the request body
 	email := requestBody.Email
 	barcode := requestBody.Barcode
+	quantity := requestBody.Quantity
 	var productRepo = *server.openFoodFactsService.ProductRepo
 	var userRepo = *server.authService.UserRepo
 
@@ -353,7 +354,11 @@ func (server *Server) addConsumedProduct(context *gin.Context) {
 		context.JSON(http.StatusNotFound, server.returnAPIData.Error(http.StatusNotFound, "Produit non existant dans la base de données"))
 
 	} else {
-		productSaved, err := productRepo.SaveConsumedProduct(product, userId)
+		quantityInt, err := strconv.Atoi(quantity)
+		if err != nil {
+			context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, "Erreur de la conversion de la quantité  (atoi)"))
+		}
+		productSaved, err := productRepo.SaveConsumedProduct(product, userId, quantityInt)
 		if productSaved {
 			context.JSON(http.StatusOK, server.returnAPIData.ProductAddedToConsumed(product))
 		} else {

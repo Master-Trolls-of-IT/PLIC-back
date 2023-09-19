@@ -30,7 +30,7 @@ func (productRepo *ProductRepo) getProduct(query string, args ...interface{}) (e
 	return product, nil
 }
 
-func (productRepo *ProductRepo) getProducts(query string, args ...interface{}) ([]entity.Product, error) {
+func (productRepo *ProductRepo) getConsumedProducts(query string, args ...interface{}) ([]entity.ConsumedProduct, error) {
 	stmt, err := productRepo.data.DB.Prepare(query)
 	if err != nil {
 		return nil, err
@@ -53,20 +53,30 @@ func (productRepo *ProductRepo) getProducts(query string, args ...interface{}) (
 		}
 	}(rows)
 
-	var products []entity.Product
+	var consumedProducts []entity.ConsumedProduct
 	for rows.Next() {
-		var product entity.Product
-		err := rows.Scan(&product.ID, &product.Name, &product.Nutrients.EnergyKj, &product.Nutrients.EnergyKcal,
-			&product.Nutrients.Fat, &product.Nutrients.SaturatedFat, &product.Nutrients.Sugar, &product.Nutrients.Fiber,
-			&product.Nutrients.Proteins, &product.Nutrients.Salt, &product.ImageURL, &product.NutriScore.Score,
-			&product.NutriScore.Grade)
+		var consumedProduct entity.ConsumedProduct
+		err := rows.Scan(&consumedProduct.Product.ID,
+			&consumedProduct.Product.Name,
+			&consumedProduct.Product.Nutrients.EnergyKj,
+			&consumedProduct.Product.Nutrients.EnergyKcal,
+			&consumedProduct.Product.Nutrients.Fat,
+			&consumedProduct.Product.Nutrients.SaturatedFat,
+			&consumedProduct.Product.Nutrients.Sugar,
+			&consumedProduct.Product.Nutrients.Fiber,
+			&consumedProduct.Product.Nutrients.Proteins,
+			&consumedProduct.Product.Nutrients.Salt,
+			&consumedProduct.Product.ImageURL,
+			&consumedProduct.Product.NutriScore.Score,
+			&consumedProduct.Product.NutriScore.Grade,
+			&consumedProduct.Quantity)
 		if err != nil {
 			return nil, err
 		}
-		products = append(products, product)
+		consumedProducts = append(consumedProducts, consumedProduct)
 	}
 
-	return products, nil
+	return consumedProducts, nil
 }
 
 func (productRepo *ProductRepo) GetProductByBarCode(barcode string) (entity.Product, error) {
@@ -88,11 +98,11 @@ func (productRepo *ProductRepo) SaveProduct(product entity.Product, barcode stri
 	return true, nil
 }
 
-func (productRepo *ProductRepo) SaveConsumedProduct(product entity.Product, userID int) (bool, error) {
+func (productRepo *ProductRepo) SaveConsumedProduct(product entity.Product, userID int, quantity int) (bool, error) {
 	// Prepare the insert statement
 	var database = productRepo.data.DB
 	// Execute the insert statement
-	_, err := database.Exec("INSERT INTO consumed_products (product_id, user_id, consumed_date)\n    VALUES ($1, $2, $3)", product.ID, userID, time.Now().UTC().Format("2006-01-02"))
+	_, err := database.Exec("INSERT INTO consumed_products (product_id, user_id, quantity, consumed_date)\n    VALUES ($1, $2, $3, $4)", product.ID, userID, quantity, time.Now().UTC().Format("2006-01-02"))
 
 	if err != nil {
 		// Return an error if the insert operation fails
@@ -102,9 +112,9 @@ func (productRepo *ProductRepo) SaveConsumedProduct(product entity.Product, user
 	return true, nil
 }
 
-func (productRepo *ProductRepo) GetConsumedProductsByUserId(userID int) ([]entity.Product, error) {
-	query := "SELECT p.id, p.name, p.energy_kj, p.energy_kcal, p.fat, p.saturated_fat, p.sugar, p.fiber, p.proteins, p.salt, p.image_url, p.nutriscore_score, p.nutriscore_grade FROM consumed_products cp INNER JOIN product p ON cp.product_id = p.id WHERE cp.user_id = $1"
-	return productRepo.getProducts(query, userID)
+func (productRepo *ProductRepo) GetConsumedProductsByUserId(userID int) ([]entity.ConsumedProduct, error) {
+	query := "SELECT p.id, p.name, p.energy_kj, p.energy_kcal, p.fat, p.saturated_fat, p.sugar, p.fiber, p.proteins, p.salt, p.image_url, p.nutriscore_score, p.nutriscore_grade, cp.quantity FROM consumed_products cp INNER JOIN product p ON cp.product_id = p.id WHERE cp.user_id = $1"
+	return productRepo.getConsumedProducts(query, userID)
 }
 
 func (productRepo *ProductRepo) DeleteConsumedProduct(id int, userID int) (bool, error) {
