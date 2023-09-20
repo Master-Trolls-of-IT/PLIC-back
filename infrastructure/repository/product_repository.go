@@ -120,7 +120,7 @@ func (productRepo *ProductRepo) GetConsumedProductsByUserId(userID int) ([]entit
 
 func (productRepo *ProductRepo) DeleteConsumedProduct(id int, userID int) (bool, error) {
 	var database = productRepo.data.DB
-	_, err := database.Exec("DELETE FROM consumed_products WHERE id = $1 AND user_id = $2", id, userID)
+	_, err := database.Exec("DELETE FROM consumed_products WHERE product_id = $1 AND user_id = $2", id, userID)
 	if err != nil {
 		return false, err
 	}
