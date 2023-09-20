@@ -108,3 +108,4 @@ func (mr *MockUserInterfaceMockRecorder) Register(userInfo interface{}) *gomock.
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Register", reflect.TypeOf((*MockUserInterface)(nil).Register), userInfo)
 }
+
