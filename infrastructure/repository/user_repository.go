@@ -23,7 +23,7 @@ func (userRepo *UserRepo) getUser(query string, args ...interface{}) (entity.Use
 	}
 	var user entity.User
 	err = stmt.QueryRow(args...).Scan(&user.Id, &user.Rights, &user.Email, &user.Username, &user.Birthdate, &user.Weight,
-		&user.Height, &user.Gender, &user.Sportiveness, &user.BasalMetabolism, &user.Password, &user.Pseudo)
+		&user.Height, &user.Gender, &user.Sportiveness, &user.BasalMetabolism, &user.Password, &user.Pseudo, &user.AvatarId)
 	if err != nil {
 		return entity.User{}, err
 	}
@@ -68,6 +68,23 @@ func (userRepo *UserRepo) Register(userInfo *entity.User) (bool, error) {
 		return false, err
 	}
 	return true, nil
+}
+func (userRepo *UserRepo) UpdateUserById(id int, newUser *entity.User) (entity.User, error) {
+	var db = userRepo.data.DB
+	stmt, err := db.Prepare("UPDATE users SET email = $1, pseudo = $2, birthdate = $3, weight = $4, " +
+		"height = $5, gender = $6, sportiveness = $7, basalmetabolism = $8, avatar_id = $9 WHERE id = $10")
+
+	if err != nil {
+		return entity.User{}, err
+	}
+	_, err = stmt.Exec(newUser.Email,
+		&newUser.Pseudo, &newUser.Birthdate, &newUser.Weight, &newUser.Height, &newUser.Gender, &newUser.Sportiveness,
+		&newUser.BasalMetabolism, &newUser.AvatarId, &id)
+
+	if err != nil {
+		return entity.User{}, err
+	}
+	return userRepo.GetUserById(id)
 }
 
 func (userRepo *UserRepo) Login(loginInfo *entity.Login_info) {}

@@ -57,7 +57,7 @@ func (server *Server) Start() {
 
 	ginEngine.POST("/login", server.login)
 	ginEngine.POST("/register", server.register)
-	ginEngine.PUT("/users/:id", server.updateProfile)
+	ginEngine.PATCH("/users/:id", server.updateProfile)
 	ginEngine.DELETE("/users/:id", server.deleteAccount)
 
 	ginEngine.GET("/refresh_token/:password", server.getRefreshToken)
@@ -295,7 +295,22 @@ func (server *Server) register(context *gin.Context) {
 }
 
 func (server *Server) updateProfile(context *gin.Context) {
-	// TODO: Update user profile
+	var user = entity.User{}
+	var userId, err = strconv.Atoi(context.Param("id"))
+
+	if err := context.ShouldBindJSON(&user); err != nil {
+		context.JSON(http.StatusBadRequest, server.returnAPIData.Error(http.StatusBadRequest, err.Error()))
+		return
+	}
+
+	var userRepo = *server.authService.UserRepo
+	newUser, err := userRepo.UpdateUserById(userId, &user)
+
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, err.Error()))
+	} else {
+		context.JSON(http.StatusOK, server.returnAPIData.UserUpdateSuccess(newUser))
+	}
 }
 
 func (server *Server) deleteAccount(context *gin.Context) {
