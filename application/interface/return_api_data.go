@@ -139,10 +139,18 @@ func (returnAPIData *ReturnAPIData) GetConsumedProductsSuccess(consumedProducts 
 	}
 }
 
-func (returnAPIData *ReturnAPIData) ProductDeletedFromConsumed(id int) any {
+func (returnAPIData *ReturnAPIData) ProductDeletedFromConsumed(consumedProducts []entity.ConsumedProduct) any {
 	return JSONObject{
 		"status":  200,
 		"message": "Le produit a été supprimé avec succès",
-		"data":    id,
+		"data":    consumedProducts,
+	}
+}
+
+func (returnAPIData *ReturnAPIData) DeletedProduct(status int, s string) any {
+	return JSONObject{
+		"status":  status,
+		"message": s,
+		"data":    JSONObject{},
 	}
 }
