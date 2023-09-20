@@ -384,7 +384,12 @@ func (server *Server) deleteConsumedProduct(context *gin.Context) {
 	if dbError != nil && dbError != sql.ErrNoRows {
 		context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, dbError.Error()))
 	} else if productDeleted {
-		context.JSON(http.StatusOK, server.returnAPIData.ProductDeletedFromConsumed(id))
+		var productRepo = *server.openFoodFactsService.ProductRepo
+		consumedProducts, dbError := productRepo.GetConsumedProductsByUserId(userId)
+		if dbError != nil && dbError != sql.ErrNoRows {
+			context.JSON(http.StatusInternalServerError, server.returnAPIData.DeletedProduct(http.StatusInternalServerError, "Could not retrieve the list of consumed products after deleting product"))
+		}
+		context.JSON(http.StatusOK, server.returnAPIData.ProductDeletedFromConsumed(consumedProducts))
 	} else {
 		context.JSON(http.StatusNotFound, server.returnAPIData.Error(http.StatusNotFound, "Produit non existant dans la base de données"))
 	}
