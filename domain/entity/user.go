@@ -13,6 +13,7 @@ type User struct {
 	Gender          Gender       `json:"gender"`
 	Sportiveness    Sportiveness `json:"sportiveness"`
 	BasalMetabolism int          `json:"basalmetabolism"`
+	AvatarId        *int         `json:"avatarid"`
 }
 
 type Gender int

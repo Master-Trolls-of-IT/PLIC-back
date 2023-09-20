@@ -1,6 +1,8 @@
 package port
 
-import "gaia-api/domain/entity"
+import (
+	"gaia-api/domain/entity"
+)
 
 type UserInterface interface {
 	GetUserById(id int) (entity.User, error)
@@ -9,4 +11,6 @@ type UserInterface interface {
 
 	CheckLogin(loginInfo *entity.Login_info) (bool, error)
 	Register(userInfo *entity.User) (bool, error)
+
+	UpdateUserById(id int, newUser *entity.User) (entity.User, error)
 }
