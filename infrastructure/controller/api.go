@@ -84,7 +84,6 @@ func (server *Server) mapAndSaveAndGetProduct(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, dbError.Error()))
 
 	} else if product == (entity.Product{}) {
-
 		openFoodFactAPI := server.OpenFoodFactsAPI
 		mappedProduct, err := openFoodFactAPI.retrieveAndMapProduct(barcode)
 
@@ -93,13 +92,14 @@ func (server *Server) mapAndSaveAndGetProduct(context *gin.Context) {
 
 		} else {
 			productSaved, err := productRepo.SaveProduct(mappedProduct, barcode)
+
 			if productSaved {
 				context.JSON(http.StatusOK, server.returnAPIData.ProductFound(mappedProduct))
+
 			} else {
 				context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, err.Error()))
 			}
 		}
-
 	} else {
 		context.JSON(http.StatusOK, server.returnAPIData.ProductFound(product))
 	}

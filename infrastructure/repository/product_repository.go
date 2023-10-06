@@ -23,7 +23,7 @@ func (productRepo *ProductRepo) getProduct(query string, args ...interface{}) (e
 	err = stmt.QueryRow(args...).Scan(&product.ID, &product.Brand, &product.Name, &product.Nutrients.EnergyKj, &product.Nutrients.EnergyKcal,
 		&product.Nutrients.Fat, &product.Nutrients.SaturatedFat, &product.Nutrients.Sugar, &product.Nutrients.Fiber,
 		&product.Nutrients.Proteins, &product.Nutrients.Salt, &product.ImageURL, &product.NutriScore.Score,
-		&product.NutriScore.Grade)
+		&product.NutriScore.Grade, &product.IsWater)
 	if err != nil {
 		return entity.Product{}, err
 	}
@@ -82,14 +82,14 @@ func (productRepo *ProductRepo) getConsumedProducts(query string, args ...interf
 
 func (productRepo *ProductRepo) GetProductByBarCode(barcode string) (entity.Product, error) {
 	return productRepo.getProduct("SELECT id, brand, name, energy_kj, energy_kcal, fat, saturated_fat, sugar, fiber, "+
-		"proteins, salt, image_url,  nutriscore_score, nutriscore_grade FROM product WHERE barcode = $1", barcode)
+		"proteins, salt, image_url, nutriscore_score, nutriscore_grade, iswater FROM product WHERE barcode = $1", barcode)
 }
 
 func (productRepo *ProductRepo) SaveProduct(product entity.Product, barcode string) (bool, error) {
 	var database = productRepo.data.DB
 
 	_, err := database.Exec("INSERT INTO product (brand, name, energy_kj, energy_kcal, fat, saturated_fat, sugar,"+
-		" fiber, proteins, salt, image_url,  nutriscore_score, nutriscore_grade, barcode, isWater) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) ",
+		" fiber, proteins, salt, image_url,  nutriscore_score, nutriscore_grade, barcode, iswater) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) ",
 		product.Brand, product.Name, product.Nutrients.EnergyKj, product.Nutrients.EnergyKcal, product.Nutrients.Fat,
 		product.Nutrients.SaturatedFat, product.Nutrients.Sugar, product.Nutrients.Fiber, product.Nutrients.Proteins,
 		product.Nutrients.Salt, product.ImageURL, product.NutriScore.Score, product.NutriScore.Grade, barcode, product.IsWater)

@@ -37,7 +37,7 @@ func mapOpenFoodFactsProductToEntitiesProduct(product *openfoodfacts.Product) (e
 	nutrients := product.Nutriments
 	mappedNutriscore := entity.NutriScore{Score: product.Nutriments.NutritionScoreFr100G, Grade: product.NutritionGradeFr}
 	isWater := false
-	if slices.Contains(product.Keywords, "eau") && slices.Contains(product.Keywords, "minerale") {
+	if slices.Contains(product.CategoriesTags, "en:waters") {
 		isWater = true
 	}
 
