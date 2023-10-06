@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"fmt"
 	"gaia-api/domain/entity"
 )
 
@@ -44,6 +45,7 @@ func (userRepo *UserRepo) GetUserById(id int) (entity.User, error) {
 
 func (userRepo *UserRepo) CheckLogin(loginInfo *entity.Login_info) (bool, error) {
 	user, err := userRepo.getUser("SELECT * FROM users WHERE username=$1 OR email=$2", loginInfo.Username, loginInfo.Email)
+	fmt.Println("err: ", err)
 	if err != nil {
 		return false, err
 	}

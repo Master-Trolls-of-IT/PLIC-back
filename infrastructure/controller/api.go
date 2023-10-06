@@ -94,6 +94,7 @@ func (server *Server) mapAndSaveAndGetProduct(context *gin.Context) {
 		} else {
 			productSaved, err := productRepo.SaveProduct(mappedProduct, barcode)
 			if productSaved {
+
 				context.JSON(http.StatusOK, server.returnAPIData.ProductFound(mappedProduct))
 			} else {
 				context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, err.Error()))
