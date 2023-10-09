@@ -202,6 +202,7 @@ func (productRepo *ProductRepo) DeleteConsumedProduct(id int, userID int) (bool,
 	return true, nil
 }
 
+//TODO: ajouter nutrientsUnit aux données du produit si besoin
 //func (productRepo *ProductRepo) insertNutrientUnit(db *sql.DB, table string, nutrients entity.NutrientsUnit) (int64, error) {
 //	var id int64
 //	err := db.QueryRow(

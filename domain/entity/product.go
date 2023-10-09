@@ -10,6 +10,7 @@ type Product struct {
 	Nutrients100g    Nutrients100g    `json:"nutrients_100g"`
 	NutrientsValue   NutrientsValue   `json:"nutrients_value"`
 	NutrientsServing NutrientsServing `json:"nutrients_serving"`
+	//TODO: ajouter nutrientsUnit aux données du produit si besoin
 	//NutrientsUnit    NutrientsUnit    `json:"nutrients_unit"`
 	ImageURL        string      `json:"image_url"`
 	NutriScore      NutriScore  `json:"nutriscore"`
@@ -44,6 +45,7 @@ type NutrientsServing struct {
 	Nutrients
 }
 
+//TODO: ajouter nutrientsUnit aux données du produit si besoin
 //type NutrientsUnit struct {
 //	EnergyKj      string `json:"energyKj"`
 //	EnergyKcal    string `json:"energyKcal"`
