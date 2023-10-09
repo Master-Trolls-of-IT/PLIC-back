@@ -156,6 +156,7 @@ func (productRepo *ProductRepo) SaveProduct(product entity.Product, barcode stri
 		return false, err
 	}
 
+	//TODO: ajouter nutrientsUnit aux données du produit si besoin
 	//nutrientsUnitID, err := productRepo.insertNutrientUnit(database, "nutrients_Unit", product.NutrientsUnit)
 	//if err != nil {
 	//	return false, err
