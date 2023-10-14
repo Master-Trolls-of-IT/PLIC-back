@@ -322,6 +322,7 @@ func (server *Server) getConsumedProducts(context *gin.Context) {
 
 	var userRepo = *server.authService.UserRepo
 	user, dbError := userRepo.GetUserByEmail(email)
+
 	if dbError != nil && dbError != sql.ErrNoRows {
 		context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, dbError.Error()))
 	} else {
