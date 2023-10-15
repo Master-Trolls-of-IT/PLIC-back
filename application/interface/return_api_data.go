@@ -55,6 +55,13 @@ func (returnAPIData *ReturnAPIData) LoginSuccess(user entity.User) JSONObject {
 	}
 }
 
+func (ReturnAPIData *ReturnAPIData) ValidPassword(message string) JSONObject {
+	return JSONObject{
+		"status":  202,
+		"message": message,
+	}
+}
+
 func (returnAPIData *ReturnAPIData) RegisterSuccess(user entity.User) JSONObject {
 	return JSONObject{
 		"status":  200,

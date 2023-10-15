@@ -56,6 +56,7 @@ func (server *Server) Start() {
 	ginEngine.POST("/logs", server.printLogs)
 
 	ginEngine.POST("/login", server.login)
+	ginEngine.GET("/checkuser", server.checkUser)
 	ginEngine.POST("/register", server.register)
 	ginEngine.PATCH("/users/:id", server.updateProfile)
 	ginEngine.DELETE("/users/:id", server.deleteAccount)
@@ -260,6 +261,24 @@ func (server *Server) login(context *gin.Context) {
 
 		//a function that generates a token using JWT
 		context.JSON(http.StatusAccepted, server.returnAPIData.LoginSuccess(user))
+	} else {
+		context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusBadRequest, err.Error()))
+	}
+}
+
+func (server *Server) checkUser(context *gin.Context) {
+	var login = entity.Login_info{}
+	if err := context.ShouldBindJSON(&login); err != nil {
+		context.JSON(http.StatusBadRequest, server.returnAPIData.Error(http.StatusBadRequest, err.Error()))
+	}
+	var userRepo = *server.authService.UserRepo
+	loggedIn, err := userRepo.CheckLogin(&login)
+	if err != nil {
+		context.JSON(http.StatusUnauthorized, server.returnAPIData.Error(http.StatusUnauthorized, "Informations de connexion non valides"))
+	} else if loggedIn {
+
+		//a function that generates a token using JWT
+		context.JSON(http.StatusAccepted, server.returnAPIData.ValidPassword("Mot de passe Valide"))
 	} else {
 		context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusBadRequest, err.Error()))
 	}
