@@ -49,6 +49,7 @@ func (userRepo *UserRepo) CheckLogin(loginInfo *entity.Login_info) (bool, error)
 	}
 	return user.Password == loginInfo.Password, nil
 }
+
 func (userRepo *UserRepo) Register(userInfo *entity.User) (bool, error) {
 	var db = userRepo.data.DB
 	var count int
