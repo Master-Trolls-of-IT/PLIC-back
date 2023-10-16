@@ -56,7 +56,7 @@ func (server *Server) Start() {
 	ginEngine.POST("/logs", server.printLogs)
 
 	ginEngine.POST("/login", server.login)
-	ginEngine.GET("/checkuser", server.checkUser)
+	ginEngine.POST("/checkuser", server.checkUser)
 	ginEngine.POST("/register", server.register)
 	ginEngine.PATCH("/users/:id", server.updateProfile)
 	ginEngine.DELETE("/users/:id", server.deleteAccount)
