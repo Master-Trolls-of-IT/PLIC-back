@@ -1,5 +1,7 @@
 package port
 
+import "gaia-api/domain/entity"
+
 type MealInterface interface {
-	SaveMeal(productsBarcodes []string, meal string, email string, isFavourite bool) error
+	SaveMeal(meal entity.Meal) error
 }

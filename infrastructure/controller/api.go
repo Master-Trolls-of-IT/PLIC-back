@@ -25,6 +25,7 @@ import (
 	"gaia-api/domain/entity"
 	"gaia-api/domain/service"
 	"gaia-api/infrastructure/error/openFoodFacts_api_error"
+	"gaia-api/infrastructure/model/requests/meal"
 	"net/http"
 	"strconv"
 
@@ -415,24 +416,16 @@ func (server *Server) deleteConsumedProduct(context *gin.Context) {
 }
 
 func (server *Server) addMeal(context *gin.Context) {
-	type MyRequestBody struct {
-		Title            string   `json:"title"`
-		UserEmail        string   `json:"user_email"`
-		IsFavourite      bool     `json:"is_favourite"`
-		ProductsBarcodes []string `json:"products_barcodes"`
-	}
 
-	var requestBody MyRequestBody
-	if err := context.ShouldBindJSON(&requestBody); err != nil {
+	var meal meal.Meal
+	if err := context.ShouldBindJSON(&meal); err != nil {
 		context.JSON(http.StatusBadRequest, server.returnAPIData.Error(http.StatusBadRequest, err.Error()))
 		return
 	}
 
 	var mealRepo = *server.openFoodFactsService.MealRepo
 
-	var title, userEmail, isFavourite, productsBarcodes = requestBody.Title, requestBody.UserEmail, requestBody.IsFavourite, requestBody.ProductsBarcodes
-
-	err := mealRepo.SaveMeal(productsBarcodes, title, userEmail, isFavourite)
+	err := mealRepo.SaveMeal(meal)
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, err.Error()))
 	}
