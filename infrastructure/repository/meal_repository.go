@@ -1,5 +1,7 @@
 package repository
 
+import "github.com/lib/pq"
+
 type MealRepo struct {
 	data *Database
 }
@@ -10,36 +12,17 @@ func NewMealRepository(db *Database) *MealRepo {
 
 func (mealRepo *MealRepo) SaveMeal(productsBarcodes []string, title string, email string, isFavourite bool) error {
 	var database = mealRepo.data.DB
-	var mealID int
-	mealInsertQuery := "INSERT INTO meal (title, user_email, is_favourite) VALUES ($1, $2, $3) RETURNING id"
 
-	if err := database.QueryRow(mealInsertQuery, title, email, isFavourite).Scan(&mealID); err != nil {
-		return err
-	}
+	query := `WITH meal_insert AS ( 
+				INSERT INTO meal (title, user_email, is_favourite) VALUES ($1, $2, $3) RETURNING id)
 
-	mealProductInsertQuery := "INSERT INTO meal_product (meal_id, product_id) VALUES ($1, $2)"
-	mealProductInsertStatement, err := database.Prepare(mealProductInsertQuery)
 
-	productSelectQuery := "SELECT id FROM product WHERE barcode = $1"
-	productSelectStatement, err := database.Prepare(productSelectQuery)
+			INSERT INTO meal_product (meal_id, product_id)
+			SELECT meal_insert.id, product.id from meal_insert join product on product.barcode = ANY($4::text[])`
+
+	_, err := database.Exec(query, title, email, isFavourite, pq.Array(productsBarcodes))
 	if err != nil {
 		return err
 	}
-
-	for _, barcode := range productsBarcodes {
-		var productID int
-
-		err = productSelectStatement.QueryRow(barcode).Scan(&productID)
-		if err != nil {
-			return err
-		}
-
-		_, err = mealProductInsertStatement.Exec(mealID, productID)
-		if err != nil {
-			return err
-		}
-
-	}
-
 	return nil
 }

@@ -425,6 +425,7 @@ func (server *Server) addMeal(context *gin.Context) {
 	var requestBody MyRequestBody
 	if err := context.ShouldBindJSON(&requestBody); err != nil {
 		context.JSON(http.StatusBadRequest, server.returnAPIData.Error(http.StatusBadRequest, err.Error()))
+		return
 	}
 
 	var mealRepo = *server.openFoodFactsService.MealRepo
@@ -432,4 +433,7 @@ func (server *Server) addMeal(context *gin.Context) {
 	var title, userEmail, isFavourite, productsBarcodes = requestBody.Title, requestBody.UserEmail, requestBody.IsFavourite, requestBody.ProductsBarcodes
 
 	err := mealRepo.SaveMeal(productsBarcodes, title, userEmail, isFavourite)
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, err.Error()))
+	}
 }
