@@ -69,6 +69,8 @@ func (server *Server) Start() {
 	ginEngine.GET("/product/consumed/user/:email", server.getConsumedProducts)
 	ginEngine.POST("/product/consumed", server.addConsumedProduct)
 	ginEngine.DELETE("/product/consumed/:id/user/:email", server.deleteConsumedProduct)
+
+	ginEngine.POST("/meal", server.addMeal)
 	err := ginEngine.Run()
 	if err != nil {
 		return
@@ -357,6 +359,7 @@ func (server *Server) addConsumedProduct(context *gin.Context) {
 	email := requestBody.Email
 	barcode := requestBody.Barcode
 	quantity := requestBody.Quantity
+
 	var productRepo = *server.openFoodFactsService.ProductRepo
 	var userRepo = *server.authService.UserRepo
 
@@ -409,4 +412,24 @@ func (server *Server) deleteConsumedProduct(context *gin.Context) {
 		context.JSON(http.StatusNotFound, server.returnAPIData.Error(http.StatusNotFound, "Produit non existant dans la base de données"))
 	}
 
+}
+
+func (server *Server) addMeal(context *gin.Context) {
+	type MyRequestBody struct {
+		Title            string   `json:"title"`
+		UserEmail        string   `json:"user_email"`
+		IsFavourite      bool     `json:"is_favourite"`
+		ProductsBarcodes []string `json:"products_barcodes"`
+	}
+
+	var requestBody MyRequestBody
+	if err := context.ShouldBindJSON(&requestBody); err != nil {
+		context.JSON(http.StatusBadRequest, server.returnAPIData.Error(http.StatusBadRequest, err.Error()))
+	}
+
+	var mealRepo = *server.openFoodFactsService.MealRepo
+
+	var title, userEmail, isFavourite, productsBarcodes = requestBody.Title, requestBody.UserEmail, requestBody.IsFavourite, requestBody.ProductsBarcodes
+
+	err := mealRepo.SaveMeal(productsBarcodes, title, userEmail, isFavourite)
 }
