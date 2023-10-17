@@ -13,6 +13,7 @@ type IReturnAPIData interface {
 	CheckToken(isTokenValid bool)
 	ProductFound(product entity.Product)
 	ProductNotAvailable(barcode string)
+	MealAdded()
 	Ping()
 }
 
@@ -183,6 +184,14 @@ func (returnAPIData *ReturnAPIData) DeletedProduct(status int, s string) any {
 	return JSONObject{
 		"status":  status,
 		"message": s,
+		"data":    JSONObject{},
+	}
+}
+
+func (returnAPIData *ReturnAPIData) MealAdded() JSONObject {
+	return JSONObject{
+		"status":  200,
+		"message": "Le repas a été ajouté avec succès",
 		"data":    JSONObject{},
 	}
 }
