@@ -83,7 +83,7 @@ func (productRepo *ProductRepo) getConsumedProducts(query string, args ...interf
 
 func (productRepo *ProductRepo) GetProductByBarCode(barcode string) (entity.Product, error) {
 	product, err := productRepo.getProduct("SELECT id, brand, name, energy_kj, energy_kcal, fat, saturated_fat, sugar, fiber, "+
-		"proteins, salt, image_url, nutriscore_score, nutriscore_grade, iswater, quantity, serving_quantity, serving_size FROM product WHERE barcode = $1", barcode)
+		"proteins, salt, image_url, nutriscore_score, nutriscore_grade, isWater, quantity, serving_quantity, serving_size FROM product WHERE barcode = $1", barcode)
 
 	if err != nil {
 		return entity.Product{}, err
@@ -136,7 +136,7 @@ func (productRepo *ProductRepo) SaveProduct(product entity.Product, barcode stri
 	var database = productRepo.data.DB
 	var productID int
 	err := database.QueryRow("INSERT INTO product (brand, name, energy_kj, energy_kcal, fat, saturated_fat, sugar,"+
-		" fiber, proteins, salt, image_url,  nutriscore_score, nutriscore_grade, barcode, iswater, quantity, serving_quantity, serving_size) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18) RETURNING id",
+		" fiber, proteins, salt, image_url,  nutriscore_score, nutriscore_grade, barcode, isWater, quantity, serving_quantity, serving_size) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18) RETURNING id",
 		product.Brand, product.Name, product.Nutrients.EnergyKj, product.Nutrients.EnergyKcal, product.Nutrients.Fat,
 		product.Nutrients.SaturatedFat, product.Nutrients.Sugar, product.Nutrients.Fiber, product.Nutrients.Proteins,
 		product.Nutrients.Salt, product.ImageURL, product.NutriScore.Score, product.NutriScore.Grade, barcode, product.IsWater, product.Quantity, product.ServingQuantity, product.ServingSize).Scan(&productID) //, nutrientsUnitID)
