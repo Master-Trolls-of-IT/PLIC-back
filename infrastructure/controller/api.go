@@ -428,5 +428,7 @@ func (server *Server) addMeal(context *gin.Context) {
 	err := mealRepo.SaveMeal(meal)
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, err.Error()))
+	} else {
+		context.JSON(http.StatusOK, server.returnAPIData.MealAdded())
 	}
 }

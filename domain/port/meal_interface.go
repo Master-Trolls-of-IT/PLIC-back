@@ -1,7 +1,9 @@
 package port
 
-import "gaia-api/domain/entity"
+import (
+	"gaia-api/infrastructure/model/requests/meal"
+)
 
 type MealInterface interface {
-	SaveMeal(meal entity.Meal) error
+	SaveMeal(meal meal.Meal) error
 }
