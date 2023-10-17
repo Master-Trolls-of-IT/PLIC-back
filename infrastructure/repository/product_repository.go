@@ -206,6 +206,17 @@ func (productRepo *ProductRepo) DeleteConsumedProduct(id int, userID int) (bool,
 	return true, nil
 }
 
+func (productRepo *ProductRepo) UpdateConsumedProductQuantity(quantity int, barcode string, userID int) error {
+	query := "UPDATE consumed_products SET quantity=$1 WHERE product_id = (SELECT id FROM product WHERE barcode = $2) AND user_id = $3"
+
+	var database = productRepo.data.DB
+	_, err := database.Exec(query, quantity, barcode, userID)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 //TODO: ajouter nutrientsUnit aux données du produit si besoin
 //func (productRepo *ProductRepo) insertNutrientUnit(db *sql.DB, table string, nutrients entity.NutrientsUnit) (int64, error) {
 //	var id int64
