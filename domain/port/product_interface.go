@@ -7,5 +7,6 @@ type ProductInterface interface {
 	SaveProduct(product entity.Product, barcode string) (bool, error)
 	SaveConsumedProduct(product entity.Product, id int, quantity int) (bool, error)
 	GetConsumedProductsByUserId(id int) ([]entity.ConsumedProduct, error)
+	UpdateConsumedProductQuantity(quantity int, barcode string, userID int) error
 	DeleteConsumedProduct(id int, userId int) (bool, error)
 }
