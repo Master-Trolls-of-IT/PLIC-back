@@ -15,7 +15,7 @@ type Product struct {
 	ImageURL        string      `json:"image_url"`
 	NutriScore      NutriScore  `json:"nutriscore"`
 	EcoScore        string      `json:"ecoscore"`
-	IsWater         bool        `json:"iswater"`
+	IsWater         bool        `json:"isWater"`
 	Quantity        string      `json:"quantity"`
 	ServingQuantity json.Number ` json:"serving_quantity"`
 	ServingSize     string      `json:"serving_size"`
