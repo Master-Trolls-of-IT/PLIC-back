@@ -1,9 +1,11 @@
 package port
 
 import (
-	"gaia-api/infrastructure/model/requests/meal"
+	request "gaia-api/infrastructure/model/requests/meal"
+	response "gaia-api/infrastructure/model/responses/meal"
 )
 
 type MealInterface interface {
-	SaveMeal(meal meal.Meal) error
+	SaveMeal(meal request.Meal) error
+	GetMeal(userID int) (response.Meal, error)
 }
