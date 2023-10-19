@@ -112,7 +112,9 @@ func (productRepo *ProductRepo) GetProductByBarCode(barcode string) (entity.Prod
 func (productRepo *ProductRepo) GetConsumedProductsByUserId(userID int) ([]entity.ConsumedProduct, error) {
 	currentTime := time.Now()
 	today := currentTime.Format("2006-01-02")
-	query := "SELECT p.id, p.name ,p.brand, p.energy_kj, p.energy_kcal, p.fat, p.saturated_fat, p.sugar, p.fiber, p.proteins, p.salt, p.image_url, p.nutriscore_score, p.nutriscore_grade, cp.quantity, cp.consumed_date FROM consumed_products cp INNER JOIN product p ON cp.product_id = p.id WHERE cp.user_id = $1 AND cp.consumed_date = $2"
+	query := "SELECT p.id, p.name ,p.brand, p.energy_kj, p.energy_kcal, p.fat, p.saturated_fat, p.sugar, p.fiber," +
+		" p.proteins, p.salt, p.image_url, p.nutriscore_score, p.nutriscore_grade, cp.quantity, cp.consumed_date" +
+		" FROM consumed_products cp INNER JOIN product p ON cp.product_id = p.id WHERE cp.user_id = $1 AND cp.consumed_date = $2"
 	return productRepo.getConsumedProducts(query, userID, today)
 }
 

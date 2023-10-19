@@ -31,7 +31,7 @@ func main() {
 	//Repository
 	userRepo := repository.NewUserRepository(db)
 	productRepo := repository.NewProductRepository(db)
-	mealRepo := repository.NewMealRepository(db)
+	mealRepo := repository.NewMealRepository(db, productRepo)
 
 	//Service
 	authenticationService := service.NewAuthService(userRepo)
