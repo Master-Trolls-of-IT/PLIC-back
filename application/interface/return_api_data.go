@@ -3,17 +3,30 @@ package interfaces
 import (
 	"fmt"
 	"gaia-api/domain/entity"
+	response "gaia-api/infrastructure/model/responses/meal"
 )
 
 type IReturnAPIData interface {
 	Error(errorStatus int, errorMessage string)
+
 	LoginSuccess(user entity.User)
-	RegisterSucces(user entity.User)
+	ValidPassword(message string)
+	RegisterSuccess(user entity.User)
+	UserUpdateSuccess(user entity.User)
 	GetToken(token string)
 	CheckToken(isTokenValid bool)
+
 	ProductFound(product entity.Product)
 	ProductNotAvailable(barcode string)
+	DeletedProduct(status int, s string)
+	UpdateProduct(status int, message string)
+
+	ProductAddedToConsumed(product entity.Product)
+	GetConsumedProductsSuccess(consumedProducts []entity.ConsumedProduct)
+	ProductDeletedFromConsumed(consumedProducts []entity.ConsumedProduct)
+
 	MealAdded()
+	GetMealsSuccess(meals []response.Meal)
 	Ping()
 }
 
@@ -56,7 +69,7 @@ func (returnAPIData *ReturnAPIData) LoginSuccess(user entity.User) JSONObject {
 	}
 }
 
-func (ReturnAPIData *ReturnAPIData) ValidPassword(message string) JSONObject {
+func (returnAPIData *ReturnAPIData) ValidPassword(message string) JSONObject {
 	return JSONObject{
 		"status":  202,
 		"message": message,
@@ -201,5 +214,13 @@ func (returnAPIData *ReturnAPIData) MealAdded() JSONObject {
 		"status":  200,
 		"message": "Le repas a été ajouté avec succès",
 		"data":    JSONObject{},
+	}
+}
+
+func (returnAPIData *ReturnAPIData) GetMealsSuccess(meals []response.Meal) JSONObject {
+	return JSONObject{
+		"status":  202,
+		"message": "Les repas de l'utilisateur ont été récupérés avec succès",
+		"data":    meals,
 	}
 }

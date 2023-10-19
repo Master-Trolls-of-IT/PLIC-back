@@ -1,17 +1,19 @@
 package repository
 
 import (
+	"fmt"
 	"gaia-api/infrastructure/model/requests/meal"
 	response "gaia-api/infrastructure/model/responses/meal"
 	"github.com/lib/pq"
 )
 
 type MealRepo struct {
-	data *Database
+	data        *Database
+	ProductRepo *ProductRepo
 }
 
-func NewMealRepository(db *Database) *MealRepo {
-	return &MealRepo{data: db}
+func NewMealRepository(db *Database, productRepo *ProductRepo) *MealRepo {
+	return &MealRepo{data: db, ProductRepo: productRepo}
 }
 
 func (mealRepo *MealRepo) SaveMeal(myMeal request.Meal) error {
@@ -28,7 +30,7 @@ func (mealRepo *MealRepo) SaveMeal(myMeal request.Meal) error {
 
 	//Associates the meal id with the corresponding product_id  and quantity
 	mealProductInsert := `INSERT INTO meal_product (meal_id, product_id, quantity)
-							SELECT $1, product.id, $2 FROM  product ON WHERE product.barcode = $3`
+							SELECT $1, product.id, $2 FROM  product WHERE product.barcode = $3`
 
 	//Associates the  meal id with the corresponding tags
 	mealTagsInsert := `INSERT INTO meal_tag (meal_id, tag_id)
@@ -54,12 +56,75 @@ func (mealRepo *MealRepo) SaveMeal(myMeal request.Meal) error {
 	return nil
 }
 
-func (mealRepo *MealRepo) GetMeal(userID int) (response.Meal, error) {
+func (mealRepo *MealRepo) GetMeals(userEmail string) ([]response.Meal, error) {
+	var database = mealRepo.data.DB
+	var productRepo = mealRepo.ProductRepo
+	var meals []response.Meal
 
-	//var Meals []response.Meal
-	//
-	//getMealsQuery := "SELECT id , title, is_favourite FROM meal WHERE user_email = $1"
-	//
-	//getTagIDSByIDQuery := "SELECT  label, color FROM  meal_tag mt join tag t on mt.tag_id = t.id where meal_id = $1"
-	return response.Meal{}, nil
+	//retrieve meals
+	getMealsQuery := "SELECT id , title, is_favourite FROM meal WHERE user_email = $1"
+	rows, err := database.Query(getMealsQuery, userEmail)
+	if err != nil {
+		return []response.Meal{}, err
+	}
+
+	//retrieve meal tags
+	getTagsByMealIDQuery := "SELECT  t.label, t.color FROM  meal_tag mt join tag t on mt.tag_id = t.id where mt.meal_id = $1"
+	getTagsByMealIDStmt, err := database.Prepare(getTagsByMealIDQuery)
+	if err != nil {
+		return []response.Meal{}, err
+	}
+
+	//retrieve meal products
+	getMealProductsQuery := "SELECT p.barcode, mp.quantity from product p join meal_product mp on p.id = mp.product_id where mp.meal_id = $1"
+	getMealProductsStmt, err := database.Prepare(getMealProductsQuery)
+	if err != nil {
+		return []response.Meal{}, err
+	}
+
+	for rows.Next() {
+		var meal response.Meal
+		meal.Tags = []response.MealTag{}
+		meal.Products = []response.MealProduct{}
+		err := rows.Scan(&meal.ID, &meal.Title, &meal.IsFavourite)
+		if err != nil {
+			fmt.Println("HERE Z")
+			return []response.Meal{}, err
+		}
+
+		//retrieve meal tags
+		mealTagRows, err := getTagsByMealIDStmt.Query(meal.ID)
+		if err != nil {
+			return []response.Meal{}, err
+		}
+
+		for mealTagRows.Next() {
+			var tag response.MealTag
+			err := mealTagRows.Scan(&tag.Label, &tag.Color)
+			if err != nil {
+				return []response.Meal{}, err
+			}
+
+			meal.Tags = append(meal.Tags, tag)
+		}
+
+		//retrieve meal products
+		mealProductRows, err := getMealProductsStmt.Query(meal.ID)
+		for mealProductRows.Next() {
+			var barcode string
+			var quantity int
+			err := mealProductRows.Scan(&barcode, &quantity)
+			if err != nil {
+				return []response.Meal{}, err
+			}
+			productInfo, err := productRepo.GetProductByBarCode(barcode)
+			if err != nil {
+				return []response.Meal{}, err
+			}
+			meal.Products = append(meal.Products, response.MealProduct{ProductInfo: productInfo, Quantity: quantity})
+		}
+
+		meals = append(meals, meal)
+	}
+	return meals, nil
 }

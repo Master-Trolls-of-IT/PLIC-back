@@ -7,5 +7,5 @@ import (
 
 type MealInterface interface {
 	SaveMeal(meal request.Meal) error
-	GetMeal(userID int) (response.Meal, error)
+	GetMeals(userEmail string) ([]response.Meal, error)
 }

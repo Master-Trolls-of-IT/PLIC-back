@@ -75,7 +75,7 @@ func (server *Server) Start() {
 	ginEngine.PATCH("/product/consumed", server.updateConsumedProduct)
 
 	ginEngine.POST("/meal", server.addMeal)
-	ginEngine.GET("/meal/:email", server.getMeal)
+	ginEngine.GET("/meal/:email", server.getMeals)
 	err := ginEngine.Run()
 	if err != nil {
 		return
@@ -478,18 +478,22 @@ func (server *Server) addMeal(context *gin.Context) {
 	}
 }
 
-func (server *Server) getMeal(context *gin.Context) {
+func (server *Server) getMeals(context *gin.Context) {
 	var email = context.Param("email")
 	var userRepo, mealRepo = *server.authService.UserRepo, *server.openFoodFactsService.MealRepo
 
 	user, err := userRepo.GetUserByEmail(email)
 	if err != nil {
+		context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, err.Error()))
 		return
 	}
 
-	meal, err := mealRepo.GetMeal(user.Id)
+	meals, err := mealRepo.GetMeals(user.Email)
 	if err != nil {
+		context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, err.Error()))
 		return
 	}
+
+	context.JSON(http.StatusAccepted, server.returnAPIData.GetMealsSuccess(meals))
 
 }
