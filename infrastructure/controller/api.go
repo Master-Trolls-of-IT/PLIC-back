@@ -333,7 +333,16 @@ func (server *Server) updateProfile(context *gin.Context) {
 }
 
 func (server *Server) deleteAccount(context *gin.Context) {
-	// TODO: Delete account
+	userId, _ := strconv.Atoi(context.Param("id"))
+	var userRepo = *server.authService.UserRepo
+	userDeleted, dbError := userRepo.DeleteUser(userId)
+	if dbError != nil && dbError != sql.ErrNoRows {
+		context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, dbError.Error()))
+	} else if userDeleted {
+		context.JSON(http.StatusOK, server.returnAPIData.DeletedUser(http.StatusOK, "Utilisateur Supprimé"))
+	} else {
+		context.JSON(http.StatusNotFound, server.returnAPIData.Error(http.StatusNotFound, "Utilisateur non existant dans la base de données"))
+	}
 }
 
 func (server *Server) getConsumedProducts(context *gin.Context) {

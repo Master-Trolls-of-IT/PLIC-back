@@ -88,4 +88,13 @@ func (userRepo *UserRepo) UpdateUserById(id int, newUser *entity.User) (entity.U
 	return userRepo.GetUserById(id)
 }
 
+func (userRepo *UserRepo) DeleteUser(userId int) (bool, error) {
+	var database = userRepo.data.DB
+	_, err := database.Exec("DELETE FROM users WHERE id = $1", userId)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
 func (userRepo *UserRepo) Login(loginInfo *entity.Login_info) {}
