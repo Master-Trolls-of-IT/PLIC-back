@@ -83,7 +83,7 @@ func (productRepo *ProductRepo) getConsumedProducts(query string, args ...interf
 
 func (productRepo *ProductRepo) GetProductByBarCode(barcode string) (entity.Product, error) {
 	product, err := productRepo.getProduct("SELECT id, brand, name, energy_kj, energy_kcal, fat, saturated_fat, sugar, fiber, "+
-		"proteins, salt, image_url, nutriscore_score, nutriscore_grade, iswater, quantity, serving_quantity, serving_size FROM product WHERE barcode = $1", barcode)
+		"proteins, salt, image_url, nutriscore_score, nutriscore_grade, isWater, quantity, serving_quantity, serving_size FROM product WHERE barcode = $1", barcode)
 
 	if err != nil {
 		return entity.Product{}, err
@@ -112,7 +112,9 @@ func (productRepo *ProductRepo) GetProductByBarCode(barcode string) (entity.Prod
 func (productRepo *ProductRepo) GetConsumedProductsByUserId(userID int) ([]entity.ConsumedProduct, error) {
 	currentTime := time.Now()
 	today := currentTime.Format("2006-01-02")
-	query := "SELECT p.id, p.name ,p.brand, p.energy_kj, p.energy_kcal, p.fat, p.saturated_fat, p.sugar, p.fiber, p.proteins, p.salt, p.image_url, p.nutriscore_score, p.nutriscore_grade, cp.quantity, cp.consumed_date FROM consumed_products cp INNER JOIN product p ON cp.product_id = p.id WHERE cp.user_id = $1 AND cp.consumed_date = $2"
+	query := "SELECT p.id, p.name ,p.brand, p.energy_kj, p.energy_kcal, p.fat, p.saturated_fat, p.sugar, p.fiber," +
+		" p.proteins, p.salt, p.image_url, p.nutriscore_score, p.nutriscore_grade, cp.quantity, cp.consumed_date" +
+		" FROM consumed_products cp INNER JOIN product p ON cp.product_id = p.id WHERE cp.user_id = $1 AND cp.consumed_date = $2"
 	return productRepo.getConsumedProducts(query, userID, today)
 }
 
@@ -136,7 +138,7 @@ func (productRepo *ProductRepo) SaveProduct(product entity.Product, barcode stri
 	var database = productRepo.data.DB
 	var productID int
 	err := database.QueryRow("INSERT INTO product (brand, name, energy_kj, energy_kcal, fat, saturated_fat, sugar,"+
-		" fiber, proteins, salt, image_url,  nutriscore_score, nutriscore_grade, barcode, iswater, quantity, serving_quantity, serving_size) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18) RETURNING id",
+		" fiber, proteins, salt, image_url,  nutriscore_score, nutriscore_grade, barcode, isWater, quantity, serving_quantity, serving_size) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18) RETURNING id",
 		product.Brand, product.Name, product.Nutrients.EnergyKj, product.Nutrients.EnergyKcal, product.Nutrients.Fat,
 		product.Nutrients.SaturatedFat, product.Nutrients.Sugar, product.Nutrients.Fiber, product.Nutrients.Proteins,
 		product.Nutrients.Salt, product.ImageURL, product.NutriScore.Score, product.NutriScore.Grade, barcode, product.IsWater, product.Quantity, product.ServingQuantity, product.ServingSize).Scan(&productID) //, nutrientsUnitID)
@@ -204,6 +206,17 @@ func (productRepo *ProductRepo) DeleteConsumedProduct(id int, userID int) (bool,
 		return false, err
 	}
 	return true, nil
+}
+
+func (productRepo *ProductRepo) UpdateConsumedProductQuantity(quantity int, barcode string, userID int) error {
+	query := "UPDATE consumed_products SET quantity=$1 WHERE product_id = (SELECT id FROM product WHERE barcode = $2) AND user_id = $3"
+
+	var database = productRepo.data.DB
+	_, err := database.Exec(query, quantity, barcode, userID)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 //TODO: ajouter nutrientsUnit aux données du produit si besoin

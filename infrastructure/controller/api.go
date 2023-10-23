@@ -25,6 +25,8 @@ import (
 	"gaia-api/domain/entity"
 	"gaia-api/domain/service"
 	"gaia-api/infrastructure/error/openFoodFacts_api_error"
+	consumed_product "gaia-api/infrastructure/model/requests/consumed-product"
+	request "gaia-api/infrastructure/model/requests/meal"
 	"net/http"
 	"strconv"
 
@@ -70,6 +72,10 @@ func (server *Server) Start() {
 	ginEngine.GET("/product/consumed/user/:email", server.getConsumedProducts)
 	ginEngine.POST("/product/consumed", server.addConsumedProduct)
 	ginEngine.DELETE("/product/consumed/:id/user/:email", server.deleteConsumedProduct)
+	ginEngine.PATCH("/product/consumed", server.updateConsumedProduct)
+
+	ginEngine.POST("/meal", server.addMeal)
+	ginEngine.GET("/meal/:email", server.getMeals)
 	err := ginEngine.Run()
 	if err != nil {
 		return
@@ -386,6 +392,7 @@ func (server *Server) addConsumedProduct(context *gin.Context) {
 	email := requestBody.Email
 	barcode := requestBody.Barcode
 	quantity := requestBody.Quantity
+
 	var productRepo = *server.openFoodFactsService.ProductRepo
 	var userRepo = *server.authService.UserRepo
 
@@ -437,5 +444,65 @@ func (server *Server) deleteConsumedProduct(context *gin.Context) {
 	} else {
 		context.JSON(http.StatusNotFound, server.returnAPIData.Error(http.StatusNotFound, "Produit non existant dans la base de données"))
 	}
+}
+
+func (server *Server) updateConsumedProduct(context *gin.Context) {
+	var productRepo = *server.openFoodFactsService.ProductRepo
+	var consumedProductUpdateQuantity consumed_product.ConsumedProductUpdateQuantity
+	if err := context.ShouldBindJSON(&consumedProductUpdateQuantity); err != nil {
+		context.JSON(http.StatusBadRequest, server.returnAPIData.Error(http.StatusBadRequest, err.Error()))
+		return
+	}
+
+	var userRepo = *server.authService.UserRepo
+	user, dbError := userRepo.GetUserByEmail(consumedProductUpdateQuantity.UserEmail)
+	if dbError != nil && dbError != sql.ErrNoRows {
+		context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, dbError.Error()))
+	}
+
+	err := productRepo.UpdateConsumedProductQuantity(consumedProductUpdateQuantity.Quantity, consumedProductUpdateQuantity.Barcode, user.Id)
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, err.Error()))
+	} else {
+		context.JSON(http.StatusOK, server.returnAPIData.UpdateProduct(http.StatusOK, "La quantité consommée du produit a été mise à jour avec succès."))
+	}
+
+}
+
+func (server *Server) addMeal(context *gin.Context) {
+
+	var meal request.Meal
+	if err := context.ShouldBindJSON(&meal); err != nil {
+		context.JSON(http.StatusBadRequest, server.returnAPIData.Error(http.StatusBadRequest, err.Error()))
+		return
+	}
+
+	var mealRepo = *server.openFoodFactsService.MealRepo
+
+	err := mealRepo.SaveMeal(meal)
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, err.Error()))
+	} else {
+		context.JSON(http.StatusOK, server.returnAPIData.MealAdded())
+	}
+}
+
+func (server *Server) getMeals(context *gin.Context) {
+	var email = context.Param("email")
+	var userRepo, mealRepo = *server.authService.UserRepo, *server.openFoodFactsService.MealRepo
+
+	user, err := userRepo.GetUserByEmail(email)
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, err.Error()))
+		return
+	}
+
+	meals, err := mealRepo.GetMeals(user.Email)
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, err.Error()))
+		return
+	}
+
+	context.JSON(http.StatusAccepted, server.returnAPIData.GetMealsSuccess(meals))
 
 }

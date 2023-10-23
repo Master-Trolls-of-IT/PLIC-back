@@ -28,12 +28,20 @@ func main() {
 		panic(err)
 	}
 
+	//Repository
 	userRepo := repository.NewUserRepository(db)
 	productRepo := repository.NewProductRepository(db)
+	mealRepo := repository.NewMealRepository(db, productRepo)
+
+	//Service
 	authenticationService := service.NewAuthService(userRepo)
+	OpenFoodFactsService := service.NewOpenFoodFactsService(productRepo, mealRepo)
+
+	//API
 	returnAPIData := interfaces.NewReturnAPIData()
-	OpenFoodFactsService := service.NewOpenFoodFactsService(productRepo)
 	OpenFoodFactsAPI := api.NewOpenFoodFactsAPI()
+
+	//Server Instance
 	ginServer := api.NewServer(authenticationService, returnAPIData, OpenFoodFactsService, OpenFoodFactsAPI)
 
 	ginServer.Start()
