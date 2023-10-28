@@ -141,10 +141,11 @@ func (productRepo *ProductRepo) SaveProduct(product entity.Product, barcode stri
 	var database = productRepo.data.DB
 	var productID int
 	err := database.QueryRow("INSERT INTO product (brand, name, energy_kj, energy_kcal, fat, saturated_fat, sugar,"+
-		" fiber, proteins, salt, image_url,  nutriscore_score, nutriscore_grade, barcode, isWater, quantity, serving_quantity, serving_size) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18) RETURNING id",
+		" fiber, proteins, salt, image_url,  nutriscore_score, nutriscore_grade, ecoscore, barcode, isWater, quantity, serving_quantity, serving_size) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19) RETURNING id",
 		product.Brand, product.Name, product.Nutrients.EnergyKj, product.Nutrients.EnergyKcal, product.Nutrients.Fat,
 		product.Nutrients.SaturatedFat, product.Nutrients.Sugar, product.Nutrients.Fiber, product.Nutrients.Proteins,
-		product.Nutrients.Salt, product.ImageURL, product.NutriScore.Score, product.NutriScore.Grade, barcode, product.IsWater, product.Quantity, product.ServingQuantity, product.ServingSize).Scan(&productID) //, nutrientsUnitID)
+		product.Nutrients.Salt, product.ImageURL, product.NutriScore.Score, product.NutriScore.Grade, product.EcoScore,
+		barcode, product.IsWater, product.Quantity, product.ServingQuantity, product.ServingSize).Scan(&productID) //, nutrientsUnitID)
 
 	if err != nil {
 		return false, err
