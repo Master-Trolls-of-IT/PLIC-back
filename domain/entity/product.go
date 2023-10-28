@@ -6,6 +6,7 @@ type Product struct {
 	ID               int              `json:"id"`
 	Brand            string           `json:"brand"`
 	Name             string           `json:"name"`
+	Barcode          string           `json:"barcode"`
 	Nutrients        Nutrients        `json:"nutrients"`
 	Nutrients100g    Nutrients100g    `json:"nutrients_100g"`
 	NutrientsValue   NutrientsValue   `json:"nutrients_value"`
