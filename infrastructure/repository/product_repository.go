@@ -70,6 +70,9 @@ func (productRepo *ProductRepo) getConsumedProducts(query string, args ...interf
 			&consumedProduct.Product.ImageURL,
 			&consumedProduct.Product.NutriScore.Score,
 			&consumedProduct.Product.NutriScore.Grade,
+			&consumedProduct.Product.Barcode,
+			&consumedProduct.Product.IsWater,
+			&consumedProduct.Product.ServingQuantity,
 			&consumedProduct.Quantity,
 			&consumedProduct.Consumed_Date)
 		if err != nil {
@@ -113,7 +116,7 @@ func (productRepo *ProductRepo) GetConsumedProductsByUserId(userID int) ([]entit
 	currentTime := time.Now()
 	today := currentTime.Format("2006-01-02")
 	query := "SELECT p.id, p.name ,p.brand, p.energy_kj, p.energy_kcal, p.fat, p.saturated_fat, p.sugar, p.fiber," +
-		" p.proteins, p.salt, p.image_url, p.nutriscore_score, p.nutriscore_grade, cp.quantity, cp.consumed_date" +
+		" p.proteins, p.salt, p.image_url, p.nutriscore_score, p.nutriscore_grade, p.barcode, p.iswater, p.serving_quantity, cp.quantity, cp.consumed_date" +
 		" FROM consumed_products cp INNER JOIN product p ON cp.product_id = p.id WHERE cp.user_id = $1 AND cp.consumed_date = $2"
 	return productRepo.getConsumedProducts(query, userID, today)
 }
