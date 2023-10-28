@@ -1,10 +1,13 @@
 package controller
 
 import (
+	"encoding/json"
 	"gaia-api/domain/entity"
 	"gaia-api/infrastructure/error/openFoodFacts_api_error"
 	"github.com/openfoodfacts/openfoodfacts-go"
 	"golang.org/x/exp/slices"
+	"net/http"
+	"strconv"
 )
 
 type OpenFoodFactsAPI struct {
@@ -16,15 +19,38 @@ func NewOpenFoodFactsAPI() *OpenFoodFactsAPI {
 	return &OpenFoodFactsAPI{&api}
 }
 
+type Response struct {
+	Product struct {
+		EcoscoreScore float64 `json:"ecoscore_score"`
+	} `json:"product"`
+}
+
+func getEcoScore(barcode string) (string, error) {
+	response, err := http.Get("https://world.openfoodfacts.org/api/v0/product/" + barcode)
+	if err != nil {
+		return "", err
+	}
+	defer response.Body.Close()
+
+	var responseJSON Response
+	err = json.NewDecoder(response.Body).Decode(&responseJSON)
+	if err != nil {
+		return "", err
+	}
+
+	ecoscoreString := strconv.FormatFloat(responseJSON.Product.EcoscoreScore, 'f', -1, 64)
+	return ecoscoreString, nil
+}
+
 func (openFoodFactsAPI *OpenFoodFactsAPI) retrieveAndMapProduct(barcode string) (entity.Product, error) {
 	client := openFoodFactsAPI.Client
 	product, err := client.Product(barcode)
-
 	if err != nil {
 		return entity.Product{}, openFoodFacts_api_error.ProductNotFoundError{Barcode: barcode}
 	}
 
 	mappedProduct, err := mapOpenFoodFactsProductToEntitiesProduct(product)
+	mappedProduct.EcoScore, err = getEcoScore(barcode)
 
 	if err != nil {
 		return entity.Product{}, err
