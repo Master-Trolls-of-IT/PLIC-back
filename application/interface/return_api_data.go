@@ -201,6 +201,15 @@ func (returnAPIData *ReturnAPIData) DeletedProduct(status int, s string) JSONObj
 	}
 }
 
+
+func (returnAPIData *ReturnAPIData) DeletedUser(status int, s string) any {
+	return JSONObject{
+		"status":  status,
+		"message": s,
+		"data":    JSONObject{},
+	}
+}
+
 func (returnAPIData *ReturnAPIData) UpdateProduct(status int, message string) JSONObject {
 	return JSONObject{
 		"status":  status,

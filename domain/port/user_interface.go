@@ -13,4 +13,5 @@ type UserInterface interface {
 	Register(userInfo *entity.User) (bool, error)
 
 	UpdateUserById(id int, newUser *entity.User) (entity.User, error)
+	DeleteUser(userId int) (bool, error)
 }
