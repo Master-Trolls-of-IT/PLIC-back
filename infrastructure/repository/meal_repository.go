@@ -4,6 +4,7 @@ import (
 	"gaia-api/infrastructure/model/requests/meal"
 	response "gaia-api/infrastructure/model/responses/meal"
 	"github.com/lib/pq"
+	"strconv"
 )
 
 type MealRepo struct {
@@ -15,7 +16,7 @@ func NewMealRepository(db *Database, productRepo *ProductRepo) *MealRepo {
 	return &MealRepo{data: db, ProductRepo: productRepo}
 }
 
-func (mealRepo *MealRepo) SaveMeal(myMeal request.Meal) error {
+func (mealRepo *MealRepo) SaveMeal(myMeal request.Meal) (*response.Meal, error) {
 	database := mealRepo.data.DB
 
 	tagLabels := make([]string, len(myMeal.Tags))
@@ -27,21 +28,22 @@ func (mealRepo *MealRepo) SaveMeal(myMeal request.Meal) error {
 	var mealID string
 	mealInsertQuery := `INSERT INTO meal (title, user_email) VALUES ($1, $2) RETURNING id`
 	if err := database.QueryRow(mealInsertQuery, myMeal.Title, myMeal.UserEmail).Scan(&mealID); err != nil {
-		return err
+		return nil, err
 	}
+	responseMealID, _ := strconv.Atoi(mealID)
 
 	// Prepare the meal product insert statement
 	mealProductInsertQuery := `INSERT INTO meal_product (meal_id, product_id, quantity)
 							SELECT $1, product.id, $2 FROM product WHERE product.barcode = $3`
 	mealProductInsertStmt, err := database.Prepare(mealProductInsertQuery)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// Insert meal products
 	for _, product := range myMeal.Products {
 		if _, err := mealProductInsertStmt.Exec(mealID, product.Quantity, product.Barcode); err != nil {
-			return err
+			return nil, err
 		}
 	}
 
@@ -49,10 +51,22 @@ func (mealRepo *MealRepo) SaveMeal(myMeal request.Meal) error {
 	mealTagsInsert := `INSERT INTO meal_tag (meal_id, tag_id)
     						SELECT $1, tag.id FROM tag WHERE tag.label = ANY($2::TEXT[])`
 	if _, err := database.Exec(mealTagsInsert, mealID, pq.Array(tagLabels)); err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	responseMeal := response.Meal{ID: responseMealID, Title: myMeal.Title, Tags: []response.MealTag{}, UserEmail: myMeal.UserEmail, Products: []response.MealProduct{}, IsFavourite: false}
+	responseMeals := []response.Meal{responseMeal}
+	err = mealRepo.retrieveMealProducts(responseMeals)
+	if err != nil {
+		return nil, err
+	}
+	err = mealRepo.retrieveMealTags(responseMeals)
+	if err != nil {
+		return nil, err
+	}
+	responseMeal = responseMeals[0]
+	responseMeal.NbProducts = len(responseMeal.Products)
+	return &responseMeal, nil
 }
 
 func (mealRepo *MealRepo) GetMeals(userEmail string) ([]response.Meal, error) {
@@ -160,6 +174,7 @@ func (mealRepo *MealRepo) retrieveMealProducts(meals []response.Meal) error {
 			}
 			meal.Products = append(meal.Products, response.MealProduct{ProductInfo: productInfo, Quantity: quantity})
 		}
+		meal.NbProducts = len(meal.Products)
 	}
 
 	return nil

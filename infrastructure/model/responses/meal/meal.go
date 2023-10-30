@@ -21,4 +21,5 @@ type Meal struct {
 	Products    []MealProduct `json:"products"`
 	Tags        []MealTag     `json:"tags"`
 	IsFavourite bool          `json:"isFavourite"`
+	NbProducts  int           `json:"numberOfProducts"`
 }
