@@ -12,8 +12,8 @@ type User struct {
 	Height          int          `json:"height"`
 	Gender          Gender       `json:"gender"`
 	Sportiveness    Sportiveness `json:"sportiveness"`
-	BasalMetabolism int          `json:"basalmetabolism"`
-	AvatarId        *int         `json:"avatarid"`
+	BasalMetabolism int          `json:"basalMetabolism"`
+	AvatarId        *int         `json:"avatarId"`
 }
 
 type Gender int
