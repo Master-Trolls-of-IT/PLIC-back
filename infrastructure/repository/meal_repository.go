@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"gaia-api/domain/entity"
 	"gaia-api/infrastructure/model/requests/meal"
 	response "gaia-api/infrastructure/model/responses/meal"
 	"github.com/lib/pq"
@@ -54,7 +55,7 @@ func (mealRepo *MealRepo) SaveMeal(myMeal request.Meal) (*response.Meal, error) 
 		return nil, err
 	}
 
-	responseMeal := response.Meal{ID: responseMealID, Title: myMeal.Title, Tags: []response.MealTag{}, UserEmail: myMeal.UserEmail, Products: []response.MealProduct{}, IsFavourite: false}
+	responseMeal := response.Meal{ID: responseMealID, Title: myMeal.Title, Tags: []response.MealTag{}, UserEmail: myMeal.UserEmail, Products: []entity.Product{}, IsFavourite: false}
 	responseMeals := []response.Meal{responseMeal}
 	err = mealRepo.retrieveMealProducts(responseMeals)
 	if err != nil {
@@ -102,7 +103,7 @@ func (mealRepo *MealRepo) retrieveMeals(userEmail string) ([]response.Meal, erro
 	for rows.Next() {
 		var meal response.Meal
 		meal.Tags = []response.MealTag{}
-		meal.Products = []response.MealProduct{}
+		meal.Products = []entity.Product{}
 		err := rows.Scan(&meal.ID, &meal.Title, &meal.IsFavourite)
 		if err != nil {
 			return []response.Meal{}, err
@@ -172,7 +173,8 @@ func (mealRepo *MealRepo) retrieveMealProducts(meals []response.Meal) error {
 			if err != nil {
 				return err
 			}
-			meal.Products = append(meal.Products, response.MealProduct{ProductInfo: productInfo, Quantity: quantity})
+			productInfo.Quantity = strconv.Itoa(quantity)
+			meal.Products = append(meal.Products, productInfo)
 		}
 		meal.NbProducts = len(meal.Products)
 	}
