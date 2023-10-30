@@ -52,20 +52,7 @@ func (returnAPIData *ReturnAPIData) LoginSuccess(user entity.User) JSONObject {
 	return JSONObject{
 		"status":  202,
 		"message": "Connecté avec succès",
-		"data": JSONObject{
-			"Id":              user.Id,
-			"Email":           user.Email,
-			"Username":        user.Username,
-			"Birthdate":       user.Birthdate,
-			"Weight":          user.Weight,
-			"Height":          user.Height,
-			"Gender":          user.Gender,
-			"Pseudo":          user.Pseudo,
-			"Rights":          user.Rights,
-			"Sportiveness":    user.Sportiveness,
-			"BasalMetabolism": user.BasalMetabolism,
-			"AvatarId":        user.AvatarId,
-		},
+		"data":    user,
 	}
 }
 
