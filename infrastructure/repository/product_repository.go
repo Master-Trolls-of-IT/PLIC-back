@@ -23,7 +23,7 @@ func (productRepo *ProductRepo) getProduct(query string, args ...interface{}) (e
 	err = stmt.QueryRow(args...).Scan(&product.ID, &product.Brand, &product.Name, &product.Nutrients.EnergyKj, &product.Nutrients.EnergyKcal,
 		&product.Nutrients.Fat, &product.Nutrients.SaturatedFat, &product.Nutrients.Sugar, &product.Nutrients.Fiber,
 		&product.Nutrients.Proteins, &product.Nutrients.Salt, &product.ImageURL, &product.NutriScore.Score,
-		&product.NutriScore.Grade, &product.IsWater, &product.Quantity, &product.ServingQuantity, &product.ServingSize)
+		&product.NutriScore.Grade, &product.EcoScore, &product.IsWater, &product.Quantity, &product.ServingQuantity, &product.ServingSize)
 	if err != nil {
 		return entity.Product{}, err
 	}
@@ -86,7 +86,7 @@ func (productRepo *ProductRepo) getConsumedProducts(query string, args ...interf
 
 func (productRepo *ProductRepo) GetProductByBarCode(barcode string) (entity.Product, error) {
 	product, err := productRepo.getProduct("SELECT id, brand, name, energy_kj, energy_kcal, fat, saturated_fat, sugar, fiber, "+
-		"proteins, salt, image_url, nutriscore_score, nutriscore_grade, isWater, quantity, serving_quantity, serving_size FROM product WHERE barcode = $1", barcode)
+		"proteins, salt, image_url, nutriscore_score, nutriscore_grade, ecoscore, isWater, quantity, serving_quantity, serving_size FROM product WHERE barcode = $1", barcode)
 
 	if err != nil {
 		return entity.Product{}, err
