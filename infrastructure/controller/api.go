@@ -479,11 +479,11 @@ func (server *Server) addMeal(context *gin.Context) {
 
 	var mealRepo = *server.openFoodFactsService.MealRepo
 
-	err := mealRepo.SaveMeal(meal)
+	responseMeal, err := mealRepo.SaveMeal(meal)
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, err.Error()))
 	} else {
-		context.JSON(http.StatusOK, server.returnAPIData.MealAdded())
+		context.JSON(http.StatusOK, server.returnAPIData.MealAdded(*responseMeal))
 	}
 }
 

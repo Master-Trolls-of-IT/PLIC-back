@@ -201,7 +201,6 @@ func (returnAPIData *ReturnAPIData) DeletedProduct(status int, s string) JSONObj
 	}
 }
 
-
 func (returnAPIData *ReturnAPIData) DeletedUser(status int, s string) any {
 	return JSONObject{
 		"status":  status,
@@ -218,11 +217,11 @@ func (returnAPIData *ReturnAPIData) UpdateProduct(status int, message string) JS
 	}
 }
 
-func (returnAPIData *ReturnAPIData) MealAdded() JSONObject {
+func (returnAPIData *ReturnAPIData) MealAdded(meal response.Meal) JSONObject {
 	return JSONObject{
 		"status":  200,
 		"message": "Le repas a été ajouté avec succès",
-		"data":    JSONObject{},
+		"data":    meal,
 	}
 }
 
