@@ -76,6 +76,7 @@ func (server *Server) Start() {
 
 	ginEngine.POST("/meal", server.addMeal)
 	ginEngine.GET("/meal/:email", server.getMeals)
+	ginEngine.DELETE("/meal/:id", server.deleteMeal)
 	err := ginEngine.Run()
 	if err != nil {
 		return
@@ -505,4 +506,21 @@ func (server *Server) getMeals(context *gin.Context) {
 
 	context.JSON(http.StatusAccepted, server.returnAPIData.GetMealsSuccess(meals))
 
+}
+
+func (server *Server) deleteMeal(context *gin.Context) {
+	mealID, err := strconv.Atoi(context.Param("id"))
+	fmt.Printf(strconv.Itoa(mealID))
+	if err != nil {
+		context.JSON(http.StatusBadRequest, server.returnAPIData.Error(http.StatusBadRequest, err.Error()))
+		return
+	}
+	var mealRepo = *server.openFoodFactsService.MealRepo
+
+	err = mealRepo.DeleteMeal(mealID)
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, err.Error()))
+		return
+	}
+	context.JSON(http.StatusOK, server.returnAPIData.MealDeleted())
 }
