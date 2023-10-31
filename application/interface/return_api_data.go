@@ -27,6 +27,7 @@ type IReturnAPIData interface {
 
 	MealAdded()
 	GetMealsSuccess(meals []response.Meal)
+	MealDeleted()
 	Ping()
 }
 
@@ -217,5 +218,13 @@ func (returnAPIData *ReturnAPIData) GetMealsSuccess(meals []response.Meal) JSONO
 		"status":  202,
 		"message": "Les repas de l'utilisateur ont été récupérés avec succès",
 		"data":    meals,
+	}
+}
+
+func (returnAPIData *ReturnAPIData) MealDeleted() JSONObject {
+	return JSONObject{
+		"status":  200,
+		"message": "Le repas de l'utilisateur a été supprimé avec succès",
+		"data":    JSONObject{},
 	}
 }

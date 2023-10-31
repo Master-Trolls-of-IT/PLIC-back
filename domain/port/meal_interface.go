@@ -8,4 +8,5 @@ import (
 type MealInterface interface {
 	SaveMeal(meal request.Meal) (*response.Meal, error)
 	GetMeals(userEmail string) ([]response.Meal, error)
+	DeleteMeal(mealID int) error
 }

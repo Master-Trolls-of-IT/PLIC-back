@@ -181,3 +181,27 @@ func (mealRepo *MealRepo) retrieveMealProducts(meals []response.Meal) error {
 
 	return nil
 }
+
+func (mealRepo *MealRepo) DeleteMeal(mealID int) error {
+	database := mealRepo.data.DB
+
+	deleteMealProductQuery := "DELETE FROM meal_product WHERE meal_id = $1"
+	_, err := database.Exec(deleteMealProductQuery, mealID)
+	if err != nil {
+		return err
+	}
+
+	deleteMealTagQuery := "DELETE FROM meal_tag where meal_id = $1"
+	_, err = database.Exec(deleteMealTagQuery, mealID)
+	if err != nil {
+		return err
+	}
+
+	deleteMealQuery := "DELETE FROM meal where id = $1"
+	_, err = database.Exec(deleteMealQuery, mealID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
