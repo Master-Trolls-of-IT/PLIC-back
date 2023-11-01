@@ -26,6 +26,7 @@ import (
 	"gaia-api/domain/service"
 	"gaia-api/infrastructure/error/openFoodFacts_api_error"
 	consumed_product "gaia-api/infrastructure/model/requests/consumedProduct"
+	response "gaia-api/infrastructure/model/responses/meal"
 
 	request "gaia-api/infrastructure/model/requests/meal"
 	"net/http"
@@ -78,7 +79,7 @@ func (server *Server) Start() {
 	ginEngine.POST("/meal", server.addMeal)
 	ginEngine.GET("/meal/:email", server.getMeals)
 	ginEngine.DELETE("/meal/:id", server.deleteMeal)
-	ginEngine.PATCH("/meal", server.consumeMeal)
+	ginEngine.POST("/meal/consumed", server.consumeMeal)
 	err := ginEngine.Run()
 	if err != nil {
 		return
@@ -415,8 +416,8 @@ func (server *Server) addConsumedProduct(context *gin.Context) {
 			context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, "Erreur de la conversion de la quantité  (atoi)"))
 		}
 		productSaved, err := productRepo.SaveConsumedProduct(product, userId, quantityInt)
-		if productSaved {
-			context.JSON(http.StatusOK, server.returnAPIData.ProductAddedToConsumed(product))
+		if err == nil {
+			context.JSON(http.StatusOK, server.returnAPIData.ProductAddedToConsumed(productSaved))
 		} else {
 			context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, err.Error()))
 		}
@@ -527,16 +528,16 @@ func (server *Server) deleteMeal(context *gin.Context) {
 }
 
 func (server *Server) consumeMeal(context *gin.Context) {
-	var meal request.Meal
+	var meal response.Meal
 	if err := context.ShouldBindJSON(&meal); err != nil {
 		context.JSON(http.StatusBadRequest, server.returnAPIData.Error(http.StatusBadRequest, err.Error()))
 		return
 	}
 	var mealRepo = *server.openFoodFactsService.MealRepo
-	err := mealRepo.ConsumeMeal(meal)
+	products, err := mealRepo.ConsumeMeal(meal)
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, err.Error()))
 	} else {
-		context.JSON(http.StatusOK, server.returnAPIData.MealConsumed())
+		context.JSON(http.StatusOK, server.returnAPIData.MealConsumed(products))
 	}
 }

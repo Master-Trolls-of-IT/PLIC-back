@@ -141,7 +141,7 @@ func (returnAPIData *ReturnAPIData) ProductFound(product entity.Product) JSONObj
 	}
 }
 
-func (returnAPIData *ReturnAPIData) ProductAddedToConsumed(product entity.Product) JSONObject {
+func (returnAPIData *ReturnAPIData) ProductAddedToConsumed(product entity.ConsumedProduct) JSONObject {
 	return JSONObject{
 		"status":  200,
 		"message": "Le produit a été ajouté avec succès",
@@ -229,10 +229,10 @@ func (returnAPIData *ReturnAPIData) MealDeleted() JSONObject {
 	}
 }
 
-func (returnAPIData *ReturnAPIData) MealConsumed() any {
+func (returnAPIData *ReturnAPIData) MealConsumed(products []entity.ConsumedProduct) any {
 	return JSONObject{
 		"status":  200,
 		"message": "Le repas de l'utilisateur a été consommé avec succès",
-		"data":    JSONObject{},
+		"data":    products,
 	}
 }
