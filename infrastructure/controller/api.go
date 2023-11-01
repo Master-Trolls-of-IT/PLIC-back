@@ -25,7 +25,8 @@ import (
 	"gaia-api/domain/entity"
 	"gaia-api/domain/service"
 	"gaia-api/infrastructure/error/openFoodFacts_api_error"
-	consumed_product "gaia-api/infrastructure/model/requests/consumed-product"
+	consumed_product "gaia-api/infrastructure/model/requests/consumedProduct"
+
 	request "gaia-api/infrastructure/model/requests/meal"
 	"net/http"
 	"strconv"
@@ -77,6 +78,7 @@ func (server *Server) Start() {
 	ginEngine.POST("/meal", server.addMeal)
 	ginEngine.GET("/meal/:email", server.getMeals)
 	ginEngine.DELETE("/meal/:id", server.deleteMeal)
+	ginEngine.PATCH("/meal", server.consumeMeal)
 	err := ginEngine.Run()
 	if err != nil {
 		return
@@ -510,7 +512,6 @@ func (server *Server) getMeals(context *gin.Context) {
 
 func (server *Server) deleteMeal(context *gin.Context) {
 	mealID, err := strconv.Atoi(context.Param("id"))
-	fmt.Printf(strconv.Itoa(mealID))
 	if err != nil {
 		context.JSON(http.StatusBadRequest, server.returnAPIData.Error(http.StatusBadRequest, err.Error()))
 		return
@@ -523,4 +524,19 @@ func (server *Server) deleteMeal(context *gin.Context) {
 		return
 	}
 	context.JSON(http.StatusOK, server.returnAPIData.MealDeleted())
+}
+
+func (server *Server) consumeMeal(context *gin.Context) {
+	var meal request.Meal
+	if err := context.ShouldBindJSON(&meal); err != nil {
+		context.JSON(http.StatusBadRequest, server.returnAPIData.Error(http.StatusBadRequest, err.Error()))
+		return
+	}
+	var mealRepo = *server.openFoodFactsService.MealRepo
+	err := mealRepo.ConsumeMeal(meal)
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, server.returnAPIData.Error(http.StatusInternalServerError, err.Error()))
+	} else {
+		context.JSON(http.StatusOK, server.returnAPIData.MealConsumed())
+	}
 }

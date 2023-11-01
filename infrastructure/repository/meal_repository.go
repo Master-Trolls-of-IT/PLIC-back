@@ -1,11 +1,13 @@
 package repository
 
 import (
+	"database/sql"
 	"gaia-api/domain/entity"
 	"gaia-api/infrastructure/model/requests/meal"
 	response "gaia-api/infrastructure/model/responses/meal"
 	"github.com/lib/pq"
 	"strconv"
+	"time"
 )
 
 type MealRepo struct {
@@ -200,6 +202,43 @@ func (mealRepo *MealRepo) DeleteMeal(mealID int) error {
 	deleteMealQuery := "DELETE FROM meal where id = $1"
 	_, err = database.Exec(deleteMealQuery, mealID)
 	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (mealRepo *MealRepo) consumeMeal(meal response.Meal) error {
+	database := mealRepo.data.DB
+	var userID int
+	err := database.QueryRow("SELECT id FROM users where email= $1", meal.UserEmail).Scan(&userID)
+	if err != nil {
+		return err
+	}
+
+	query := "INSERT INTO consumed_products (product_id, user_id, quantity, consumed_date) VALUES ($1, $2, $3, $4)"
+	statement, err := database.Prepare(query)
+	if err != nil {
+		return err
+	}
+	defer statement.Close()
+
+	transaction, err := database.Begin()
+	if err != nil {
+		return err
+	}
+	defer func(transaction *sql.Tx) {
+		txError := transaction.Rollback()
+		if txError != nil {
+			err = txError
+		}
+	}(transaction)
+
+	for _, product := range meal.Products {
+		_, _ = statement.Exec(product.ID, userID, product.Quantity, time.Now().UTC().Format("2006-01-02"))
+	}
+
+	if err = transaction.Commit(); err != nil {
 		return err
 	}
 

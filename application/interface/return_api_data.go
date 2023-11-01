@@ -228,3 +228,11 @@ func (returnAPIData *ReturnAPIData) MealDeleted() JSONObject {
 		"data":    JSONObject{},
 	}
 }
+
+func (returnAPIData *ReturnAPIData) MealConsumed() any {
+	return JSONObject{
+		"status":  200,
+		"message": "Le repas de l'utilisateur a été consommé avec succès",
+		"data":    JSONObject{},
+	}
+}
