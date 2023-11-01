@@ -1,11 +1,14 @@
 package repository
 
 import (
+	"database/sql"
 	"gaia-api/domain/entity"
 	"gaia-api/infrastructure/model/requests/meal"
 	response "gaia-api/infrastructure/model/responses/meal"
+	"github.com/jackc/pgtype"
 	"github.com/lib/pq"
 	"strconv"
+	"time"
 )
 
 type MealRepo struct {
@@ -67,6 +70,7 @@ func (mealRepo *MealRepo) SaveMeal(myMeal request.Meal) (*response.Meal, error) 
 	}
 	responseMeal = responseMeals[0]
 	responseMeal.NbProducts = len(responseMeal.Products)
+	responseMeal.UserEmail = myMeal.UserEmail
 	return &responseMeal, nil
 }
 
@@ -204,4 +208,51 @@ func (mealRepo *MealRepo) DeleteMeal(mealID int) error {
 	}
 
 	return nil
+}
+
+func (mealRepo *MealRepo) ConsumeMeal(meal response.Meal) ([]entity.ConsumedProduct, error) {
+	database := mealRepo.data.DB
+	var consumedProducts []entity.ConsumedProduct
+	var userID int
+	err := database.QueryRow("SELECT id FROM users where email= $1", meal.UserEmail).Scan(&userID)
+	if err != nil {
+		return nil, err
+	}
+
+	query := "INSERT INTO consumed_products (product_id, user_id, quantity, consumed_date) VALUES ($1, $2, $3, $4)"
+	statement, err := database.Prepare(query)
+	if err != nil {
+		return nil, err
+	}
+	defer statement.Close()
+
+	transaction, err := database.Begin()
+	if err != nil {
+		return nil, err
+	}
+	defer func(transaction *sql.Tx) {
+		txError := transaction.Rollback()
+		if txError != nil {
+			err = txError
+		}
+	}(transaction)
+
+	for _, product := range meal.Products {
+		quantity, err := strconv.Atoi(product.Quantity)
+		date := time.Now().UTC()
+		if err != nil {
+			return nil, err
+		}
+		consumedProducts = append(consumedProducts, entity.ConsumedProduct{Product: product, Quantity: quantity, Consumed_Date: pgtype.Date{Time: date, Status: pgtype.Present}})
+		_, err = statement.Exec(product.ID, userID, product.Quantity, date.Format("2006-01-02"))
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if err = transaction.Commit(); err != nil {
+		return nil, err
+	}
+
+	return consumedProducts, nil
 }

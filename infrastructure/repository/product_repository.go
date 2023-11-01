@@ -3,6 +3,7 @@ package repository
 import (
 	"database/sql"
 	"gaia-api/domain/entity"
+	"github.com/jackc/pgtype"
 	"time"
 )
 
@@ -175,16 +176,19 @@ func (productRepo *ProductRepo) SaveProduct(product entity.Product, barcode stri
 	return true, nil
 }
 
-func (productRepo *ProductRepo) SaveConsumedProduct(product entity.Product, userID int, quantity int) (bool, error) {
+func (productRepo *ProductRepo) SaveConsumedProduct(product entity.Product, userID int, quantity int) (entity.ConsumedProduct, error) {
 	var database = productRepo.data.DB
-	_, err := database.Exec("INSERT INTO consumed_products (product_id, user_id, quantity, consumed_date)\n    VALUES ($1, $2, $3, $4)", product.ID, userID, quantity, time.Now().UTC().Format("2006-01-02"))
+
+	var date = time.Now().UTC()
+	_, err := database.Exec("INSERT INTO consumed_products (product_id, user_id, quantity, consumed_date)\n    VALUES ($1, $2, $3, $4)", product.ID, userID, quantity, date.Format("2006-01-02"))
 
 	if err != nil {
 		// Return an error if the insert operation fails
-		return false, err
+		return entity.ConsumedProduct{}, err
 	}
+	consumedProduct := entity.ConsumedProduct{Product: product, Quantity: quantity, Consumed_Date: pgtype.Date{Time: date, Status: pgtype.Present}}
 
-	return true, nil
+	return consumedProduct, nil
 }
 
 func (productRepo *ProductRepo) insertNutrientData(productID int, table string, nutrients entity.Nutrients) error {
