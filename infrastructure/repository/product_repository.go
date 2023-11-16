@@ -147,7 +147,7 @@ func (productRepo *ProductRepo) SaveProduct(product entity.Product, barcode stri
 		product.Brand, product.Name, product.Nutrients.EnergyKj, product.Nutrients.EnergyKcal, product.Nutrients.Fat,
 		product.Nutrients.SaturatedFat, product.Nutrients.Sugar, product.Nutrients.Fiber, product.Nutrients.Proteins,
 		product.Nutrients.Salt, product.ImageURL, product.NutriScore.Score, product.NutriScore.Grade, product.EcoScore,
-		barcode, product.IsWater, product.Quantity, product.ServingQuantity, product.ServingSize).Scan(&productID) //, nutrientsUnitID)
+		barcode, product.IsWater, product.Quantity, product.ServingQuantity, product.ServingSize).Scan(&productID)
 
 	if err != nil {
 		return false, err
@@ -166,12 +166,6 @@ func (productRepo *ProductRepo) SaveProduct(product entity.Product, barcode stri
 	if err != nil {
 		return false, err
 	}
-
-	//TODO: ajouter nutrientsUnit aux données du produit si besoin
-	//nutrientsUnitID, err := productRepo.insertNutrientUnit(database, "nutrients_Unit", product.NutrientsUnit)
-	//if err != nil {
-	//	return false, err
-	//}
 
 	return true, nil
 }
@@ -227,21 +221,3 @@ func (productRepo *ProductRepo) UpdateConsumedProductQuantity(quantity int, barc
 	}
 	return nil
 }
-
-//TODO: ajouter nutrientsUnit aux données du produit si besoin
-//func (productRepo *ProductRepo) insertNutrientUnit(db *sql.DB, table string, nutrients entity.NutrientsUnit) (int64, error) {
-//	var id int64
-//	err := db.QueryRow(
-//		"INSERT INTO "+table+" (energy_kj, energy_kcal, fat, saturated_fat, sugar, fiber, proteins, salt) "+
-//			"VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id",
-//		nutrients.EnergyKj, nutrients.EnergyKcal, nutrients.Fat,
-//		nutrients.SaturatedFat, nutrients.Sugar, nutrients.Fiber, nutrients.Proteins,
-//		nutrients.Salt,
-//	).Scan(&id)
-//
-//	if err != nil {
-//		return 0, err
-//	}
-//
-//	return id, nil
-//}

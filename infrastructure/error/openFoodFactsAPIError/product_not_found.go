@@ -1,4 +1,4 @@
-package openFoodFacts_api_error
+package openFoodFactsAPIError
 
 import "fmt"
 

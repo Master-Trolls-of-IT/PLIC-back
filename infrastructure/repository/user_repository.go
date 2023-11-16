@@ -96,5 +96,3 @@ func (userRepo *UserRepo) DeleteUser(userId int) (bool, error) {
 	}
 	return true, nil
 }
-
-func (userRepo *UserRepo) Login(loginInfo *entity.Login_info) {}

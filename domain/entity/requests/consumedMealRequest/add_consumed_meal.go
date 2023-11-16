@@ -1,4 +1,4 @@
-package consumedMeal
+package consumedMealRequest
 
 type ConsumedMeal struct {
 	MealID int    `json:"mealID"`

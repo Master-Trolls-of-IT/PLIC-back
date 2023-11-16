@@ -1,9 +1,9 @@
-package controller
+package product
 
 import (
 	"encoding/json"
 	"gaia-api/domain/entity"
-	"gaia-api/infrastructure/error/openFoodFacts_api_error"
+	"gaia-api/infrastructure/error/openFoodFactsAPIError"
 	"github.com/openfoodfacts/openfoodfacts-go"
 	"golang.org/x/exp/slices"
 	"net/http"
@@ -46,7 +46,7 @@ func (openFoodFactsAPI *OpenFoodFactsAPI) retrieveAndMapProduct(barcode string) 
 	client := openFoodFactsAPI.Client
 	product, err := client.Product(barcode)
 	if err != nil {
-		return entity.Product{}, openFoodFacts_api_error.ProductNotFoundError{Barcode: barcode}
+		return entity.Product{}, openFoodFactsAPIError.ProductNotFoundError{Barcode: barcode}
 	}
 
 	mappedProduct, err := mapOpenFoodFactsProductToEntitiesProduct(product)
@@ -122,18 +122,6 @@ func mapOpenFoodFactsProductToEntitiesProduct(product *openfoodfacts.Product) (e
 		},
 	}
 
-	//mappedNutrientsUnit := entity.NutrientsUnit{
-	//	EnergyKj:      nutrients.EnergyUnit,
-	//	EnergyKcal:    nutrients.EnergyKcalUnit,
-	//	Fat:           nutrients.FatUnit,
-	//	SaturatedFat:  nutrients.SaturatedFatUnit,
-	//	Carbohydrates: nutrients.CarbohydratesUnit,
-	//	Sugar:         nutrients.SugarsUnit,
-	//	Fiber:         nutrients.FiberUnit,
-	//	Proteins:      nutrients.ProteinsUnit,
-	//	Salt:          nutrients.SaltUnit,
-	//}
-
 	mappedProduct := entity.Product{
 		Brand:            product.Brands,
 		Name:             product.ProductName,
@@ -141,14 +129,13 @@ func mapOpenFoodFactsProductToEntitiesProduct(product *openfoodfacts.Product) (e
 		Nutrients100g:    mappedNutrients100g,
 		NutrientsServing: mappedNutrientsServing,
 		NutrientsValue:   mappedNutrientsValue,
-		//NutrientsUnit:    mappedNutrientsUnit,
-		ImageURL:        product.ImageFrontURL.URL.String(),
-		NutriScore:      mappedNutriscore,
-		EcoScore:        product.EcoscoreGrade,
-		IsWater:         isWater,
-		Quantity:        product.Quantity,
-		ServingQuantity: product.ServingQuantity,
-		ServingSize:     product.ServingSize,
+		ImageURL:         product.ImageFrontURL.URL.String(),
+		NutriScore:       mappedNutriscore,
+		EcoScore:         product.EcoscoreGrade,
+		IsWater:          isWater,
+		Quantity:         product.Quantity,
+		ServingQuantity:  product.ServingQuantity,
+		ServingSize:      product.ServingSize,
 	}
 
 	return mappedProduct, nil

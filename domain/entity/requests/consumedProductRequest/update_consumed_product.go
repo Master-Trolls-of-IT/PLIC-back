@@ -1,4 +1,4 @@
-package consumedProduct
+package consumedProductRequest
 
 type ConsumedProductUpdateQuantity struct {
 	UserEmail string `json:"email"`

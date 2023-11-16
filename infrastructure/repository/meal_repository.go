@@ -3,8 +3,8 @@ package repository
 import (
 	"database/sql"
 	"gaia-api/domain/entity"
-	"gaia-api/infrastructure/model/requests/meal"
-	response "gaia-api/infrastructure/model/responses/meal"
+	"gaia-api/domain/entity/requests/mealRequest"
+	"gaia-api/domain/entity/responses/meal"
 	"github.com/jackc/pgtype"
 	"github.com/lib/pq"
 	"strconv"
@@ -20,7 +20,7 @@ func NewMealRepository(db *Database, productRepo *ProductRepo) *MealRepo {
 	return &MealRepo{data: db, ProductRepo: productRepo}
 }
 
-func (mealRepo *MealRepo) SaveMeal(myMeal request.Meal) (*response.Meal, error) {
+func (mealRepo *MealRepo) SaveMeal(myMeal mealRequest.Meal) (*response.Meal, error) {
 	database := mealRepo.data.DB
 
 	tagLabels := make([]string, len(myMeal.Tags))
