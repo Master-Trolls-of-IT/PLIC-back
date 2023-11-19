@@ -1,12 +1,11 @@
-package controller
+package helper
 
 import (
 	"github.com/golang-jwt/jwt/v5"
 	"time"
 )
 
-// Define a function to generate a new refresh token with a secret key
-func generateRefreshToken(secretKey []byte) (string, error) {
+func GenerateRefreshToken(secretKey []byte) (string, error) {
 	// Create a new claims object
 	claims := jwt.MapClaims{}
 
@@ -25,8 +24,29 @@ func generateRefreshToken(secretKey []byte) (string, error) {
 	return refreshToken, nil
 }
 
-// Define a function to generate a new access token that depends on the refresh token and a secret key
-func generateAccessToken(refreshToken string, secretKey []byte) (string, error) {
+func CheckRefreshToken(refreshToken string) (bool, error) {
+	claims := jwt.MapClaims{}
+	_, err := jwt.ParseWithClaims(refreshToken, claims, func(token *jwt.Token) (interface{}, error) {
+		return []byte("your-secret-key"), nil
+	})
+
+	if err != nil {
+		if err == jwt.ErrSignatureInvalid {
+			return false, nil
+		}
+		return false, err
+	}
+
+	// Check if the token has expired
+	exp := int64(claims["exp"].(float64))
+	if time.Now().Unix() > exp {
+		return false, nil
+	}
+
+	return true, nil
+}
+
+func GenerateAccessToken(refreshToken string, secretKey []byte) (string, error) {
 	// Parse the refresh token
 	claims := jwt.MapClaims{}
 	_, err := jwt.ParseWithClaims(refreshToken, claims, func(token *jwt.Token) (interface{}, error) {
@@ -55,35 +75,9 @@ func generateAccessToken(refreshToken string, secretKey []byte) (string, error) 
 	return accessToken, nil
 }
 
-// Define a function to verify if an access token is still valid
-func verifyAccessToken(accessToken string) (bool, error) {
-	// Parse the access token
+func CheckAccessToken(accessToken string) (bool, error) {
 	claims := jwt.MapClaims{}
 	_, err := jwt.ParseWithClaims(accessToken, claims, func(token *jwt.Token) (interface{}, error) {
-		return []byte("your-secret-key"), nil
-	})
-
-	if err != nil {
-		if err == jwt.ErrSignatureInvalid {
-			return false, nil
-		}
-		return false, err
-	}
-
-	// Check if the token has expired
-	exp := int64(claims["exp"].(float64))
-	if time.Now().Unix() > exp {
-		return false, nil
-	}
-
-	return true, nil
-}
-
-// Define a function to verify if a refresh token is still valid
-func verifyRefreshToken(refreshToken string) (bool, error) {
-	// Parse the refresh token
-	claims := jwt.MapClaims{}
-	_, err := jwt.ParseWithClaims(refreshToken, claims, func(token *jwt.Token) (interface{}, error) {
 		return []byte("your-secret-key"), nil
 	})
 

@@ -5,6 +5,7 @@ import (
 	"gaia-api/application/interface"
 	"gaia-api/domain/service"
 	api "gaia-api/infrastructure/controller"
+	"gaia-api/infrastructure/controller/product"
 	"gaia-api/infrastructure/repository"
 
 	_ "github.com/golang-jwt/jwt/v5"
@@ -39,7 +40,7 @@ func main() {
 
 	//API
 	returnAPIData := interfaces.NewReturnAPIData()
-	OpenFoodFactsAPI := api.NewOpenFoodFactsAPI()
+	OpenFoodFactsAPI := product.NewOpenFoodFactsAPI()
 
 	//Server Instance
 	ginServer := api.NewServer(authenticationService, returnAPIData, OpenFoodFactsService, OpenFoodFactsAPI)

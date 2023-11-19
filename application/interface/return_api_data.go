@@ -3,7 +3,7 @@ package interfaces
 import (
 	"fmt"
 	"gaia-api/domain/entity"
-	response "gaia-api/infrastructure/model/responses/meal"
+	"gaia-api/domain/entity/responses/meal"
 )
 
 type IReturnAPIData interface {
