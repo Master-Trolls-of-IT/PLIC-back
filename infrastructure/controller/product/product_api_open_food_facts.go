@@ -3,7 +3,6 @@ package product
 import (
 	"encoding/json"
 	"gaia-api/domain/entity/mapping"
-	"gaia-api/infrastructure/error/openFoodFactsAPIError"
 	"github.com/openfoodfacts/openfoodfacts-go"
 	"golang.org/x/exp/slices"
 	"net/http"
@@ -46,12 +45,14 @@ func (openFoodFactsAPI *OpenFoodFactsAPI) retrieveAndMapProduct(barcode string) 
 	client := openFoodFactsAPI.Client
 	product, err := client.Product(barcode)
 	if err != nil {
-		return mapping.Product{}, openFoodFactsAPIError.ProductNotFoundError{Barcode: barcode}
+		return mapping.Product{}, err
 	}
 
 	mappedProduct, err := mapOpenFoodFactsProductToEntitiesProduct(product)
+	if err != nil {
+		return mapping.Product{}, err
+	}
 	mappedProduct.EcoScore, err = getEcoScore(barcode)
-
 	if err != nil {
 		return mapping.Product{}, err
 	}

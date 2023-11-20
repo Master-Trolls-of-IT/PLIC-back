@@ -5,7 +5,6 @@ import (
 	"gaia-api/application/returnAPI"
 	"gaia-api/domain/entity/mapping"
 	"gaia-api/domain/service"
-	"gaia-api/infrastructure/error/openFoodFactsAPIError"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -38,7 +37,7 @@ func (product *Product) GetProduct(context *gin.Context) {
 		openFoodFactAPI := product.openFoodFactsAPI
 		mappedProduct, err := openFoodFactAPI.retrieveAndMapProduct(barcode)
 
-		if _, productNotFound := err.(openFoodFactsAPIError.ProductNotFoundError); productNotFound {
+		if err != nil {
 			returnAPI.Error(context, http.StatusNotFound)
 
 		} else {
