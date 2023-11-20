@@ -1,7 +1,8 @@
 package repository
 
 import (
-	"gaia-api/domain/entity"
+	"gaia-api/domain/entity/request"
+	"gaia-api/domain/entity/shared"
 )
 
 type Error struct {
@@ -16,41 +17,41 @@ func NewUserRepository(db *Database) *UserRepo {
 	return &UserRepo{data: db}
 }
 
-func (userRepo *UserRepo) getUser(query string, args ...interface{}) (entity.User, error) {
+func (userRepo *UserRepo) getUser(query string, args ...interface{}) (shared.User, error) {
 	stmt, err := userRepo.data.DB.Prepare(query)
 	if err != nil {
-		return entity.User{}, err
+		return shared.User{}, err
 	}
-	var user entity.User
+	var user shared.User
 	err = stmt.QueryRow(args...).Scan(&user.Id, &user.Rights, &user.Email, &user.Username, &user.Birthdate, &user.Weight,
 		&user.Height, &user.Gender, &user.Sportiveness, &user.BasalMetabolism, &user.Password, &user.Pseudo, &user.AvatarId)
 	if err != nil {
-		return entity.User{}, err
+		return shared.User{}, err
 	}
 	return user, nil
 }
 
-func (userRepo *UserRepo) GetUserByEmail(email string) (entity.User, error) {
+func (userRepo *UserRepo) GetUserByEmail(email string) (shared.User, error) {
 	return userRepo.getUser("SELECT * FROM users WHERE email = $1", email)
 }
 
-func (userRepo *UserRepo) GetUserByUsername(username string) (entity.User, error) {
+func (userRepo *UserRepo) GetUserByUsername(username string) (shared.User, error) {
 	return userRepo.getUser("SELECT * FROM users WHERE username = $1", username)
 }
 
-func (userRepo *UserRepo) GetUserById(id int) (entity.User, error) {
+func (userRepo *UserRepo) GetUserById(id int) (shared.User, error) {
 	return userRepo.getUser("SELECT * FROM users WHERE id = $1", id)
 }
 
-func (userRepo *UserRepo) CheckLogin(loginInfo *entity.Login_info) (bool, error) {
-	user, err := userRepo.getUser("SELECT * FROM users WHERE username=$1 OR email=$2", loginInfo.Username, loginInfo.Email)
+func (userRepo *UserRepo) CheckLogin(login *request.Login) (bool, error) {
+	user, err := userRepo.getUser("SELECT * FROM users WHERE username=$1 OR email=$2", login.Username, login.Email)
 	if err != nil {
 		return false, err
 	}
-	return user.Password == loginInfo.Password, nil
+	return user.Password == login.Password, nil
 }
 
-func (userRepo *UserRepo) Register(userInfo *entity.User) (bool, error) {
+func (userRepo *UserRepo) Register(userInfo *shared.User) (bool, error) {
 	var db = userRepo.data.DB
 	var count int
 	err := db.QueryRow("SELECT COUNT(*) FROM users WHERE username=$1 OR email=$2", userInfo.Username,
@@ -70,20 +71,20 @@ func (userRepo *UserRepo) Register(userInfo *entity.User) (bool, error) {
 	}
 	return true, nil
 }
-func (userRepo *UserRepo) UpdateUserById(id int, newUser *entity.User) (entity.User, error) {
+func (userRepo *UserRepo) UpdateUserById(id int, newUser *shared.User) (shared.User, error) {
 	var db = userRepo.data.DB
 	stmt, err := db.Prepare("UPDATE users SET email = $1, pseudo = $2, birthdate = $3, weight = $4, " +
 		"height = $5, gender = $6, sportiveness = $7, basalmetabolism = $8, avatar_id = $9 WHERE id = $10")
 
 	if err != nil {
-		return entity.User{}, err
+		return shared.User{}, err
 	}
 	_, err = stmt.Exec(newUser.Email,
 		&newUser.Pseudo, &newUser.Birthdate, &newUser.Weight, &newUser.Height, &newUser.Gender, &newUser.Sportiveness,
 		&newUser.BasalMetabolism, &newUser.AvatarId, &id)
 
 	if err != nil {
-		return entity.User{}, err
+		return shared.User{}, err
 	}
 	return userRepo.GetUserById(id)
 }

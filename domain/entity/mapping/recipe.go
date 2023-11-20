@@ -1,13 +1,13 @@
-package entity
+package mapping
 
 import "time"
 
 type Recipe struct {
 	Id           int       `json:"id"`
-	CreationDate time.Time `json:"creation_date"`
-	UserId       int       `json:"user_id"`
+	CreationDate time.Time `json:"creationDate"`
+	UserId       int       `json:"userId"`
 	Name         string    `json:"name"`
-	TotalSteps   int       `json:"total_steps"`
+	TotalSteps   int       `json:"totalSteps"`
 	Nutriscore   int       `json:"nutriscore"`
 	Score        float32   `json:"score"`
 	Icon         []byte    `json:"icon"`

@@ -2,7 +2,7 @@ package user
 
 import (
 	"gaia-api/application/returnAPI"
-	"gaia-api/domain/entity"
+	"gaia-api/domain/entity/request"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -23,7 +23,7 @@ func (checkUserController *CheckUserController) Start() {
 }
 
 func (checkUserController *CheckUserController) checkUser(context *gin.Context) {
-	var login = entity.Login_info{}
+	var login = request.Login{}
 	if err := context.ShouldBindJSON(&login); err != nil {
 		returnAPI.Error(context, http.StatusBadRequest)
 	}

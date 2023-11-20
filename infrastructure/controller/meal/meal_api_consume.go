@@ -2,7 +2,7 @@ package meal
 
 import (
 	"gaia-api/application/returnAPI"
-	response "gaia-api/domain/entity/responses/meal"
+	"gaia-api/domain/entity/response"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )

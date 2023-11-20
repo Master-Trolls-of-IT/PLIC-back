@@ -2,9 +2,9 @@ package repository
 
 import (
 	"database/sql"
-	"gaia-api/domain/entity"
-	"gaia-api/domain/entity/requests/mealRequest"
-	"gaia-api/domain/entity/responses/meal"
+	"gaia-api/domain/entity/mapping"
+	"gaia-api/domain/entity/request"
+	"gaia-api/domain/entity/response"
 	"github.com/jackc/pgtype"
 	"github.com/lib/pq"
 	"strconv"
@@ -20,7 +20,7 @@ func NewMealRepository(db *Database, productRepo *ProductRepo) *MealRepo {
 	return &MealRepo{data: db, ProductRepo: productRepo}
 }
 
-func (mealRepo *MealRepo) SaveMeal(myMeal mealRequest.Meal) (*response.Meal, error) {
+func (mealRepo *MealRepo) SaveMeal(myMeal request.Meal) (*response.Meal, error) {
 	database := mealRepo.data.DB
 
 	tagLabels := make([]string, len(myMeal.Tags))
@@ -58,7 +58,7 @@ func (mealRepo *MealRepo) SaveMeal(myMeal mealRequest.Meal) (*response.Meal, err
 		return nil, err
 	}
 
-	responseMeal := response.Meal{ID: responseMealID, Title: myMeal.Title, Tags: []response.MealTag{}, UserEmail: myMeal.UserEmail, Products: []entity.Product{}, IsFavourite: false}
+	responseMeal := response.Meal{ID: responseMealID, Title: myMeal.Title, Tags: []response.MealTag{}, UserEmail: myMeal.UserEmail, Products: []mapping.Product{}, IsFavourite: false}
 	responseMeals := []response.Meal{responseMeal}
 	err = mealRepo.retrieveMealProducts(responseMeals)
 	if err != nil {
@@ -107,7 +107,7 @@ func (mealRepo *MealRepo) retrieveMeals(userEmail string) ([]response.Meal, erro
 	for rows.Next() {
 		var meal response.Meal
 		meal.Tags = []response.MealTag{}
-		meal.Products = []entity.Product{}
+		meal.Products = []mapping.Product{}
 		err := rows.Scan(&meal.ID, &meal.Title, &meal.IsFavourite)
 		if err != nil {
 			return []response.Meal{}, err
@@ -210,9 +210,9 @@ func (mealRepo *MealRepo) DeleteMeal(mealID int) error {
 	return nil
 }
 
-func (mealRepo *MealRepo) ConsumeMeal(meal response.Meal) ([]entity.ConsumedProduct, error) {
+func (mealRepo *MealRepo) ConsumeMeal(meal response.Meal) ([]mapping.ConsumedProduct, error) {
 	database := mealRepo.data.DB
-	var consumedProducts []entity.ConsumedProduct
+	var consumedProducts []mapping.ConsumedProduct
 	var userID int
 	err := database.QueryRow("SELECT id FROM users where email= $1", meal.UserEmail).Scan(&userID)
 	if err != nil {
@@ -243,7 +243,7 @@ func (mealRepo *MealRepo) ConsumeMeal(meal response.Meal) ([]entity.ConsumedProd
 		if err != nil {
 			return nil, err
 		}
-		consumedProducts = append(consumedProducts, entity.ConsumedProduct{Product: product, Quantity: quantity, Consumed_Date: pgtype.Date{Time: date, Status: pgtype.Present}})
+		consumedProducts = append(consumedProducts, mapping.ConsumedProduct{Product: product, Quantity: quantity, ConsumedDate: pgtype.Date{Time: date, Status: pgtype.Present}})
 		_, err = statement.Exec(product.ID, userID, product.Quantity, date.Format("2006-01-02"))
 		if err != nil {
 			return nil, err

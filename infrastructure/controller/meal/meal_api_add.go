@@ -2,7 +2,7 @@ package meal
 
 import (
 	"gaia-api/application/returnAPI"
-	"gaia-api/domain/entity/requests/mealRequest"
+	"gaia-api/domain/entity/request"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -22,7 +22,7 @@ func (addController *AddController) Start() {
 }
 
 func (addController *AddController) addMeal(context *gin.Context) {
-	var meal mealRequest.Meal
+	var meal request.Meal
 	if err := context.ShouldBindJSON(&meal); err != nil {
 		returnAPI.Error(context, http.StatusBadRequest)
 		return

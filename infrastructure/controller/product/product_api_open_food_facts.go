@@ -2,7 +2,7 @@ package product
 
 import (
 	"encoding/json"
-	"gaia-api/domain/entity"
+	"gaia-api/domain/entity/mapping"
 	"gaia-api/infrastructure/error/openFoodFactsAPIError"
 	"github.com/openfoodfacts/openfoodfacts-go"
 	"golang.org/x/exp/slices"
@@ -42,33 +42,33 @@ func getEcoScore(barcode string) (string, error) {
 	return ecoscoreString, nil
 }
 
-func (openFoodFactsAPI *OpenFoodFactsAPI) retrieveAndMapProduct(barcode string) (entity.Product, error) {
+func (openFoodFactsAPI *OpenFoodFactsAPI) retrieveAndMapProduct(barcode string) (mapping.Product, error) {
 	client := openFoodFactsAPI.Client
 	product, err := client.Product(barcode)
 	if err != nil {
-		return entity.Product{}, openFoodFactsAPIError.ProductNotFoundError{Barcode: barcode}
+		return mapping.Product{}, openFoodFactsAPIError.ProductNotFoundError{Barcode: barcode}
 	}
 
 	mappedProduct, err := mapOpenFoodFactsProductToEntitiesProduct(product)
 	mappedProduct.EcoScore, err = getEcoScore(barcode)
 
 	if err != nil {
-		return entity.Product{}, err
+		return mapping.Product{}, err
 	}
 
 	return mappedProduct, nil
 }
 
-func mapOpenFoodFactsProductToEntitiesProduct(product *openfoodfacts.Product) (entity.Product, error) {
+func mapOpenFoodFactsProductToEntitiesProduct(product *openfoodfacts.Product) (mapping.Product, error) {
 	nutrients := product.Nutriments
 	isWater := false
 	if slices.Contains(product.CategoriesTags, "en:waters") {
 		isWater = true
 	}
 
-	mappedNutriscore := entity.NutriScore{Score: product.Nutriments.NutritionScoreFr100G, Grade: product.NutritionGradeFr}
+	mappedNutriscore := mapping.NutriScore{Score: product.Nutriments.NutritionScoreFr100G, Grade: product.NutritionGradeFr}
 
-	mappedNutrients := entity.Nutrients{
+	mappedNutrients := mapping.Nutrients{
 		EnergyKj:      nutrients.Energy,
 		EnergyKcal:    nutrients.EnergyKcal,
 		Fat:           nutrients.Fat,
@@ -80,8 +80,8 @@ func mapOpenFoodFactsProductToEntitiesProduct(product *openfoodfacts.Product) (e
 		Salt:          nutrients.Salt,
 	}
 
-	mappedNutrients100g := entity.Nutrients100g{
-		entity.Nutrients{
+	mappedNutrients100g := mapping.Nutrients100g{
+		mapping.Nutrients{
 			EnergyKj:      nutrients.Energy100G,
 			EnergyKcal:    nutrients.EnergyKcal100G,
 			Fat:           nutrients.Fat100G,
@@ -94,8 +94,8 @@ func mapOpenFoodFactsProductToEntitiesProduct(product *openfoodfacts.Product) (e
 		},
 	}
 
-	mappedNutrientsValue := entity.NutrientsValue{
-		entity.Nutrients{
+	mappedNutrientsValue := mapping.NutrientsValue{
+		mapping.Nutrients{
 			EnergyKj:      nutrients.EnergyValue,
 			EnergyKcal:    nutrients.EnergyKcalValue,
 			Fat:           nutrients.FatValue,
@@ -108,8 +108,8 @@ func mapOpenFoodFactsProductToEntitiesProduct(product *openfoodfacts.Product) (e
 		},
 	}
 
-	mappedNutrientsServing := entity.NutrientsServing{
-		entity.Nutrients{
+	mappedNutrientsServing := mapping.NutrientsServing{
+		mapping.Nutrients{
 			EnergyKj:      nutrients.EnergyServing,
 			EnergyKcal:    nutrients.EnergyKcalServing,
 			Fat:           nutrients.FatServing,
@@ -122,7 +122,7 @@ func mapOpenFoodFactsProductToEntitiesProduct(product *openfoodfacts.Product) (e
 		},
 	}
 
-	mappedProduct := entity.Product{
+	mappedProduct := mapping.Product{
 		Brand:            product.Brands,
 		Name:             product.ProductName,
 		Nutrients:        mappedNutrients,

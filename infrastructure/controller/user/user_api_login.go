@@ -2,7 +2,8 @@ package user
 
 import (
 	"gaia-api/application/returnAPI"
-	"gaia-api/domain/entity"
+	"gaia-api/domain/entity/request"
+	"gaia-api/domain/entity/shared"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -23,8 +24,8 @@ func (loginController *LoginController) Start() {
 }
 
 func (loginController *LoginController) login(context *gin.Context) {
-	var login = entity.Login_info{}
-	//binds Json Body to Entities.Login_info Class
+	var login = request.Login{}
+	//binds Json Body to Entities.Login Class
 	if err := context.ShouldBindJSON(&login); err != nil {
 		returnAPI.Error(context, http.StatusBadRequest)
 	}
@@ -33,7 +34,7 @@ func (loginController *LoginController) login(context *gin.Context) {
 	if err != nil {
 		returnAPI.Error(context, http.StatusUnauthorized)
 	} else if loggedIn {
-		var user entity.User
+		var user shared.User
 		if login.Email == "" {
 			user, _ = userRepo.GetUserByUsername(login.Username)
 		} else {
