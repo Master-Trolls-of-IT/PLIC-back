@@ -1,6 +1,7 @@
 package meal
 
 import (
+	"gaia-api/application/returnAPI"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -25,16 +26,16 @@ func (getController *GetController) getMeals(context *gin.Context) {
 
 	user, err := userRepo.GetUserByEmail(email)
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, getController.meal.ReturnAPIData.Error(http.StatusInternalServerError, err.Error()))
+		returnAPI.Error(context, http.StatusInternalServerError)
 		return
 	}
 
 	meals, err := mealRepo.GetMeals(user.Email)
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, getController.meal.ReturnAPIData.Error(http.StatusInternalServerError, err.Error()))
+		returnAPI.Error(context, http.StatusInternalServerError)
 		return
+	} else if len(meals) == 0 {
+		returnAPI.Success(context, http.StatusOK, nil)
 	}
-
-	context.JSON(http.StatusAccepted, getController.meal.ReturnAPIData.GetMealsSuccess(meals))
-
+	returnAPI.Success(context, http.StatusOK, meals)
 }

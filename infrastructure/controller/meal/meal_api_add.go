@@ -1,6 +1,7 @@
 package meal
 
 import (
+	"gaia-api/application/returnAPI"
 	"gaia-api/domain/entity/requests/mealRequest"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -23,7 +24,7 @@ func (addController *AddController) Start() {
 func (addController *AddController) addMeal(context *gin.Context) {
 	var meal mealRequest.Meal
 	if err := context.ShouldBindJSON(&meal); err != nil {
-		context.JSON(http.StatusBadRequest, addController.meal.ReturnAPIData.Error(http.StatusBadRequest, err.Error()))
+		returnAPI.Error(context, http.StatusBadRequest)
 		return
 	}
 
@@ -31,8 +32,8 @@ func (addController *AddController) addMeal(context *gin.Context) {
 
 	responseMeal, err := mealRepo.SaveMeal(meal)
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, addController.meal.ReturnAPIData.Error(http.StatusInternalServerError, err.Error()))
+		returnAPI.Error(context, http.StatusInternalServerError)
 	} else {
-		context.JSON(http.StatusOK, addController.meal.ReturnAPIData.MealAdded(*responseMeal))
+		returnAPI.Success(context, http.StatusOK, *responseMeal)
 	}
 }
