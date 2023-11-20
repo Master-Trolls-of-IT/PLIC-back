@@ -1,14 +1,14 @@
 package port
 
 import (
-	"gaia-api/domain/entity"
-	"gaia-api/domain/entity/requests/mealRequest"
-	"gaia-api/domain/entity/responses/meal"
+	"gaia-api/domain/entity/mapping"
+	"gaia-api/domain/entity/request"
+	"gaia-api/domain/entity/response"
 )
 
 type MealInterface interface {
-	SaveMeal(meal mealRequest.Meal) (*response.Meal, error)
+	SaveMeal(meal request.Meal) (*response.Meal, error)
 	GetMeals(userEmail string) ([]response.Meal, error)
 	DeleteMeal(mealID int) error
-	ConsumeMeal(meal response.Meal) ([]entity.ConsumedProduct, error)
+	ConsumeMeal(meal response.Meal) ([]mapping.ConsumedProduct, error)
 }

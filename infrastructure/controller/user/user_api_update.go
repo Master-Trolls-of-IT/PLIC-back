@@ -2,7 +2,7 @@ package user
 
 import (
 	"gaia-api/application/returnAPI"
-	"gaia-api/domain/entity"
+	"gaia-api/domain/entity/shared"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
@@ -24,7 +24,7 @@ func (updateController *UpdateController) Start() {
 }
 
 func (updateController *UpdateController) updateUser(context *gin.Context) {
-	var user = entity.User{}
+	var user = shared.User{}
 	var userId, err = strconv.Atoi(context.Param("id"))
 
 	if err := context.ShouldBindJSON(&user); err != nil {

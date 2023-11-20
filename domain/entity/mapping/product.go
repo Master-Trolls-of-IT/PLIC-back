@@ -1,4 +1,4 @@
-package entity
+package mapping
 
 import "encoding/json"
 
@@ -11,15 +11,13 @@ type Product struct {
 	Nutrients100g    Nutrients100g    `json:"nutrients_100g"`
 	NutrientsValue   NutrientsValue   `json:"nutrients_value"`
 	NutrientsServing NutrientsServing `json:"nutrients_serving"`
-	//TODO: ajouter nutrientsUnit aux données du produit si besoin
-	//NutrientsUnit    NutrientsUnit    `json:"nutrients_unit"`
-	ImageURL        string      `json:"image_url"`
-	NutriScore      NutriScore  `json:"nutriscore"`
-	EcoScore        string      `json:"ecoscore"`
-	IsWater         bool        `json:"isWater"`
-	Quantity        string      `json:"quantity"`
-	ServingQuantity json.Number ` json:"serving_quantity"`
-	ServingSize     string      `json:"serving_size"`
+	ImageURL         string           `json:"image_url"`
+	NutriScore       NutriScore       `json:"nutriscore"`
+	EcoScore         string           `json:"ecoscore"`
+	IsWater          bool             `json:"isWater"`
+	Quantity         string           `json:"quantity"`
+	ServingQuantity  json.Number      `json:"serving_quantity"`
+	ServingSize      string           `json:"serving_size"`
 }
 
 type Nutrients struct {

@@ -1,6 +1,6 @@
-package entity
+package request
 
-type Login_info struct {
+type Login struct {
 	Username string `json:"username"`
 	Email    string `json:"email"`
 	Password string `json:"password"`

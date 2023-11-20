@@ -1,4 +1,4 @@
-package mealRequest
+package request
 
 import "encoding/json"
 

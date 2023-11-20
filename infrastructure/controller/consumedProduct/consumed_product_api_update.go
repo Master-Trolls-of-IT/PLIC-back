@@ -3,7 +3,7 @@ package consumedProduct
 import (
 	"database/sql"
 	"gaia-api/application/returnAPI"
-	"gaia-api/domain/entity/requests/consumedProductRequest"
+	"gaia-api/domain/entity/request"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -24,7 +24,7 @@ func (updateController *UpdateController) Start() {
 
 func (updateController *UpdateController) updateConsumedProduct(context *gin.Context) {
 	var productRepo = *updateController.consumedProduct.OpenFoodFactsService.ProductRepo
-	var consumedProductUpdateQuantity consumedProductRequest.ConsumedProductUpdateQuantity
+	var consumedProductUpdateQuantity request.ConsumedProductUpdateQuantity
 	if err := context.ShouldBindJSON(&consumedProductUpdateQuantity); err != nil {
 		returnAPI.Error(context, http.StatusBadRequest)
 		return

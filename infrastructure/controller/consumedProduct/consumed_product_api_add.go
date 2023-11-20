@@ -3,7 +3,7 @@ package consumedProduct
 import (
 	"database/sql"
 	"gaia-api/application/returnAPI"
-	"gaia-api/domain/entity"
+	"gaia-api/domain/entity/mapping"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
@@ -52,7 +52,7 @@ func (addController *AddController) addConsumedProduct(context *gin.Context) {
 	if dbError != nil && dbError != sql.ErrNoRows {
 		returnAPI.Error(context, http.StatusInternalServerError)
 
-	} else if product == (entity.Product{}) {
+	} else if product == (mapping.Product{}) {
 		returnAPI.Error(context, http.StatusNotFound)
 
 	} else {
