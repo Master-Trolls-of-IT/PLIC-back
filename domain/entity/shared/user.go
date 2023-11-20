@@ -13,5 +13,5 @@ type User struct {
 	Gender          int     `json:"gender"`
 	Sportiveness    int     `json:"sportiveness"`
 	BasalMetabolism int     `json:"basalMetabolism"`
-	AvatarId        int     `json:"avatarId"`
+	AvatarId        *int    `json:"avatarId"`
 }
