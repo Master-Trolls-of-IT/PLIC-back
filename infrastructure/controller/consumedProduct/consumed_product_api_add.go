@@ -64,7 +64,7 @@ func (addController *AddController) addConsumedProduct(context *gin.Context) {
 		if err != nil {
 			returnAPI.Error(context, http.StatusInternalServerError)
 		} else {
-			returnAPI.Success(context, http.StatusOK, productSaved)
+			returnAPI.Success(context, http.StatusCreated, productSaved)
 		}
 	}
 }

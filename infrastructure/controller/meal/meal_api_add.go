@@ -34,6 +34,6 @@ func (addController *AddController) addMeal(context *gin.Context) {
 	if err != nil {
 		returnAPI.Error(context, http.StatusInternalServerError)
 	} else {
-		returnAPI.Success(context, http.StatusOK, *responseMeal)
+		returnAPI.Success(context, http.StatusCreated, *responseMeal)
 	}
 }

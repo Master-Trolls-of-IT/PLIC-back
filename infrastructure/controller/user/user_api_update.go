@@ -1,6 +1,7 @@
 package user
 
 import (
+	"gaia-api/application/returnAPI"
 	"gaia-api/domain/entity"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -27,7 +28,7 @@ func (updateController *UpdateController) updateUser(context *gin.Context) {
 	var userId, err = strconv.Atoi(context.Param("id"))
 
 	if err := context.ShouldBindJSON(&user); err != nil {
-		context.JSON(http.StatusBadRequest, updateController.user.ReturnAPIData.Error(http.StatusBadRequest, err.Error()))
+		returnAPI.Error(context, http.StatusBadRequest)
 		return
 	}
 
@@ -35,8 +36,8 @@ func (updateController *UpdateController) updateUser(context *gin.Context) {
 	newUser, err := userRepo.UpdateUserById(userId, &user)
 
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, updateController.user.ReturnAPIData.Error(http.StatusInternalServerError, err.Error()))
+		returnAPI.Error(context, http.StatusInternalServerError)
 	} else {
-		context.JSON(http.StatusOK, updateController.user.ReturnAPIData.UserUpdateSuccess(newUser))
+		returnAPI.Success(context, http.StatusOK, newUser)
 	}
 }

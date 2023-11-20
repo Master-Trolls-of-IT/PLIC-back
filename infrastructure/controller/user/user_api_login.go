@@ -1,6 +1,7 @@
 package user
 
 import (
+	"gaia-api/application/returnAPI"
 	"gaia-api/domain/entity"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -25,12 +26,12 @@ func (loginController *LoginController) login(context *gin.Context) {
 	var login = entity.Login_info{}
 	//binds Json Body to Entities.Login_info Class
 	if err := context.ShouldBindJSON(&login); err != nil {
-		context.JSON(http.StatusBadRequest, loginController.user.ReturnAPIData.Error(http.StatusBadRequest, err.Error()))
+		returnAPI.Error(context, http.StatusBadRequest)
 	}
 	var userRepo = *loginController.user.AuthService.UserRepo
 	loggedIn, err := userRepo.CheckLogin(&login)
 	if err != nil {
-		context.JSON(http.StatusUnauthorized, loginController.user.ReturnAPIData.Error(http.StatusUnauthorized, "Informations de connexion non valides"))
+		returnAPI.Error(context, http.StatusUnauthorized)
 	} else if loggedIn {
 		var user entity.User
 		if login.Email == "" {
@@ -39,9 +40,9 @@ func (loginController *LoginController) login(context *gin.Context) {
 			user, _ = userRepo.GetUserByEmail(login.Email)
 		}
 
-		//a function that generates a token using JWT
-		context.JSON(http.StatusAccepted, loginController.user.ReturnAPIData.LoginSuccess(user))
+		// A function that generates a token using JWT
+		returnAPI.Success(context, http.StatusOK, user)
 	} else {
-		context.JSON(http.StatusInternalServerError, loginController.user.ReturnAPIData.Error(http.StatusBadRequest, err.Error()))
+		returnAPI.Error(context, http.StatusInternalServerError)
 	}
 }

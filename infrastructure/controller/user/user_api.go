@@ -1,19 +1,17 @@
 package user
 
 import (
-	interfaces "gaia-api/application/interface"
 	"gaia-api/domain/service"
 	"github.com/gin-gonic/gin"
 )
 
 type User struct {
-	GinEngine     *gin.Engine
-	AuthService   *service.AuthService
-	ReturnAPIData *interfaces.ReturnAPIData
+	GinEngine   *gin.Engine
+	AuthService *service.AuthService
 }
 
-func NewUserController(ginEngine *gin.Engine, authService *service.AuthService, returnAPIData *interfaces.ReturnAPIData) *User {
-	user := &User{GinEngine: ginEngine, AuthService: authService, ReturnAPIData: returnAPIData}
+func NewUserController(ginEngine *gin.Engine, authService *service.AuthService) *User {
+	user := &User{GinEngine: ginEngine, AuthService: authService}
 	user.Start()
 	return user
 }

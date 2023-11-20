@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"gaia-api/application/interface"
 	"gaia-api/domain/service"
 	api "gaia-api/infrastructure/controller"
 	"gaia-api/infrastructure/controller/product"
@@ -39,11 +38,10 @@ func main() {
 	OpenFoodFactsService := service.NewOpenFoodFactsService(productRepo, mealRepo)
 
 	//API
-	returnAPIData := interfaces.NewReturnAPIData()
 	OpenFoodFactsAPI := product.NewOpenFoodFactsAPI()
 
 	//Server Instance
-	ginServer := api.NewServer(authenticationService, returnAPIData, OpenFoodFactsService, OpenFoodFactsAPI)
+	ginServer := api.NewServer(authenticationService, OpenFoodFactsService, OpenFoodFactsAPI)
 
 	ginServer.Start()
 }
