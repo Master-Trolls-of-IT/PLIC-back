@@ -25,3 +25,5 @@
             DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           run: |
             curl -H "Content-Type: application/json" -X POST -d '{"content": "Une erreur de code a été détectée lors du build","name": "test webhook","type": 1,"avatar": null,"user": {"username": "test"}}' $DISCORD_WEBHOOK_URL
+        - name: Test
+          run: go test -v ./...
