@@ -31,13 +31,11 @@ func (registerController *RegisterController) register(context *gin.Context) {
 	}
 
 	var userRepo = *registerController.user.AuthService.UserRepo
-	registered, err := userRepo.Register(&user)
+	registered, _ := userRepo.Register(&user)
 
-	if err != nil {
-		returnAPI.Error(context, http.StatusInternalServerError)
-	} else if registered {
+	if registered {
 		returnAPI.Success(context, http.StatusCreated, user)
 	} else {
-		returnAPI.Error(context, http.StatusConflict)
+		returnAPI.Error(context, http.StatusInternalServerError)
 	}
 }
