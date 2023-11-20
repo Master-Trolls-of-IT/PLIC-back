@@ -1,19 +1,17 @@
 package recipe
 
 import (
-	interfaces "gaia-api/application/interface"
 	"gaia-api/domain/service"
 	"github.com/gin-gonic/gin"
 )
 
 type Recipe struct {
-	GinEngine     *gin.Engine
-	AuthService   *service.AuthService
-	ReturnAPIData *interfaces.ReturnAPIData
+	GinEngine   *gin.Engine
+	AuthService *service.AuthService
 }
 
-func NewRecipeController(ginEngine *gin.Engine, authService *service.AuthService, returnAPIData *interfaces.ReturnAPIData) *Recipe {
-	recipe := &Recipe{GinEngine: ginEngine, AuthService: authService, ReturnAPIData: returnAPIData}
+func NewRecipeController(ginEngine *gin.Engine, authService *service.AuthService) *Recipe {
+	recipe := &Recipe{GinEngine: ginEngine, AuthService: authService}
 	recipe.Start()
 	return recipe
 }

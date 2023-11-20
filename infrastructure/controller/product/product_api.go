@@ -2,7 +2,7 @@ package product
 
 import (
 	"database/sql"
-	interfaces "gaia-api/application/interface"
+	"gaia-api/application/returnAPI"
 	"gaia-api/domain/entity"
 	"gaia-api/domain/service"
 	"gaia-api/infrastructure/error/openFoodFactsAPIError"
@@ -12,13 +12,12 @@ import (
 
 type Product struct {
 	ginEngine            *gin.Engine
-	returnAPIData        *interfaces.ReturnAPIData
 	openFoodFactsService *service.OpenFoodFactsService
 	openFoodFactsAPI     *OpenFoodFactsAPI
 }
 
-func NewProductController(ginEngine *gin.Engine, returnAPIData *interfaces.ReturnAPIData, openFoodFactsService *service.OpenFoodFactsService, openFoodFactsAPI *OpenFoodFactsAPI) *Product {
-	product := &Product{ginEngine: ginEngine, returnAPIData: returnAPIData, openFoodFactsService: openFoodFactsService, openFoodFactsAPI: openFoodFactsAPI}
+func NewProductController(ginEngine *gin.Engine, openFoodFactsService *service.OpenFoodFactsService, openFoodFactsAPI *OpenFoodFactsAPI) *Product {
+	product := &Product{ginEngine: ginEngine, openFoodFactsService: openFoodFactsService, openFoodFactsAPI: openFoodFactsAPI}
 	product.Start()
 	return product
 }
@@ -33,26 +32,26 @@ func (product *Product) GetProduct(context *gin.Context) {
 	productEntity, dbError := productRepo.GetProductByBarCode(barcode)
 
 	if dbError != nil && dbError != sql.ErrNoRows {
-		context.JSON(http.StatusInternalServerError, product.returnAPIData.Error(http.StatusInternalServerError, dbError.Error()))
+		returnAPI.Error(context, http.StatusInternalServerError)
 
 	} else if productEntity == (entity.Product{}) {
 		openFoodFactAPI := product.openFoodFactsAPI
 		mappedProduct, err := openFoodFactAPI.retrieveAndMapProduct(barcode)
 
 		if _, productNotFound := err.(openFoodFactsAPIError.ProductNotFoundError); productNotFound {
-			context.JSON(http.StatusInternalServerError, product.returnAPIData.ProductNotAvailable(barcode))
+			returnAPI.Error(context, http.StatusNotFound)
 
 		} else {
 			productSaved, err := productRepo.SaveProduct(mappedProduct, barcode)
 
 			if productSaved {
-				context.JSON(http.StatusOK, product.returnAPIData.ProductFound(mappedProduct))
+				returnAPI.Success(context, http.StatusOK, mappedProduct)
 
-			} else {
-				context.JSON(http.StatusInternalServerError, product.returnAPIData.Error(http.StatusInternalServerError, err.Error()))
+			} else if err != nil {
+				returnAPI.Error(context, http.StatusInternalServerError)
 			}
 		}
 	} else {
-		context.JSON(http.StatusOK, product.returnAPIData.ProductFound(productEntity))
+		returnAPI.Success(context, http.StatusOK, productEntity)
 	}
 }

@@ -31,8 +31,8 @@ func (server *Server) Start() {
 	connexion.NewConnexionController(ginEngine, server.ReturnAPIData)
 	consumedProduct.NewConsumedProductController(ginEngine, server.AuthService, server.ReturnAPIData, server.OpenFoodFactsService)
 	meal.NewMealController(ginEngine, server.AuthService, server.ReturnAPIData, server.OpenFoodFactsService)
-	recipe.NewRecipeController(ginEngine, server.AuthService, server.ReturnAPIData)
-	product.NewProductController(ginEngine, server.ReturnAPIData, server.OpenFoodFactsService, server.OpenFoodFactsAPI)
+	recipe.NewRecipeController(ginEngine, server.AuthService)
+	product.NewProductController(ginEngine, server.OpenFoodFactsService, server.OpenFoodFactsAPI)
 	token.NewTokenController(ginEngine, server.ReturnAPIData)
 	user.NewUserController(ginEngine, server.AuthService, server.ReturnAPIData)
 
