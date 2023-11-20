@@ -2,6 +2,7 @@ package consumedProduct
 
 import (
 	"database/sql"
+	"gaia-api/application/returnAPI"
 	"gaia-api/domain/entity/requests/consumedProductRequest"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -25,21 +26,21 @@ func (updateController *UpdateController) updateConsumedProduct(context *gin.Con
 	var productRepo = *updateController.consumedProduct.OpenFoodFactsService.ProductRepo
 	var consumedProductUpdateQuantity consumedProductRequest.ConsumedProductUpdateQuantity
 	if err := context.ShouldBindJSON(&consumedProductUpdateQuantity); err != nil {
-		context.JSON(http.StatusBadRequest, updateController.consumedProduct.ReturnAPIData.Error(http.StatusBadRequest, err.Error()))
+		returnAPI.Error(context, http.StatusBadRequest)
 		return
 	}
 
 	var userRepo = *updateController.consumedProduct.AuthService.UserRepo
 	user, dbError := userRepo.GetUserByEmail(consumedProductUpdateQuantity.UserEmail)
 	if dbError != nil && dbError != sql.ErrNoRows {
-		context.JSON(http.StatusInternalServerError, updateController.consumedProduct.ReturnAPIData.Error(http.StatusInternalServerError, dbError.Error()))
+		returnAPI.Error(context, http.StatusInternalServerError)
 	}
 
 	err := productRepo.UpdateConsumedProductQuantity(consumedProductUpdateQuantity.Quantity, consumedProductUpdateQuantity.Barcode, user.Id)
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, updateController.consumedProduct.ReturnAPIData.Error(http.StatusInternalServerError, err.Error()))
+		returnAPI.Error(context, http.StatusInternalServerError)
 	} else {
-		context.JSON(http.StatusOK, updateController.consumedProduct.ReturnAPIData.UpdateProduct(http.StatusOK, "La quantité consommée du produit a été mise à jour avec succès."))
+		returnAPI.Success(context, http.StatusOK, gin.H{})
 	}
 
 }

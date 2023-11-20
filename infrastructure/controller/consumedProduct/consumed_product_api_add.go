@@ -2,6 +2,7 @@ package consumedProduct
 
 import (
 	"database/sql"
+	"gaia-api/application/returnAPI"
 	"gaia-api/domain/entity"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -32,7 +33,7 @@ func (addController *AddController) addConsumedProduct(context *gin.Context) {
 	var requestBody MyRequestBody
 	// Bind the request body
 	if err := context.ShouldBindJSON(&requestBody); err != nil {
-		context.JSON(http.StatusBadRequest, addController.consumedProduct.ReturnAPIData.Error(http.StatusBadRequest, err.Error()))
+		returnAPI.Error(context, http.StatusBadRequest)
 		return
 	}
 
@@ -49,21 +50,21 @@ func (addController *AddController) addConsumedProduct(context *gin.Context) {
 	var userId = user.Id
 
 	if dbError != nil && dbError != sql.ErrNoRows {
-		context.JSON(http.StatusInternalServerError, addController.consumedProduct.ReturnAPIData.Error(http.StatusInternalServerError, dbError.Error()))
+		returnAPI.Error(context, http.StatusInternalServerError)
 
 	} else if product == (entity.Product{}) {
-		context.JSON(http.StatusNotFound, addController.consumedProduct.ReturnAPIData.Error(http.StatusNotFound, "Produit non existant dans la base de données"))
+		returnAPI.Error(context, http.StatusNotFound)
 
 	} else {
 		quantityInt, err := strconv.Atoi(quantity)
 		if err != nil {
-			context.JSON(http.StatusInternalServerError, addController.consumedProduct.ReturnAPIData.Error(http.StatusInternalServerError, "Erreur de la conversion de la quantité  (atoi)"))
+			returnAPI.Error(context, http.StatusInternalServerError)
 		}
 		productSaved, err := productRepo.SaveConsumedProduct(product, userId, quantityInt)
-		if err == nil {
-			context.JSON(http.StatusOK, addController.consumedProduct.ReturnAPIData.ProductAddedToConsumed(productSaved))
+		if err != nil {
+			returnAPI.Error(context, http.StatusInternalServerError)
 		} else {
-			context.JSON(http.StatusInternalServerError, addController.consumedProduct.ReturnAPIData.Error(http.StatusInternalServerError, err.Error()))
+			returnAPI.Success(context, http.StatusOK, productSaved)
 		}
 	}
 }

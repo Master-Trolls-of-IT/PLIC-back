@@ -40,6 +40,14 @@ var StatusMessage = map[int]string{
 	StatusNotImplemented:      "Not implemented",
 }
 
+func replaceNilObject(data interface{}) interface{} {
+	if data != nil {
+		return data
+	} else {
+		return gin.H{}
+	}
+}
+
 func Error(context *gin.Context, statusCode int) {
 	context.JSON(statusCode, ReturnAPI{
 		Code:    statusCode,
@@ -52,6 +60,6 @@ func Success(context *gin.Context, statusCode int, data interface{}) {
 	context.JSON(statusCode, ReturnAPI{
 		Code:    statusCode,
 		Message: StatusMessage[statusCode],
-		Data:    data,
+		Data:    replaceNilObject(data),
 	})
 }

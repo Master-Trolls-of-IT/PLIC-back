@@ -29,7 +29,7 @@ func (server *Server) Start() {
 	ginEngine := gin.Default()
 
 	connexion.NewConnexionController(ginEngine)
-	consumedProduct.NewConsumedProductController(ginEngine, server.AuthService, server.ReturnAPIData, server.OpenFoodFactsService)
+	consumedProduct.NewConsumedProductController(ginEngine, server.AuthService, server.OpenFoodFactsService)
 	meal.NewMealController(ginEngine, server.AuthService, server.ReturnAPIData, server.OpenFoodFactsService)
 	recipe.NewRecipeController(ginEngine, server.AuthService)
 	product.NewProductController(ginEngine, server.OpenFoodFactsService, server.OpenFoodFactsAPI)

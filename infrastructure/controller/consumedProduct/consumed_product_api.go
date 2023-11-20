@@ -1,7 +1,6 @@
 package consumedProduct
 
 import (
-	interfaces "gaia-api/application/interface"
 	"gaia-api/domain/service"
 	"github.com/gin-gonic/gin"
 )
@@ -9,12 +8,11 @@ import (
 type ConsumedProduct struct {
 	GinEngine            *gin.Engine
 	AuthService          *service.AuthService
-	ReturnAPIData        *interfaces.ReturnAPIData
 	OpenFoodFactsService *service.OpenFoodFactsService
 }
 
-func NewConsumedProductController(ginEngine *gin.Engine, authService *service.AuthService, returnAPIData *interfaces.ReturnAPIData, openFoodFactsService *service.OpenFoodFactsService) *ConsumedProduct {
-	consumedProduct := &ConsumedProduct{GinEngine: ginEngine, AuthService: authService, ReturnAPIData: returnAPIData, OpenFoodFactsService: openFoodFactsService}
+func NewConsumedProductController(ginEngine *gin.Engine, authService *service.AuthService, openFoodFactsService *service.OpenFoodFactsService) *ConsumedProduct {
+	consumedProduct := &ConsumedProduct{GinEngine: ginEngine, AuthService: authService, OpenFoodFactsService: openFoodFactsService}
 	consumedProduct.Start()
 	return consumedProduct
 }

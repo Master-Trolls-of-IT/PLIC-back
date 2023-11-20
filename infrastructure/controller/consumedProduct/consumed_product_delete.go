@@ -2,6 +2,7 @@ package consumedProduct
 
 import (
 	"database/sql"
+	"gaia-api/application/returnAPI"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
@@ -26,7 +27,7 @@ func (deleteController *DeleteController) deleteConsumedProduct(context *gin.Con
 	var userRepo = *deleteController.consumedProduct.AuthService.UserRepo
 	user, dbError := userRepo.GetUserByEmail(email)
 	if dbError != nil && dbError != sql.ErrNoRows {
-		context.JSON(http.StatusInternalServerError, deleteController.consumedProduct.ReturnAPIData.Error(http.StatusInternalServerError, dbError.Error()))
+		returnAPI.Error(context, http.StatusInternalServerError)
 	}
 	var userId = user.Id
 	var id, _ = strconv.Atoi(context.Param("id"))
@@ -34,15 +35,15 @@ func (deleteController *DeleteController) deleteConsumedProduct(context *gin.Con
 
 	productDeleted, dbError := productRepo.DeleteConsumedProduct(id, userId)
 	if dbError != nil && dbError != sql.ErrNoRows {
-		context.JSON(http.StatusInternalServerError, deleteController.consumedProduct.ReturnAPIData.Error(http.StatusInternalServerError, dbError.Error()))
+		returnAPI.Error(context, http.StatusInternalServerError)
 	} else if productDeleted {
 		var productRepo = *deleteController.consumedProduct.OpenFoodFactsService.ProductRepo
 		consumedProducts, dbError := productRepo.GetConsumedProductsByUserId(userId)
 		if dbError != nil && dbError != sql.ErrNoRows {
-			context.JSON(http.StatusInternalServerError, deleteController.consumedProduct.ReturnAPIData.DeletedProduct(http.StatusInternalServerError, "Could not retrieve the list of consumed products after deleting product"))
+			returnAPI.Error(context, http.StatusInternalServerError)
 		}
-		context.JSON(http.StatusOK, deleteController.consumedProduct.ReturnAPIData.ProductDeletedFromConsumed(consumedProducts))
+		returnAPI.Success(context, http.StatusOK, consumedProducts)
 	} else {
-		context.JSON(http.StatusNotFound, deleteController.consumedProduct.ReturnAPIData.Error(http.StatusNotFound, "Produit non existant dans la base de données"))
+		returnAPI.Error(context, http.StatusNotFound)
 	}
 }
