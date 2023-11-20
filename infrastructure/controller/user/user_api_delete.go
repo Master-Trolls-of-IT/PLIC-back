@@ -2,6 +2,7 @@ package user
 
 import (
 	"database/sql"
+	"gaia-api/application/returnAPI"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
@@ -27,10 +28,10 @@ func (deleteController *DeleteController) deleteUser(context *gin.Context) {
 	var userRepo = *deleteController.user.AuthService.UserRepo
 	userDeleted, dbError := userRepo.DeleteUser(userId)
 	if dbError != nil && dbError != sql.ErrNoRows {
-		context.JSON(http.StatusInternalServerError, deleteController.user.ReturnAPIData.Error(http.StatusInternalServerError, dbError.Error()))
+		returnAPI.Error(context, http.StatusInternalServerError)
 	} else if userDeleted {
-		context.JSON(http.StatusOK, deleteController.user.ReturnAPIData.DeletedUser(http.StatusOK, "Utilisateur Supprimé"))
+		returnAPI.Success(context, http.StatusOK, nil)
 	} else {
-		context.JSON(http.StatusNotFound, deleteController.user.ReturnAPIData.Error(http.StatusNotFound, "Utilisateur non existant dans la base de données"))
+		returnAPI.Error(context, http.StatusNotFound)
 	}
 }

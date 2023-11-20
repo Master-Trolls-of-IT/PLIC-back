@@ -1,18 +1,17 @@
 package connexion
 
 import (
-	interfaces "gaia-api/application/interface"
+	"gaia-api/application/returnAPI"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
 type Connexion struct {
-	ginEngine     *gin.Engine
-	returnAPIData *interfaces.ReturnAPIData
+	ginEngine *gin.Engine
 }
 
-func NewConnexionController(ginEngine *gin.Engine, returnAPIData *interfaces.ReturnAPIData) *Connexion {
-	connexion := &Connexion{ginEngine: ginEngine, returnAPIData: returnAPIData}
+func NewConnexionController(ginEngine *gin.Engine) *Connexion {
+	connexion := &Connexion{ginEngine: ginEngine}
 	connexion.Start()
 	return connexion
 }
@@ -23,9 +22,9 @@ func (connexion *Connexion) Start() {
 }
 
 func (connexion *Connexion) welcome(context *gin.Context) {
-	context.JSON(http.StatusOK, gin.H{"Title": "Gaia"})
+	returnAPI.Success(context, http.StatusOK, gin.H{"Title": "Gaïa: Nature's Kitchen"})
 }
 
 func (connexion *Connexion) ping(context *gin.Context) {
-	context.JSON(http.StatusOK, connexion.returnAPIData.Ping())
+	returnAPI.Success(context, http.StatusOK, gin.H{"response": "Pong"})
 }

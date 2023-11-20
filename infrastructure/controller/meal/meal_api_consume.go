@@ -1,6 +1,7 @@
 package meal
 
 import (
+	"gaia-api/application/returnAPI"
 	response "gaia-api/domain/entity/responses/meal"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -23,14 +24,14 @@ func (consumeController *ConsumeController) Start() {
 func (consumeController *ConsumeController) consumeMeal(context *gin.Context) {
 	var meal response.Meal
 	if err := context.ShouldBindJSON(&meal); err != nil {
-		context.JSON(http.StatusBadRequest, consumeController.meal.ReturnAPIData.Error(http.StatusBadRequest, err.Error()))
+		returnAPI.Error(context, http.StatusBadRequest)
 		return
 	}
 	var mealRepo = *consumeController.meal.OpenFoodFactsService.MealRepo
 	products, err := mealRepo.ConsumeMeal(meal)
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, consumeController.meal.ReturnAPIData.Error(http.StatusInternalServerError, err.Error()))
+		returnAPI.Error(context, http.StatusInternalServerError)
 	} else {
-		context.JSON(http.StatusOK, consumeController.meal.ReturnAPIData.MealConsumed(products))
+		returnAPI.Success(context, http.StatusOK, products)
 	}
 }

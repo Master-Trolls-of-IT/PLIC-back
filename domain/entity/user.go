@@ -18,18 +18,4 @@ type User struct {
 
 type Gender int
 
-const (
-	male Gender = iota
-	female
-	other
-)
-
 type Sportiveness int
-
-const (
-	Sedentaire Sportiveness = iota
-	ActifLeger
-	ActifModere
-	ActifIntense
-	Athlete
-)
