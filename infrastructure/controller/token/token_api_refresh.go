@@ -1,6 +1,7 @@
 package token
 
 import (
+	"gaia-api/application/returnAPI"
 	"gaia-api/infrastructure/controller/token/helper"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -25,16 +26,19 @@ func (refreshTokenController *RefreshTokenController) Start() {
 func (refreshTokenController *RefreshTokenController) getRefreshToken(context *gin.Context) {
 	refreshToken, err := helper.GenerateRefreshToken([]byte(context.Param("password")))
 	if err != nil {
-		context.JSON(http.StatusBadRequest, refreshTokenController.token.ReturnAPIData.Error(http.StatusBadRequest, err.Error()))
+		returnAPI.Error(context, http.StatusBadRequest)
+	} else {
+		returnAPI.Success(context, http.StatusOK, refreshToken)
 	}
-	context.JSON(http.StatusOK, refreshTokenController.token.ReturnAPIData.GetToken(refreshToken))
 }
 
 func (refreshTokenController *RefreshTokenController) checkRefreshToken(context *gin.Context) {
 	isTokenValid, err := helper.CheckAccessToken(context.Param("token"))
 	if err != nil {
-		context.JSON(http.StatusBadRequest, refreshTokenController.token.ReturnAPIData.Error(http.StatusBadRequest, err.Error()))
+		returnAPI.Error(context, http.StatusBadRequest)
+	} else if !isTokenValid {
+		returnAPI.Error(context, http.StatusUnauthorized)
 	} else {
-		context.JSON(http.StatusOK, refreshTokenController.token.ReturnAPIData.CheckToken(isTokenValid))
+		returnAPI.Success(context, http.StatusOK, isTokenValid)
 	}
 }

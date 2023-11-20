@@ -1,6 +1,7 @@
 package token
 
 import (
+	"gaia-api/application/returnAPI"
 	"gaia-api/infrastructure/controller/token/helper"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -13,7 +14,6 @@ type AccessTokenController struct {
 func NewAccessTokenController(token *Token) *AccessTokenController {
 	accessTokenController := &AccessTokenController{token: token}
 	accessTokenController.Start()
-
 	return accessTokenController
 }
 
@@ -25,17 +25,19 @@ func (accessTokenController *AccessTokenController) Start() {
 func (accessTokenController *AccessTokenController) checkAccessToken(context *gin.Context) {
 	isTokenValid, err := helper.CheckAccessToken(context.Param("token"))
 	if err != nil {
-		context.JSON(http.StatusBadRequest, accessTokenController.token.ReturnAPIData.Error(http.StatusBadRequest, err.Error()))
+		returnAPI.Error(context, http.StatusBadRequest)
+	} else if !isTokenValid {
+		returnAPI.Error(context, http.StatusUnauthorized)
 	} else {
-		context.JSON(http.StatusOK, accessTokenController.token.ReturnAPIData.CheckToken(isTokenValid))
+		returnAPI.Success(context, http.StatusOK, isTokenValid)
 	}
 }
 
 func (accessTokenController *AccessTokenController) getAccessToken(context *gin.Context) {
-	// Use GenerateAccessToken function to generate a new access token
 	accessToken, err := helper.GenerateAccessToken(context.Param("password"), []byte(context.Param("refresh_token")))
 	if err != nil {
-		context.JSON(http.StatusBadRequest, accessTokenController.token.ReturnAPIData.Error(http.StatusBadRequest, err.Error()))
+		returnAPI.Error(context, http.StatusBadRequest)
+	} else {
+		returnAPI.Success(context, http.StatusOK, accessToken)
 	}
-	context.JSON(http.StatusOK, accessTokenController.token.ReturnAPIData.GetToken(accessToken))
 }

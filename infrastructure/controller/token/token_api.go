@@ -1,17 +1,15 @@
 package token
 
 import (
-	interfaces "gaia-api/application/interface"
 	"github.com/gin-gonic/gin"
 )
 
 type Token struct {
-	GinEngine     *gin.Engine
-	ReturnAPIData *interfaces.ReturnAPIData
+	GinEngine *gin.Engine
 }
 
-func NewTokenController(ginEngine *gin.Engine, returnAPIData *interfaces.ReturnAPIData) *Token {
-	token := &Token{GinEngine: ginEngine, ReturnAPIData: returnAPIData}
+func NewTokenController(ginEngine *gin.Engine) *Token {
+	token := &Token{GinEngine: ginEngine}
 	token.Start()
 	return token
 }

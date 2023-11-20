@@ -28,12 +28,12 @@ func NewServer(authService *service.AuthService, returnAPIData *interfaces.Retur
 func (server *Server) Start() {
 	ginEngine := gin.Default()
 
-	connexion.NewConnexionController(ginEngine, server.ReturnAPIData)
+	connexion.NewConnexionController(ginEngine)
 	consumedProduct.NewConsumedProductController(ginEngine, server.AuthService, server.ReturnAPIData, server.OpenFoodFactsService)
 	meal.NewMealController(ginEngine, server.AuthService, server.ReturnAPIData, server.OpenFoodFactsService)
 	recipe.NewRecipeController(ginEngine, server.AuthService)
 	product.NewProductController(ginEngine, server.OpenFoodFactsService, server.OpenFoodFactsAPI)
-	token.NewTokenController(ginEngine, server.ReturnAPIData)
+	token.NewTokenController(ginEngine)
 	user.NewUserController(ginEngine, server.AuthService, server.ReturnAPIData)
 
 	err := ginEngine.Run()
