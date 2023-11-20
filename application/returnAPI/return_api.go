@@ -6,7 +6,7 @@ import (
 )
 
 type ReturnAPI struct {
-	Code    int         `json:"code"`
+	Status  int         `json:"status"`
 	Message string      `json:"message"`
 	Data    interface{} `json:"data"`
 }
@@ -36,7 +36,7 @@ func replaceNilObject(data interface{}) interface{} {
 
 func Error(context *gin.Context, statusCode int) {
 	context.JSON(statusCode, ReturnAPI{
-		Code:    statusCode,
+		Status:  statusCode,
 		Message: StatusMessage[statusCode],
 		Data:    nil,
 	})
@@ -44,7 +44,7 @@ func Error(context *gin.Context, statusCode int) {
 
 func Success(context *gin.Context, statusCode int, data interface{}) {
 	context.JSON(statusCode, ReturnAPI{
-		Code:    statusCode,
+		Status:  statusCode,
 		Message: StatusMessage[statusCode],
 		Data:    replaceNilObject(data),
 	})
