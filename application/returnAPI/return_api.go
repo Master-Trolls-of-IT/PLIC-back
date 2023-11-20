@@ -2,6 +2,7 @@ package returnAPI
 
 import (
 	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
 type ReturnAPI struct {
@@ -10,34 +11,19 @@ type ReturnAPI struct {
 	Data    interface{} `json:"data"`
 }
 
-const (
-	StatusOK                  = 200
-	StatusCreated             = 201
-	StatusAccepted            = 202
-	StatusNoContent           = 204
-	StatusBadRequest          = 400
-	StatusUnauthorized        = 401
-	StatusForbidden           = 403
-	StatusNotFound            = 404
-	StatusMethodNotAllowed    = 405
-	StatusConflict            = 409
-	StatusInternalServerError = 500
-	StatusNotImplemented      = 501
-)
-
 var StatusMessage = map[int]string{
-	StatusOK:                  "Request succeeded",
-	StatusCreated:             "Created successfully",
-	StatusAccepted:            "Request accepted",
-	StatusNoContent:           "No content",
-	StatusBadRequest:          "Bad request",
-	StatusUnauthorized:        "Unauthorized",
-	StatusForbidden:           "Forbidden",
-	StatusNotFound:            "Not found",
-	StatusMethodNotAllowed:    "Method not allowed",
-	StatusConflict:            "Conflict",
-	StatusInternalServerError: "Internal server error",
-	StatusNotImplemented:      "Not implemented",
+	http.StatusOK:                  "Request succeeded",
+	http.StatusCreated:             "Created successfully",
+	http.StatusAccepted:            "Request accepted",
+	http.StatusNoContent:           "No content",
+	http.StatusBadRequest:          "Bad request",
+	http.StatusUnauthorized:        "Unauthorized",
+	http.StatusForbidden:           "Forbidden",
+	http.StatusNotFound:            "Not found",
+	http.StatusMethodNotAllowed:    "Method not allowed",
+	http.StatusConflict:            "Conflict",
+	http.StatusInternalServerError: "Internal server error",
+	http.StatusNotImplemented:      "Not implemented",
 }
 
 func replaceNilObject(data interface{}) interface{} {
