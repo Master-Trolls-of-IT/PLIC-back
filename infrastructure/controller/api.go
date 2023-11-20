@@ -7,6 +7,7 @@ import (
 	"gaia-api/infrastructure/controller/consumedProduct"
 	"gaia-api/infrastructure/controller/meal"
 	"gaia-api/infrastructure/controller/product"
+	"gaia-api/infrastructure/controller/recipe"
 	"gaia-api/infrastructure/controller/token"
 	"gaia-api/infrastructure/controller/user"
 	"github.com/gin-gonic/gin"
@@ -30,6 +31,7 @@ func (server *Server) Start() {
 	connexion.NewConnexionController(ginEngine, server.ReturnAPIData)
 	consumedProduct.NewConsumedProductController(ginEngine, server.AuthService, server.ReturnAPIData, server.OpenFoodFactsService)
 	meal.NewMealController(ginEngine, server.AuthService, server.ReturnAPIData, server.OpenFoodFactsService)
+	recipe.NewRecipeController(ginEngine, server.AuthService, server.ReturnAPIData)
 	product.NewProductController(ginEngine, server.ReturnAPIData, server.OpenFoodFactsService, server.OpenFoodFactsAPI)
 	token.NewTokenController(ginEngine, server.ReturnAPIData)
 	user.NewUserController(ginEngine, server.AuthService, server.ReturnAPIData)

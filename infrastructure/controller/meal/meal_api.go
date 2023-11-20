@@ -14,9 +14,9 @@ type Meal struct {
 }
 
 func NewMealController(ginEngine *gin.Engine, authService *service.AuthService, returnAPIData *interfaces.ReturnAPIData, openFoodFactsService *service.OpenFoodFactsService) *Meal {
-	user := &Meal{GinEngine: ginEngine, AuthService: authService, ReturnAPIData: returnAPIData, OpenFoodFactsService: openFoodFactsService}
-	user.Start()
-	return user
+	meal := &Meal{GinEngine: ginEngine, AuthService: authService, ReturnAPIData: returnAPIData, OpenFoodFactsService: openFoodFactsService}
+	meal.Start()
+	return meal
 }
 
 func (meal *Meal) Start() {

@@ -20,7 +20,6 @@ type Product struct {
 func NewProductController(ginEngine *gin.Engine, returnAPIData *interfaces.ReturnAPIData, openFoodFactsService *service.OpenFoodFactsService, openFoodFactsAPI *OpenFoodFactsAPI) *Product {
 	product := &Product{ginEngine: ginEngine, returnAPIData: returnAPIData, openFoodFactsService: openFoodFactsService, openFoodFactsAPI: openFoodFactsAPI}
 	product.Start()
-
 	return product
 }
 
