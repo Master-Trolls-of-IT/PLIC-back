@@ -16,8 +16,8 @@ type MealRepo struct {
 	ProductRepo *ProductRepo
 }
 
-func NewMealRepository(db *Database, productRepo *ProductRepo) *MealRepo {
-	return &MealRepo{data: db, ProductRepo: productRepo}
+func NewMealRepository(data *Database, productRepo *ProductRepo) *MealRepo {
+	return &MealRepo{data: data, ProductRepo: productRepo}
 }
 
 func (mealRepo *MealRepo) SaveMeal(myMeal request.Meal) (*response.Meal, error) {
@@ -58,16 +58,26 @@ func (mealRepo *MealRepo) SaveMeal(myMeal request.Meal) (*response.Meal, error) 
 		return nil, err
 	}
 
-	responseMeal := response.Meal{ID: responseMealID, Title: myMeal.Title, Tags: []response.MealTag{}, UserEmail: myMeal.UserEmail, Products: []mapping.Product{}, IsFavourite: false}
+	responseMeal := response.Meal{
+		ID:          responseMealID,
+		Title:       myMeal.Title,
+		Tags:        []response.MealTag{},
+		UserEmail:   myMeal.UserEmail,
+		Products:    []mapping.Product{},
+		IsFavourite: false,
+	}
 	responseMeals := []response.Meal{responseMeal}
+
 	err = mealRepo.retrieveMealProducts(responseMeals)
 	if err != nil {
 		return nil, err
 	}
+
 	err = mealRepo.retrieveMealTags(responseMeals)
 	if err != nil {
 		return nil, err
 	}
+
 	responseMeal = responseMeals[0]
 	responseMeal.NbProducts = len(responseMeal.Products)
 	responseMeal.UserEmail = myMeal.UserEmail
@@ -102,7 +112,12 @@ func (mealRepo *MealRepo) retrieveMeals(userEmail string) ([]response.Meal, erro
 	if err != nil {
 		return []response.Meal{}, err
 	}
-	defer rows.Close()
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			return
+		}
+	}(rows)
 
 	for rows.Next() {
 		var meal response.Meal
@@ -182,7 +197,6 @@ func (mealRepo *MealRepo) retrieveMealProducts(meals []response.Meal) error {
 		}
 		meal.NbProducts = len(meal.Products)
 	}
-
 	return nil
 }
 
@@ -224,7 +238,12 @@ func (mealRepo *MealRepo) ConsumeMeal(meal response.Meal) ([]mapping.ConsumedPro
 	if err != nil {
 		return nil, err
 	}
-	defer statement.Close()
+	defer func(statement *sql.Stmt) {
+		err := statement.Close()
+		if err != nil {
+			return
+		}
+	}(statement)
 
 	transaction, err := database.Begin()
 	if err != nil {

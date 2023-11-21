@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"gaia-api/application/returnAPI"
 	"gaia-api/domain/entity/mapping"
+	"gaia-api/domain/entity/request"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
@@ -24,23 +25,15 @@ func (addController *AddController) Start() {
 }
 
 func (addController *AddController) addConsumedProduct(context *gin.Context) {
-	type MyRequestBody struct {
-		Barcode  string `json:"barcode"`
-		Email    string `json:"email"`
-		Quantity string `json:"quantity"`
-	}
-
-	var requestBody MyRequestBody
-	// Bind the request body
-	if err := context.ShouldBindJSON(&requestBody); err != nil {
+	var consumedProductAdd request.ConsumedProductAdd
+	if err := context.ShouldBindJSON(&consumedProductAdd); err != nil {
 		returnAPI.Error(context, http.StatusBadRequest)
 		return
 	}
 
-	// Retrieve values from the request body
-	email := requestBody.Email
-	barcode := requestBody.Barcode
-	quantity := requestBody.Quantity
+	email := consumedProductAdd.Email
+	barcode := consumedProductAdd.Barcode
+	quantity := consumedProductAdd.Quantity
 
 	var productRepo = *addController.consumedProduct.OpenFoodFactsService.ProductRepo
 	var userRepo = *addController.consumedProduct.AuthService.UserRepo
