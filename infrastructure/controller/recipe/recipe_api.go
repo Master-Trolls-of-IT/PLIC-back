@@ -6,8 +6,9 @@ import (
 )
 
 type Recipe struct {
-	GinEngine   *gin.Engine
-	AuthService *service.AuthService
+	GinEngine            *gin.Engine
+	AuthService          *service.AuthService
+	OpenFoodFactsService *service.OpenFoodFactsService
 }
 
 func NewRecipeController(ginEngine *gin.Engine, authService *service.AuthService) *Recipe {
@@ -17,4 +18,9 @@ func NewRecipeController(ginEngine *gin.Engine, authService *service.AuthService
 }
 
 func (recipe *Recipe) Start() {
+	NewGetAllController(recipe)
+	NewGetUserController(recipe)
+	NewAddController(recipe)
+	NewDeleteController(recipe)
+	NewUpdateController(recipe)
 }
