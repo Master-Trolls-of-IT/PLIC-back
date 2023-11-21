@@ -226,7 +226,7 @@ func (mealRepo *MealRepo) DeleteMeal(mealID int) error {
 	return nil
 }
 
-func (mealRepo *MealRepo) ConsumeMeal(meal request.Meal) ([]response.ConsumedProduct, error) {
+func (mealRepo *MealRepo) ConsumeMeal(meal response.Meal) ([]response.ConsumedProduct, error) {
 	database := mealRepo.data.DB
 	var consumedProducts []response.ConsumedProduct
 	var userID int
