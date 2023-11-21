@@ -99,16 +99,23 @@ func (recipeRepo *RecipeRepo) GetAllRecipes() ([]response.Recipe, error) {
 
 func (recipeRepo *RecipeRepo) GetUserRecipes(userEmail string) ([]response.Recipe, error) {
 	recipes, err := recipeRepo.retrieveUserRecipes(userEmail)
+	if err != nil {
+		fmt.Print("Error retrieving recipes")
+		return nil, err
+	}
 	err = recipeRepo.retrieveRecipeIngredients(recipes)
 	if err != nil {
+		fmt.Print("Error retrieving recipe ingredients")
 		return nil, err
 	}
 	err = recipeRepo.retrieveRecipeSteps(recipes)
 	if err != nil {
+		fmt.Print("Error retrieving recipe steps")
 		return nil, err
 	}
 	err = recipeRepo.retrieveRecipeTags(recipes)
 	if err != nil {
+		fmt.Print("Error retrieving recipe tags")
 		return nil, err
 	}
 	return recipes, nil
