@@ -1,14 +1,16 @@
 package repository
 
 import (
-	"database/sql"
 	"fmt"
-	"log"
 	"os"
+
+	_ "github.com/jackc/pgx/v4/stdlib"
+	"github.com/jmoiron/sqlx"
+	"log"
 )
 
 type Database struct {
-	DB *sql.DB
+	DB *sqlx.DB
 }
 
 func NewDatabase(URI ...string) (*Database, error) {
@@ -17,7 +19,6 @@ func NewDatabase(URI ...string) (*Database, error) {
 		dbURI = URI[0]
 	} else {
 		mustGetenv := func(variable string) string {
-
 			value := os.Getenv(variable)
 			if value == "" {
 				log.Fatalf("Fatal Error in connect_unix.go: %s environment variable not set.\n", variable)
@@ -33,15 +34,16 @@ func NewDatabase(URI ...string) (*Database, error) {
 
 		dbURI = fmt.Sprintf("user=%s password=%s database=%s host=%s",
 			dbUser, dbPwd, dbName, unixSocketPath)
-
 	}
 
-	// db is the pool of database connections.
-
-	db, err := sql.Open("pgx", dbURI)
+	db, err := sqlx.Connect("pgx", dbURI)
 	if err != nil {
-		return nil, fmt.Errorf("sql.Open: %v", err)
+		return nil, fmt.Errorf("sqlx.Connect: %v", err)
 	}
 
-	return &Database{db}, nil
+	return &Database{DB: db}, nil
+}
+
+func (d *Database) Get(dest interface{}, query string, args ...interface{}) error {
+	return d.DB.Get(dest, query, args...)
 }

@@ -24,7 +24,6 @@ func (registerController *RegisterController) Start() {
 
 func (registerController *RegisterController) register(context *gin.Context) {
 	var user = shared.User{}
-	//binds Json Body to Entities.User Class
 	if err := context.ShouldBindJSON(&user); err != nil {
 		returnAPI.Error(context, http.StatusBadRequest)
 		return
