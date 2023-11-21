@@ -36,6 +36,7 @@ func (getController *GetController) getMeals(context *gin.Context) {
 		return
 	} else if len(meals) == 0 {
 		returnAPI.Success(context, http.StatusOK, nil)
+	} else {
+		returnAPI.Success(context, http.StatusOK, meals)
 	}
-	returnAPI.Success(context, http.StatusOK, meals)
 }
