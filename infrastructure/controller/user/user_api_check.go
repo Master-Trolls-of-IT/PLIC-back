@@ -27,7 +27,7 @@ func (checkUserController *CheckUserController) checkUser(context *gin.Context) 
 	if err := context.ShouldBindJSON(&login); err != nil {
 		returnAPI.Error(context, http.StatusBadRequest)
 	}
-	var userRepo = *checkUserController.user.AuthService.UserRepo
+	var userRepo = *checkUserController.user.UserService.UserRepo
 	loggedIn, err := userRepo.CheckLogin(&login)
 	if err != nil {
 		returnAPI.Error(context, http.StatusUnauthorized)

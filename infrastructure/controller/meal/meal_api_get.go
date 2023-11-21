@@ -22,7 +22,7 @@ func (getController *GetController) Start() {
 
 func (getController *GetController) getMeals(context *gin.Context) {
 	var email = context.Param("email")
-	var userRepo, mealRepo = *getController.meal.AuthService.UserRepo, *getController.meal.OpenFoodFactsService.MealRepo
+	var userRepo, mealRepo = *getController.meal.UserService.UserRepo, *getController.meal.MealService.MealRepo
 
 	user, err := userRepo.GetUserByEmail(email)
 	if err != nil {

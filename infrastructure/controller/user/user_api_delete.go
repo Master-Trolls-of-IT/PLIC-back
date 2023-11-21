@@ -25,7 +25,7 @@ func (deleteController *DeleteController) Start() {
 
 func (deleteController *DeleteController) deleteUser(context *gin.Context) {
 	userId, _ := strconv.Atoi(context.Param("id"))
-	var userRepo = *deleteController.user.AuthService.UserRepo
+	var userRepo = *deleteController.user.UserService.UserRepo
 	userDeleted, dbError := userRepo.DeleteUser(userId)
 	if dbError != nil && dbError != sql.ErrNoRows {
 		returnAPI.Error(context, http.StatusInternalServerError)

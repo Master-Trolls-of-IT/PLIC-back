@@ -32,7 +32,7 @@ func (updateController *UpdateController) updateUser(context *gin.Context) {
 		return
 	}
 
-	var userRepo = *updateController.user.AuthService.UserRepo
+	var userRepo = *updateController.user.UserService.UserRepo
 	newUser, err := userRepo.UpdateUserById(userId, &user)
 
 	if err != nil {
