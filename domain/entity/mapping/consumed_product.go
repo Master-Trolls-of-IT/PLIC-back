@@ -5,7 +5,9 @@ import (
 )
 
 type ConsumedProduct struct {
-	Product      Product     `json:"product"`
-	Quantity     int         `json:"quantity"`
-	ConsumedDate pgtype.Date `json:"consumedDate"`
+	ID           int         `db:"id"`
+	UserID       int         `db:"user_id"`
+	ProductID    int         `db:"product_id"`
+	Quantity     int         `db:"quantity"`
+	ConsumedDate pgtype.Date `db:"consumed_date"`
 }

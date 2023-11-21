@@ -2,6 +2,7 @@ package consumedProduct
 
 import (
 	"database/sql"
+	"errors"
 	"gaia-api/application/returnAPI"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -26,7 +27,7 @@ func (deleteController *DeleteController) deleteConsumedProduct(context *gin.Con
 	email := context.Param("email")
 	var userRepo = *deleteController.consumedProduct.AuthService.UserRepo
 	user, dbError := userRepo.GetUserByEmail(email)
-	if dbError != nil && dbError != sql.ErrNoRows {
+	if dbError != nil && !errors.Is(sql.ErrNoRows, dbError) {
 		returnAPI.Error(context, http.StatusInternalServerError)
 	}
 	var userId = user.Id
@@ -34,15 +35,18 @@ func (deleteController *DeleteController) deleteConsumedProduct(context *gin.Con
 	var productRepo = *deleteController.consumedProduct.OpenFoodFactsService.ProductRepo
 
 	productDeleted, dbError := productRepo.DeleteConsumedProduct(id, userId)
-	if dbError != nil && dbError != sql.ErrNoRows {
+	if dbError != nil && !errors.Is(sql.ErrNoRows, dbError) {
 		returnAPI.Error(context, http.StatusInternalServerError)
 	} else if productDeleted {
 		var productRepo = *deleteController.consumedProduct.OpenFoodFactsService.ProductRepo
 		consumedProducts, dbError := productRepo.GetConsumedProductsByUserId(userId)
-		if dbError != nil && dbError != sql.ErrNoRows {
+		if dbError != nil && !errors.Is(sql.ErrNoRows, dbError) {
 			returnAPI.Error(context, http.StatusInternalServerError)
+		} else if len(consumedProducts) == 0 {
+			returnAPI.Success(context, http.StatusOK, nil)
+		} else {
+			returnAPI.Success(context, http.StatusOK, consumedProducts)
 		}
-		returnAPI.Success(context, http.StatusOK, consumedProducts)
 	} else {
 		returnAPI.Error(context, http.StatusNotFound)
 	}

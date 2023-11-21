@@ -2,8 +2,9 @@ package product
 
 import (
 	"database/sql"
+	"errors"
 	"gaia-api/application/returnAPI"
-	"gaia-api/domain/entity/mapping"
+	"gaia-api/domain/entity/response"
 	"gaia-api/domain/service"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -22,18 +23,18 @@ func NewProductController(ginEngine *gin.Engine, openFoodFactsService *service.O
 }
 
 func (product *Product) Start() {
-	product.ginEngine.GET("/product/:barcode", product.GetProduct)
+	product.ginEngine.GET("/product/:barcode", product.getProduct)
 }
 
-func (product *Product) GetProduct(context *gin.Context) {
+func (product *Product) getProduct(context *gin.Context) {
 	var barcode = context.Param("barcode")
 	var productRepo = *product.openFoodFactsService.ProductRepo
 	productEntity, dbError := productRepo.GetProductByBarCode(barcode)
 
-	if dbError != nil && dbError != sql.ErrNoRows {
+	if dbError != nil && !errors.Is(sql.ErrNoRows, dbError) {
 		returnAPI.Error(context, http.StatusInternalServerError)
 
-	} else if productEntity == (mapping.Product{}) {
+	} else if productEntity == (response.Product{}) {
 		openFoodFactAPI := product.openFoodFactsAPI
 		mappedProduct, err := openFoodFactAPI.retrieveAndMapProduct(barcode)
 
