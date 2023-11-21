@@ -1,6 +1,7 @@
 package recipe
 
 import (
+	"fmt"
 	"gaia-api/application/returnAPI"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -26,6 +27,7 @@ func (getUserController *GetUserController) getUserRecipes(context *gin.Context)
 
 	user, err := userRepo.GetUserByEmail(email)
 	if err != nil {
+		fmt.Print(err)
 		returnAPI.Error(context, http.StatusInternalServerError)
 		return
 	}
