@@ -2,9 +2,10 @@ package product
 
 import (
 	"encoding/json"
-	"gaia-api/domain/entity/mapping"
+	"gaia-api/domain/entity/response"
 	"github.com/openfoodfacts/openfoodfacts-go"
 	"golang.org/x/exp/slices"
+	"io"
 	"net/http"
 	"strconv"
 )
@@ -29,7 +30,12 @@ func getEcoScore(barcode string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer response.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			return
+		}
+	}(response.Body)
 
 	var responseJSON Response
 	err = json.NewDecoder(response.Body).Decode(&responseJSON)
@@ -41,35 +47,36 @@ func getEcoScore(barcode string) (string, error) {
 	return ecoscoreString, nil
 }
 
-func (openFoodFactsAPI *OpenFoodFactsAPI) retrieveAndMapProduct(barcode string) (mapping.Product, error) {
+func (openFoodFactsAPI *OpenFoodFactsAPI) retrieveAndMapProduct(barcode string) (response.Product, error) {
 	client := openFoodFactsAPI.Client
 	product, err := client.Product(barcode)
 	if err != nil {
-		return mapping.Product{}, err
+		return response.Product{}, err
 	}
 
 	mappedProduct, err := mapOpenFoodFactsProductToEntitiesProduct(product)
 	if err != nil {
-		return mapping.Product{}, err
+		return response.Product{}, err
 	}
+	mappedProduct.Barcode = barcode
 	mappedProduct.EcoScore, err = getEcoScore(barcode)
 	if err != nil {
-		return mapping.Product{}, err
+		return response.Product{}, err
 	}
 
 	return mappedProduct, nil
 }
 
-func mapOpenFoodFactsProductToEntitiesProduct(product *openfoodfacts.Product) (mapping.Product, error) {
+func mapOpenFoodFactsProductToEntitiesProduct(product *openfoodfacts.Product) (response.Product, error) {
 	nutrients := product.Nutriments
 	isWater := false
 	if slices.Contains(product.CategoriesTags, "en:waters") {
 		isWater = true
 	}
 
-	mappedNutriscore := mapping.NutriScore{Score: product.Nutriments.NutritionScoreFr100G, Grade: product.NutritionGradeFr}
+	mappedNutriscore := response.NutriScore{Score: 5, Grade: product.NutritionGradeFr}
 
-	mappedNutrients := mapping.Nutrients{
+	mappedNutrients := response.Nutrients{
 		EnergyKj:      nutrients.Energy,
 		EnergyKcal:    nutrients.EnergyKcal,
 		Fat:           nutrients.Fat,
@@ -81,62 +88,17 @@ func mapOpenFoodFactsProductToEntitiesProduct(product *openfoodfacts.Product) (m
 		Salt:          nutrients.Salt,
 	}
 
-	mappedNutrients100g := mapping.Nutrients100g{
-		mapping.Nutrients{
-			EnergyKj:      nutrients.Energy100G,
-			EnergyKcal:    nutrients.EnergyKcal100G,
-			Fat:           nutrients.Fat100G,
-			SaturatedFat:  nutrients.SaturatedFat100G,
-			Carbohydrates: nutrients.Carbohydrates100G,
-			Sugar:         nutrients.Sugars100G,
-			Fiber:         nutrients.Fiber100G,
-			Proteins:      nutrients.Proteins100G,
-			Salt:          nutrients.Salt100G,
-		},
-	}
-
-	mappedNutrientsValue := mapping.NutrientsValue{
-		mapping.Nutrients{
-			EnergyKj:      nutrients.EnergyValue,
-			EnergyKcal:    nutrients.EnergyKcalValue,
-			Fat:           nutrients.FatValue,
-			SaturatedFat:  nutrients.SaturatedFatValue,
-			Carbohydrates: nutrients.CarbohydratesValue,
-			Sugar:         nutrients.SugarsValue,
-			Fiber:         nutrients.FiberValue,
-			Proteins:      nutrients.ProteinsValue,
-			Salt:          nutrients.SaltValue,
-		},
-	}
-
-	mappedNutrientsServing := mapping.NutrientsServing{
-		mapping.Nutrients{
-			EnergyKj:      nutrients.EnergyServing,
-			EnergyKcal:    nutrients.EnergyKcalServing,
-			Fat:           nutrients.FatServing,
-			SaturatedFat:  nutrients.SaturatedFatServing,
-			Carbohydrates: nutrients.CarbohydratesServing,
-			Sugar:         nutrients.SugarsServing,
-			Fiber:         nutrients.FiberServing,
-			Proteins:      nutrients.ProteinsServing,
-			Salt:          nutrients.SaltServing,
-		},
-	}
-
-	mappedProduct := mapping.Product{
-		Brand:            product.Brands,
-		Name:             product.ProductName,
-		Nutrients:        mappedNutrients,
-		Nutrients100g:    mappedNutrients100g,
-		NutrientsServing: mappedNutrientsServing,
-		NutrientsValue:   mappedNutrientsValue,
-		ImageURL:         product.ImageFrontURL.URL.String(),
-		NutriScore:       mappedNutriscore,
-		EcoScore:         product.EcoscoreGrade,
-		IsWater:          isWater,
-		Quantity:         product.Quantity,
-		ServingQuantity:  product.ServingQuantity,
-		ServingSize:      product.ServingSize,
+	mappedProduct := response.Product{
+		Brand:           product.Brands,
+		Name:            product.ProductName,
+		Nutrients:       mappedNutrients,
+		ImageURL:        product.ImageFrontURL.URL.String(),
+		NutriScore:      mappedNutriscore,
+		EcoScore:        product.EcoscoreGrade,
+		IsWater:         isWater,
+		Quantity:        product.Quantity,
+		ServingQuantity: product.ServingQuantity,
+		ServingSize:     product.ServingSize,
 	}
 
 	return mappedProduct, nil

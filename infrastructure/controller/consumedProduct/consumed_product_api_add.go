@@ -2,9 +2,10 @@ package consumedProduct
 
 import (
 	"database/sql"
+	"errors"
 	"gaia-api/application/returnAPI"
-	"gaia-api/domain/entity/mapping"
 	"gaia-api/domain/entity/request"
+	"gaia-api/domain/entity/response"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
@@ -42,10 +43,10 @@ func (addController *AddController) addConsumedProduct(context *gin.Context) {
 	user, dbError := userRepo.GetUserByEmail(email)
 	var userId = user.Id
 
-	if dbError != nil && dbError != sql.ErrNoRows {
+	if dbError != nil && !errors.Is(sql.ErrNoRows, dbError) {
 		returnAPI.Error(context, http.StatusInternalServerError)
 
-	} else if product == (mapping.Product{}) {
+	} else if product == (response.Product{}) {
 		returnAPI.Error(context, http.StatusNotFound)
 
 	} else {

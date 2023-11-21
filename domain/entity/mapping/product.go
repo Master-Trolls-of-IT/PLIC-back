@@ -3,48 +3,29 @@ package mapping
 import "encoding/json"
 
 type Product struct {
-	ID               int              `json:"id"`
-	Brand            string           `json:"brand"`
-	Name             string           `json:"name"`
-	Barcode          string           `json:"barcode"`
-	Nutrients        Nutrients        `json:"nutrients"`
-	Nutrients100g    Nutrients100g    `json:"nutrients_100g"`
-	NutrientsValue   NutrientsValue   `json:"nutrients_value"`
-	NutrientsServing NutrientsServing `json:"nutrients_serving"`
-	ImageURL         string           `json:"image_url"`
-	NutriScore       NutriScore       `json:"nutriscore"`
-	EcoScore         string           `json:"ecoscore"`
-	IsWater          bool             `json:"isWater"`
-	Quantity         string           `json:"quantity"`
-	ServingQuantity  json.Number      `json:"serving_quantity"`
-	ServingSize      string           `json:"serving_size"`
+	ID              int         `db:"id"`
+	Name            string      `db:"name"`
+	ImageURL        string      `db:"image_url"`
+	NutriScoreScore int         `db:"nutriscore_score"`
+	NutriScoreGrade string      `db:"nutriscore_grade"`
+	EcoScore        string      `db:"ecoscore"`
+	Barcode         string      `db:"barcode"`
+	IsWater         bool        `db:"iswater"`
+	Brand           string      `db:"brand"`
+	Quantity        string      `db:"quantity"`
+	ServingQuantity json.Number `db:"serving_quantity"`
+	ServingSize     string      `db:"serving_size"`
+	NutrientsID     int         `db:"nutrients_id"`
 }
 
 type Nutrients struct {
-	EnergyKj      float64 `json:"energyKj"`
-	EnergyKcal    float64 `json:"energyKcal"`
-	Fat           float64 `json:"fat"`
-	SaturatedFat  float64 `json:"saturatedFat"`
-	Carbohydrates float64 `json:"carbohydrates"`
-	Sugar         float64 `json:"sugar"`
-	Fiber         float64 `json:"fiber"`
-	Proteins      float64 `json:"proteins"`
-	Salt          float64 `json:"salt"`
-}
-
-type Nutrients100g struct {
-	Nutrients
-}
-
-type NutrientsValue struct {
-	Nutrients
-}
-
-type NutrientsServing struct {
-	Nutrients
-}
-
-type NutriScore struct {
-	Score float64 `json:"score"`
-	Grade string  `json:"grade"`
+	EnergyKj      float64 `db:"energy_kj"`
+	EnergyKcal    float64 `db:"energy_kcal"`
+	Fat           float64 `db:"fat"`
+	SaturatedFat  float64 `db:"saturated_fat"`
+	Carbohydrates float64 `db:"carbohydrates"`
+	Sugar         float64 `db:"sugar"`
+	Fiber         float64 `db:"fiber"`
+	Proteins      float64 `db:"proteins"`
+	Salt          float64 `db:"salt"`
 }

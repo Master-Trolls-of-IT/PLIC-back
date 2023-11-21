@@ -2,6 +2,7 @@ package consumedProduct
 
 import (
 	"database/sql"
+	"errors"
 	"gaia-api/application/returnAPI"
 	"gaia-api/domain/entity/request"
 	"github.com/gin-gonic/gin"
@@ -32,7 +33,7 @@ func (updateController *UpdateController) updateConsumedProduct(context *gin.Con
 
 	var userRepo = *updateController.consumedProduct.AuthService.UserRepo
 	user, dbError := userRepo.GetUserByEmail(consumedProductUpdateQuantity.UserEmail)
-	if dbError != nil && dbError != sql.ErrNoRows {
+	if dbError != nil && !errors.Is(dbError, sql.ErrNoRows) {
 		returnAPI.Error(context, http.StatusInternalServerError)
 	}
 
