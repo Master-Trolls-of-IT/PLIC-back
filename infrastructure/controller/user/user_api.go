@@ -7,11 +7,11 @@ import (
 
 type User struct {
 	GinEngine   *gin.Engine
-	AuthService *service.AuthService
+	UserService *service.UserService
 }
 
-func NewUserController(ginEngine *gin.Engine, authService *service.AuthService) *User {
-	user := &User{GinEngine: ginEngine, AuthService: authService}
+func NewUserController(ginEngine *gin.Engine, UserService *service.UserService) *User {
+	user := &User{GinEngine: ginEngine, UserService: UserService}
 	user.Start()
 	return user
 }

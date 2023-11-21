@@ -25,20 +25,20 @@ func (deleteController *DeleteController) Start() {
 
 func (deleteController *DeleteController) deleteConsumedProduct(context *gin.Context) {
 	email := context.Param("email")
-	var userRepo = *deleteController.consumedProduct.AuthService.UserRepo
+	var userRepo = *deleteController.consumedProduct.UserService.UserRepo
 	user, dbError := userRepo.GetUserByEmail(email)
 	if dbError != nil && !errors.Is(sql.ErrNoRows, dbError) {
 		returnAPI.Error(context, http.StatusInternalServerError)
 	}
 	var userId = user.Id
 	var id, _ = strconv.Atoi(context.Param("id"))
-	var productRepo = *deleteController.consumedProduct.OpenFoodFactsService.ProductRepo
+	var productRepo = *deleteController.consumedProduct.ProductService.ProductRepo
 
 	productDeleted, dbError := productRepo.DeleteConsumedProduct(id, userId)
 	if dbError != nil && !errors.Is(sql.ErrNoRows, dbError) {
 		returnAPI.Error(context, http.StatusInternalServerError)
 	} else if productDeleted {
-		var productRepo = *deleteController.consumedProduct.OpenFoodFactsService.ProductRepo
+		var productRepo = *deleteController.consumedProduct.ProductService.ProductRepo
 		consumedProducts, dbError := productRepo.GetConsumedProductsByUserId(userId)
 		if dbError != nil && !errors.Is(sql.ErrNoRows, dbError) {
 			returnAPI.Error(context, http.StatusInternalServerError)

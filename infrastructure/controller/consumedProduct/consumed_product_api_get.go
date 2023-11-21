@@ -25,7 +25,7 @@ func (getController *GetController) Start() {
 func (getController *GetController) getConsumedProducts(context *gin.Context) {
 	email := context.Param("email")
 
-	var userRepo = *getController.consumedProduct.AuthService.UserRepo
+	var userRepo = *getController.consumedProduct.UserService.UserRepo
 	user, dbError := userRepo.GetUserByEmail(email)
 
 	if dbError != nil && !errors.Is(sql.ErrNoRows, dbError) {
@@ -33,7 +33,7 @@ func (getController *GetController) getConsumedProducts(context *gin.Context) {
 	} else {
 		var userId = user.Id
 
-		var productRepo = *getController.consumedProduct.OpenFoodFactsService.ProductRepo
+		var productRepo = *getController.consumedProduct.ProductService.ProductRepo
 		consumedProducts, dbError := productRepo.GetConsumedProductsByUserId(userId)
 		if dbError != nil && !errors.Is(sql.ErrNoRows, dbError) {
 			returnAPI.Error(context, http.StatusInternalServerError)

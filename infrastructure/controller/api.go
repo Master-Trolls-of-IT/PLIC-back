@@ -14,25 +14,31 @@ import (
 )
 
 type Server struct {
-	AuthService          *service.AuthService
-	OpenFoodFactsService *service.OpenFoodFactsService
-	OpenFoodFactsAPI     *product.OpenFoodFactsAPI
+	UserService      *service.UserService
+	ProductService   *service.ProductService
+	MealService      *service.MealService
+	OpenFoodFactsAPI *product.OpenFoodFactsAPI
 }
 
-func NewServer(authService *service.AuthService, OpenFoodFactsService *service.OpenFoodFactsService, OpenFoodFactsAPI *product.OpenFoodFactsAPI) *Server {
-	return &Server{AuthService: authService, OpenFoodFactsService: OpenFoodFactsService, OpenFoodFactsAPI: OpenFoodFactsAPI}
+func NewServer(
+	userService *service.UserService,
+	productService *service.ProductService,
+	mealService *service.MealService,
+	OpenFoodFactsAPI *product.OpenFoodFactsAPI,
+) *Server {
+	return &Server{UserService: userService, ProductService: productService, MealService: mealService, OpenFoodFactsAPI: OpenFoodFactsAPI}
 }
 
 func (server *Server) Start() {
 	ginEngine := gin.Default()
 
 	connexion.NewConnexionController(ginEngine)
-	consumedProduct.NewConsumedProductController(ginEngine, server.AuthService, server.OpenFoodFactsService)
-	meal.NewMealController(ginEngine, server.AuthService, server.OpenFoodFactsService)
-	recipe.NewRecipeController(ginEngine, server.AuthService)
-	product.NewProductController(ginEngine, server.OpenFoodFactsService, server.OpenFoodFactsAPI)
+	consumedProduct.NewConsumedProductController(ginEngine, server.UserService, server.ProductService)
+	meal.NewMealController(ginEngine, server.UserService, server.MealService)
+	recipe.NewRecipeController(ginEngine, server.UserService)
+	product.NewProductController(ginEngine, server.ProductService, server.OpenFoodFactsAPI)
 	token.NewTokenController(ginEngine)
-	user.NewUserController(ginEngine, server.AuthService)
+	user.NewUserController(ginEngine, server.UserService)
 
 	err := ginEngine.Run()
 	if err != nil {

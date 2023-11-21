@@ -33,14 +33,15 @@ func main() {
 	mealRepo := repository.NewMealRepository(db, productRepo)
 
 	//Service
-	authenticationService := service.NewAuthService(userRepo)
-	OpenFoodFactsService := service.NewOpenFoodFactsService(productRepo, mealRepo)
+	userService := service.NewUserService(userRepo)
+	productService := service.NewProductService(productRepo)
+	mealService := service.NewMealService(mealRepo)
 
 	//API
 	OpenFoodFactsAPI := product.NewOpenFoodFactsAPI()
 
 	//Server Instance
-	ginServer := api.NewServer(authenticationService, OpenFoodFactsService, OpenFoodFactsAPI)
+	ginServer := api.NewServer(userService, productService, mealService, OpenFoodFactsAPI)
 
 	ginServer.Start()
 }

@@ -24,14 +24,14 @@ func (updateController *UpdateController) Start() {
 }
 
 func (updateController *UpdateController) updateConsumedProduct(context *gin.Context) {
-	var productRepo = *updateController.consumedProduct.OpenFoodFactsService.ProductRepo
+	var productRepo = *updateController.consumedProduct.ProductService.ProductRepo
 	var consumedProductUpdateQuantity request.ConsumedProductUpdateQuantity
 	if err := context.ShouldBindJSON(&consumedProductUpdateQuantity); err != nil {
 		returnAPI.Error(context, http.StatusBadRequest)
 		return
 	}
 
-	var userRepo = *updateController.consumedProduct.AuthService.UserRepo
+	var userRepo = *updateController.consumedProduct.UserService.UserRepo
 	user, dbError := userRepo.GetUserByEmail(consumedProductUpdateQuantity.UserEmail)
 	if dbError != nil && !errors.Is(dbError, sql.ErrNoRows) {
 		returnAPI.Error(context, http.StatusInternalServerError)

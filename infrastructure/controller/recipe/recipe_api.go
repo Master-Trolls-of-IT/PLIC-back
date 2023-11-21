@@ -7,11 +7,11 @@ import (
 
 type Recipe struct {
 	GinEngine   *gin.Engine
-	AuthService *service.AuthService
+	UserService *service.UserService
 }
 
-func NewRecipeController(ginEngine *gin.Engine, authService *service.AuthService) *Recipe {
-	recipe := &Recipe{GinEngine: ginEngine, AuthService: authService}
+func NewRecipeController(ginEngine *gin.Engine, UserService *service.UserService) *Recipe {
+	recipe := &Recipe{GinEngine: ginEngine, UserService: UserService}
 	recipe.Start()
 	return recipe
 }

@@ -6,13 +6,13 @@ import (
 )
 
 type Meal struct {
-	GinEngine            *gin.Engine
-	AuthService          *service.AuthService
-	OpenFoodFactsService *service.OpenFoodFactsService
+	GinEngine   *gin.Engine
+	UserService *service.UserService
+	MealService *service.MealService
 }
 
-func NewMealController(ginEngine *gin.Engine, authService *service.AuthService, openFoodFactsService *service.OpenFoodFactsService) *Meal {
-	meal := &Meal{GinEngine: ginEngine, AuthService: authService, OpenFoodFactsService: openFoodFactsService}
+func NewMealController(ginEngine *gin.Engine, userService *service.UserService, mealService *service.MealService) *Meal {
+	meal := &Meal{GinEngine: ginEngine, UserService: userService, MealService: mealService}
 	meal.Start()
 	return meal
 }
