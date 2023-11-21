@@ -11,8 +11,8 @@ type Recipe struct {
 	OpenFoodFactsService *service.OpenFoodFactsService
 }
 
-func NewRecipeController(ginEngine *gin.Engine, authService *service.AuthService) *Recipe {
-	recipe := &Recipe{GinEngine: ginEngine, AuthService: authService}
+func NewRecipeController(ginEngine *gin.Engine, authService *service.AuthService, openFoodFactsService *service.OpenFoodFactsService) *Recipe {
+	recipe := &Recipe{GinEngine: ginEngine, AuthService: authService, OpenFoodFactsService: openFoodFactsService}
 	recipe.Start()
 	return recipe
 }

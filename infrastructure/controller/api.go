@@ -29,7 +29,7 @@ func (server *Server) Start() {
 	connexion.NewConnexionController(ginEngine)
 	consumedProduct.NewConsumedProductController(ginEngine, server.AuthService, server.OpenFoodFactsService)
 	meal.NewMealController(ginEngine, server.AuthService, server.OpenFoodFactsService)
-	recipe.NewRecipeController(ginEngine, server.AuthService)
+	recipe.NewRecipeController(ginEngine, server.AuthService, server.OpenFoodFactsService)
 	product.NewProductController(ginEngine, server.OpenFoodFactsService, server.OpenFoodFactsAPI)
 	token.NewTokenController(ginEngine)
 	user.NewUserController(ginEngine, server.AuthService)
