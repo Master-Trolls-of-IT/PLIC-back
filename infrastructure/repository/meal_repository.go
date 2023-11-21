@@ -2,7 +2,6 @@ package repository
 
 import (
 	"database/sql"
-	"fmt"
 	"gaia-api/domain/entity/request"
 	"gaia-api/domain/entity/response"
 	"github.com/jackc/pgtype"
@@ -231,14 +230,12 @@ func (mealRepo *MealRepo) ConsumeMeal(meal response.Meal) ([]response.ConsumedPr
 	var consumedProducts []response.ConsumedProduct
 	var userID int
 	err := database.QueryRow("SELECT id FROM users where email= $1", meal.UserEmail).Scan(&userID)
-	fmt.Print(err)
 	if err != nil {
 		return nil, err
 	}
 
 	query := "INSERT INTO consumed_products (product_id, user_id, quantity, consumed_date) VALUES ($1, $2, $3, $4)"
 	statement, err := database.Prepare(query)
-	fmt.Print(err)
 	if err != nil {
 		return nil, err
 	}
@@ -250,7 +247,6 @@ func (mealRepo *MealRepo) ConsumeMeal(meal response.Meal) ([]response.ConsumedPr
 	}(statement)
 
 	transaction, err := database.Begin()
-	fmt.Print(err)
 	if err != nil {
 		return nil, err
 	}
@@ -264,13 +260,11 @@ func (mealRepo *MealRepo) ConsumeMeal(meal response.Meal) ([]response.ConsumedPr
 	for _, product := range meal.Products {
 		quantity, err := strconv.Atoi(product.Quantity)
 		date := time.Now().UTC()
-		fmt.Print(err)
 		if err != nil {
 			return nil, err
 		}
 		consumedProducts = append(consumedProducts, response.ConsumedProduct{Product: product, Quantity: quantity, ConsumedDate: pgtype.Date{Time: date, Status: pgtype.Present}})
 		_, err = statement.Exec(product.ID, userID, product.Quantity, date.Format("2006-01-02"))
-		fmt.Print(err)
 		if err != nil {
 			return nil, err
 		}
