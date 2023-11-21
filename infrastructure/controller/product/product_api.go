@@ -11,13 +11,12 @@ import (
 )
 
 type Product struct {
-	ginEngine        *gin.Engine
-	ProductService   *service.ProductService
-	openFoodFactsAPI *OpenFoodFactsAPI
+	ginEngine      *gin.Engine
+	ProductService *service.ProductService
 }
 
-func NewProductController(ginEngine *gin.Engine, productService *service.ProductService, openFoodFactsAPI *OpenFoodFactsAPI) *Product {
-	product := &Product{ginEngine: ginEngine, ProductService: productService, openFoodFactsAPI: openFoodFactsAPI}
+func NewProductController(ginEngine *gin.Engine, productService *service.ProductService) *Product {
+	product := &Product{ginEngine: ginEngine, ProductService: productService}
 	product.Start()
 	return product
 }
@@ -35,9 +34,7 @@ func (product *Product) getProduct(context *gin.Context) {
 		returnAPI.Error(context, http.StatusInternalServerError)
 
 	} else if productEntity == (response.Product{}) {
-		openFoodFactAPI := product.openFoodFactsAPI
-		mappedProduct, err := openFoodFactAPI.retrieveAndMapProduct(barcode)
-
+		mappedProduct, err := product.RetrieveOpenFoodFactsProduct(barcode)
 		if err != nil {
 			returnAPI.Error(context, http.StatusNotFound)
 

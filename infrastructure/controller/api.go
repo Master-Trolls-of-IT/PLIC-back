@@ -14,19 +14,17 @@ import (
 )
 
 type Server struct {
-	UserService      *service.UserService
-	ProductService   *service.ProductService
-	MealService      *service.MealService
-	OpenFoodFactsAPI *product.OpenFoodFactsAPI
+	UserService    *service.UserService
+	ProductService *service.ProductService
+	MealService    *service.MealService
 }
 
 func NewServer(
 	userService *service.UserService,
 	productService *service.ProductService,
 	mealService *service.MealService,
-	OpenFoodFactsAPI *product.OpenFoodFactsAPI,
 ) *Server {
-	return &Server{UserService: userService, ProductService: productService, MealService: mealService, OpenFoodFactsAPI: OpenFoodFactsAPI}
+	return &Server{UserService: userService, ProductService: productService, MealService: mealService}
 }
 
 func (server *Server) Start() {
@@ -36,7 +34,7 @@ func (server *Server) Start() {
 	consumedProduct.NewConsumedProductController(ginEngine, server.UserService, server.ProductService)
 	meal.NewMealController(ginEngine, server.UserService, server.MealService)
 	recipe.NewRecipeController(ginEngine, server.UserService)
-	product.NewProductController(ginEngine, server.ProductService, server.OpenFoodFactsAPI)
+	product.NewProductController(ginEngine, server.ProductService)
 	token.NewTokenController(ginEngine)
 	user.NewUserController(ginEngine, server.UserService)
 
