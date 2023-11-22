@@ -34,8 +34,10 @@ func (recipeRepo *RecipeRepo) AddRecipe(recipe request.Recipe) (*response.Recipe
 
 	// Insert the recipe and retrieve the recipe ID
 	var recipeID string
-	recipeInsertQuery := `INSERT INTO recipes (title, author, duration, difficulty) VALUES ($1, $2, $3, $4) RETURNING id`
+	recipeInsertQuery := `INSERT INTO recipes (title, author, duration, difficulty, rating, score, kcal, icon, number_of_ratings) VALUES ($1, $2, $3, $4, 0, 0, 0, 'test', 0) RETURNING id`
 	if err := database.QueryRow(recipeInsertQuery, recipe.Title, recipe.UserEmail, recipe.Duration, recipe.Difficulty).Scan(&recipeID); err != nil {
+		fmt.Print(err)
+
 		return nil, err
 	}
 	responseRecipeID, _ := strconv.Atoi(recipeID)
@@ -250,7 +252,7 @@ func (recipeRepo *RecipeRepo) retrieveRecipes() ([]response.Recipe, error) {
 		recipe.RecipeItem.Tags = []response.RecipeTag{}
 		recipe.RecipeItem.Steps = []string{}
 		recipe.RecipeItem.Ingredients = []string{}
-		if err := rows.Scan(&recipe.RecipeItem.ID, &recipe.RecipeItem.Title, &recipe.RecipeItem.Author, &recipe.RecipeItem.Duration, &recipe.RecipeItem.Difficulty, &recipe.RecipeItem.Rating, &recipe.RecipeItem.NumberOfRatings, &recipe.RecipeItem.Score, &recipe.RecipeItem.Kcal, &recipe.RecipeItem.Image); err != nil {
+		if err := rows.Scan(&recipe.RecipeItem.ID, &recipe.RecipeItem.Title, &recipe.RecipeItem.Author, &recipe.RecipeItem.Duration, &recipe.RecipeItem.Difficulty, &recipe.RecipeItem.Rating, &recipe.RecipeItem.Score, &recipe.RecipeItem.Kcal, &recipe.RecipeItem.Image, &recipe.RecipeItem.NumberOfRatings); err != nil {
 			return nil, err
 		}
 		recipes = append(recipes, recipe)
@@ -262,7 +264,7 @@ func (recipeRepo *RecipeRepo) retrieveUserRecipes(userEmail string) ([]response.
 	var recipes []response.Recipe
 	database := recipeRepo.data.DB
 
-	recipesQuery := `SELECT id, title, author, duration, difficulty, rating, number_of_ratings, score, kcal, icon FROM recipes WHERE author = $1`
+	recipesQuery := `SELECT * FROM recipes WHERE author = $1`
 	rows, err := database.Query(recipesQuery, userEmail)
 	if err != nil {
 		return nil, err
@@ -273,7 +275,7 @@ func (recipeRepo *RecipeRepo) retrieveUserRecipes(userEmail string) ([]response.
 		recipe.RecipeItem.Tags = []response.RecipeTag{}
 		recipe.RecipeItem.Steps = []string{}
 		recipe.RecipeItem.Ingredients = []string{}
-		if err := rows.Scan(&recipe.RecipeItem.ID, &recipe.RecipeItem.Title, &recipe.RecipeItem.Author, &recipe.RecipeItem.Duration, &recipe.RecipeItem.Difficulty, &recipe.RecipeItem.Rating, &recipe.RecipeItem.NumberOfRatings, &recipe.RecipeItem.Score, &recipe.RecipeItem.Kcal, &recipe.RecipeItem.Image); err != nil {
+		if err := rows.Scan(&recipe.RecipeItem.ID, &recipe.RecipeItem.Title, &recipe.RecipeItem.Author, &recipe.RecipeItem.Duration, &recipe.RecipeItem.Difficulty, &recipe.RecipeItem.Rating, &recipe.RecipeItem.Score, &recipe.RecipeItem.Kcal, &recipe.RecipeItem.Image, &recipe.RecipeItem.NumberOfRatings); err != nil {
 			return nil, err
 		}
 		recipes = append(recipes, recipe)
