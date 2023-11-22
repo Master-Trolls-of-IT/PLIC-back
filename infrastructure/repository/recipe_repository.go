@@ -38,7 +38,6 @@ func (recipeRepo *RecipeRepo) AddRecipe(recipe request.Recipe) (*response.Recipe
 	var recipeID string
 	recipeInsertQuery := `INSERT INTO recipes (title, author, duration, difficulty, rating, score, kcal, icon, number_of_ratings) VALUES ($1, $2, $3, $4, 0, 0, 0, 'test', 0) RETURNING id`
 	if err := database.QueryRow(recipeInsertQuery, recipe.Title, recipe.UserEmail, recipe.Duration, recipe.Difficulty).Scan(&recipeID); err != nil {
-		fmt.Print(err)
 
 		return nil, err
 	}
@@ -77,25 +76,25 @@ func (recipeRepo *RecipeRepo) GetAllRecipes() ([]response.Recipe, error) {
 	recipes, err := recipeRepo.retrieveRecipes(`SELECT * FROM recipes`)
 	if err != nil {
 		fmt.Print("Error retrieving recipes")
-		fmt.Print(err)
+
 		return nil, err
 	}
 	err = recipeRepo.retrieveRecipeIngredients(recipes)
 	if err != nil {
 		fmt.Print("Error retrieving recipe ingredients")
-		fmt.Print(err)
+
 		return nil, err
 	}
 	err = recipeRepo.retrieveRecipeSteps(recipes)
 	if err != nil {
 		fmt.Print("Error retrieving recipe steps")
-		fmt.Print(err)
+
 		return nil, err
 	}
 	err = recipeRepo.retrieveRecipeTags(recipes)
 	if err != nil {
 		fmt.Print("Error retrieving recipe tags")
-		fmt.Print(err)
+
 		return nil, err
 	}
 	return recipes, nil
@@ -167,7 +166,7 @@ func (recipeRepo *RecipeRepo) UpdateRecipe(recipeID int, recipe request.Recipe) 
 	recipeUpdateQuery := `UPDATE recipes SET title = $1, author = $2, duration = $3, difficulty = $4 WHERE id = $5`
 	if _, err := database.Exec(recipeUpdateQuery, recipe.Title, recipe.UserEmail, recipe.Duration, recipe.Difficulty, recipeID); err != nil {
 		fmt.Print("Error updating recipe")
-		fmt.Print(err)
+
 		return nil, err
 	}
 	// Delete all recipe ingredients / steps / tags
@@ -221,7 +220,7 @@ func (recipeRepo *RecipeRepo) retrieveRecipes(query string, args ...interface{})
 	defer func(stmt *sqlx.Stmt) {
 		err := stmt.Close()
 		if err != nil {
-			fmt.Print(err)
+
 		}
 	}(stmt)
 
@@ -232,7 +231,7 @@ func (recipeRepo *RecipeRepo) retrieveRecipes(query string, args ...interface{})
 	defer func(rows *sqlx.Rows) {
 		err := rows.Close()
 		if err != nil {
-			fmt.Print(err)
+
 		}
 	}(rows)
 	var recipes []response.Recipe
@@ -240,7 +239,7 @@ func (recipeRepo *RecipeRepo) retrieveRecipes(query string, args ...interface{})
 		var recipeMapping mapping.RecipeItem
 		err := rows.StructScan(&recipeMapping)
 		if err != nil {
-			fmt.Print(err)
+
 			return nil, err
 		}
 		var recipe response.Recipe
@@ -362,7 +361,7 @@ func (recipeRepo *RecipeRepo) InsertRecipeIngredients(recipeId int, ingredients 
 	for _, ingredient := range ingredients {
 		if _, err := database.Exec(recipeIngredientInsert, recipeId, ingredient); err != nil {
 			fmt.Print("Error inserting recipe ingredients")
-			fmt.Print(err)
+
 			return err
 		}
 	}
@@ -376,7 +375,7 @@ func (recipeRepo *RecipeRepo) InsertRecipeTags(recipeId int, tags []string) erro
 							SELECT $1, tag.id FROM tag WHERE tag.label = ANY($2::TEXT[])`
 	if _, err := database.Exec(recipeTagsInsert, recipeId, pq.Array(tags)); err != nil {
 		fmt.Print("Error inserting recipe tags")
-		fmt.Print(err)
+
 		return err
 	}
 	return nil
@@ -389,7 +388,7 @@ func (recipeRepo *RecipeRepo) InsertRecipeSteps(recipeId int, steps []string) er
 	for i, step := range steps {
 		if _, err := database.Exec(recipeStepsInsert, recipeId, i+1, step); err != nil {
 			fmt.Print("Error inserting recipe steps")
-			fmt.Print(err)
+
 			return err
 		}
 	}

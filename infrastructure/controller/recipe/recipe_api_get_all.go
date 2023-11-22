@@ -1,7 +1,6 @@
 package recipe
 
 import (
-	"fmt"
 	"gaia-api/application/returnAPI"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -26,7 +25,7 @@ func (getAllController *GetAllController) getAllRecipe(context *gin.Context) {
 
 	recipes, err := recipeRepo.GetAllRecipes()
 	if err != nil {
-		fmt.Print(err)
+
 		returnAPI.Error(context, http.StatusInternalServerError)
 		return
 	}
