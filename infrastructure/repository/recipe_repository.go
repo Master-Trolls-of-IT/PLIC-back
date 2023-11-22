@@ -239,7 +239,7 @@ func (recipeRepo *RecipeRepo) retrieveRecipes() ([]response.Recipe, error) {
 	var recipes []response.Recipe
 	database := recipeRepo.data.DB
 
-	recipesQuery := `SELECT id, title, author, duration, difficulty, rating, number_of_ratings, score, kcal, icon FROM recipes`
+	recipesQuery := `SELECT * FROM recipes`
 	rows, err := database.Query(recipesQuery)
 	if err != nil {
 		return nil, err
