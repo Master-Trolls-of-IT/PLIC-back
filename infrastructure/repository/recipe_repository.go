@@ -2,8 +2,10 @@ package repository
 
 import (
 	"fmt"
+	"gaia-api/domain/entity/mapping"
 	"gaia-api/domain/entity/request"
 	"gaia-api/domain/entity/response"
+	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
 	"strconv"
 )
@@ -81,7 +83,7 @@ func (recipeRepo *RecipeRepo) AddRecipe(recipe request.Recipe) (*response.Recipe
 }
 
 func (recipeRepo *RecipeRepo) GetAllRecipes() ([]response.Recipe, error) {
-	recipes, err := recipeRepo.retrieveRecipes()
+	recipes, err := recipeRepo.retrieveRecipes(`SELECT * FROM recipes`)
 	if err != nil {
 		fmt.Print("Error retrieving recipes")
 		fmt.Print(err)
@@ -109,7 +111,7 @@ func (recipeRepo *RecipeRepo) GetAllRecipes() ([]response.Recipe, error) {
 }
 
 func (recipeRepo *RecipeRepo) GetUserRecipes(userEmail string) ([]response.Recipe, error) {
-	recipes, err := recipeRepo.retrieveUserRecipes(userEmail)
+	recipes, err := recipeRepo.retrieveRecipes(`SELECT * FROM recipes WHERE author = $1`, userEmail)
 	if err != nil {
 		fmt.Print("Error retrieving recipes")
 		return nil, err
@@ -237,49 +239,52 @@ func (recipeRepo *RecipeRepo) UpdateRecipe(recipeID int, recipe request.Recipe) 
 
 }
 
-func (recipeRepo *RecipeRepo) retrieveRecipes() ([]response.Recipe, error) {
-	var recipes []response.Recipe
-	database := recipeRepo.data.DB
-
-	recipesQuery := `SELECT * FROM recipes`
-	rows, err := database.Query(recipesQuery)
+func (recipeRepo *RecipeRepo) retrieveRecipes(query string, args ...interface{}) ([]response.Recipe, error) {
+	stmt, err := recipeRepo.data.DB.Preparex(query)
 	if err != nil {
 		return nil, err
 	}
-
-	for rows.Next() {
-		var recipe response.Recipe
-		recipe.RecipeItem.Tags = []response.RecipeTag{}
-		recipe.RecipeItem.Steps = []string{}
-		recipe.RecipeItem.Ingredients = []string{}
-		if err := rows.Scan(&recipe.RecipeItem.ID, &recipe.RecipeItem.Title, &recipe.RecipeItem.Author, &recipe.RecipeItem.Duration, &recipe.RecipeItem.Difficulty, &recipe.RecipeItem.Rating, &recipe.RecipeItem.Score, &recipe.RecipeItem.Kcal, &recipe.RecipeItem.Image, &recipe.RecipeItem.NumberOfRatings); err != nil {
-			return nil, err
+	defer func(stmt *sqlx.Stmt) {
+		err := stmt.Close()
+		if err != nil {
+			fmt.Print(err)
 		}
-		recipes = append(recipes, recipe)
-	}
-	return recipes, nil
-}
+	}(stmt)
 
-func (recipeRepo *RecipeRepo) retrieveUserRecipes(userEmail string) ([]response.Recipe, error) {
-	var recipes []response.Recipe
-	database := recipeRepo.data.DB
-
-	recipesQuery := `SELECT * FROM recipes WHERE author = $1`
-	rows, err := database.Query(recipesQuery, userEmail)
+	rows, err := stmt.Queryx(args...)
 	if err != nil {
 		return nil, err
 	}
-
+	defer func(rows *sqlx.Rows) {
+		err := rows.Close()
+		if err != nil {
+			fmt.Print(err)
+		}
+	}(rows)
+	var recipes []response.Recipe
 	for rows.Next() {
-		var recipe response.Recipe
-		recipe.RecipeItem.Tags = []response.RecipeTag{}
-		recipe.RecipeItem.Steps = []string{}
-		recipe.RecipeItem.Ingredients = []string{}
-		if err := rows.Scan(&recipe.RecipeItem.ID, &recipe.RecipeItem.Title, &recipe.RecipeItem.Author, &recipe.RecipeItem.Duration, &recipe.RecipeItem.Difficulty, &recipe.RecipeItem.Rating, &recipe.RecipeItem.Score, &recipe.RecipeItem.Kcal, &recipe.RecipeItem.Image, &recipe.RecipeItem.NumberOfRatings); err != nil {
+		var recipeMapping mapping.RecipeItem
+		err := rows.StructScan(&recipeMapping)
+		if err != nil {
+			fmt.Print(err)
 			return nil, err
 		}
+		var recipe response.Recipe
+		recipe.RecipeItem.ID = recipeMapping.ID
+		recipe.RecipeItem.Title = recipeMapping.Title
+		recipe.RecipeItem.Author = recipeMapping.Author
+		recipe.RecipeItem.Duration = recipeMapping.Duration
+		recipe.RecipeItem.Difficulty = recipeMapping.Difficulty
+		recipe.RecipeItem.Rating = recipeMapping.Rating
+		recipe.RecipeItem.NumberOfRatings = recipeMapping.NumberOfRatings
+		recipe.RecipeItem.Score = recipeMapping.Score
+		recipe.RecipeItem.Kcal = recipeMapping.Kcal
+		recipe.RecipeItem.Image = recipeMapping.Image
+
 		recipes = append(recipes, recipe)
 	}
+	fmt.Print(rows)
+	fmt.Print("kfjldsqmjfklmsqf")
 	return recipes, nil
 }
 
