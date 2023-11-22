@@ -36,6 +36,7 @@ func (getUserController *GetUserController) getUserRecipes(context *gin.Context)
 		return
 	} else if len(recipes) == 0 {
 		returnAPI.Success(context, http.StatusOK, nil)
+	} else {
+		returnAPI.Success(context, http.StatusOK, recipes)
 	}
-	returnAPI.Success(context, http.StatusOK, recipes)
 }
