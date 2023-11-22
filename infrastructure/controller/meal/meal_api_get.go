@@ -22,7 +22,7 @@ func (getController *GetController) Start() {
 
 func (getController *GetController) getMeals(context *gin.Context) {
 	var email = context.Param("email")
-	var userRepo, mealRepo = *getController.meal.AuthService.UserRepo, *getController.meal.OpenFoodFactsService.MealRepo
+	var userRepo, mealRepo = *getController.meal.UserService.UserRepo, *getController.meal.MealService.MealRepo
 
 	user, err := userRepo.GetUserByEmail(email)
 	if err != nil {
@@ -36,6 +36,7 @@ func (getController *GetController) getMeals(context *gin.Context) {
 		return
 	} else if len(meals) == 0 {
 		returnAPI.Success(context, http.StatusOK, nil)
+	} else {
+		returnAPI.Success(context, http.StatusOK, meals)
 	}
-	returnAPI.Success(context, http.StatusOK, meals)
 }

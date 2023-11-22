@@ -111,6 +111,7 @@ func (mealRepo *MealRepo) retrieveMeals(userEmail string) ([]response.Meal, erro
 	if err != nil {
 		return []response.Meal{}, err
 	}
+
 	defer func(rows *sql.Rows) {
 		err := rows.Close()
 		if err != nil {
@@ -122,6 +123,7 @@ func (mealRepo *MealRepo) retrieveMeals(userEmail string) ([]response.Meal, erro
 		var meal response.Meal
 		meal.Tags = []response.MealTag{}
 		meal.Products = []response.Product{}
+		meal.UserEmail = userEmail
 		err := rows.Scan(&meal.ID, &meal.Title, &meal.IsFavourite)
 		if err != nil {
 			return []response.Meal{}, err

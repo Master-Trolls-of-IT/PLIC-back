@@ -22,7 +22,7 @@ func (getAllController *GetAllController) Start() {
 }
 
 func (getAllController *GetAllController) getAllRecipe(context *gin.Context) {
-	var recipeRepo = *getAllController.recipe.OpenFoodFactsService.RecipeRepo
+	var recipeRepo = *getAllController.recipe.RecipeService.RecipeRepo
 
 	recipes, err := recipeRepo.GetAllRecipes()
 	if err != nil {

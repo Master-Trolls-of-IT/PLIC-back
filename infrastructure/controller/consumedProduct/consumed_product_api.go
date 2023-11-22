@@ -6,13 +6,13 @@ import (
 )
 
 type ConsumedProduct struct {
-	GinEngine            *gin.Engine
-	AuthService          *service.AuthService
-	OpenFoodFactsService *service.OpenFoodFactsService
+	GinEngine      *gin.Engine
+	UserService    *service.UserService
+	ProductService *service.ProductService
 }
 
-func NewConsumedProductController(ginEngine *gin.Engine, authService *service.AuthService, openFoodFactsService *service.OpenFoodFactsService) *ConsumedProduct {
-	consumedProduct := &ConsumedProduct{GinEngine: ginEngine, AuthService: authService, OpenFoodFactsService: openFoodFactsService}
+func NewConsumedProductController(ginEngine *gin.Engine, userService *service.UserService, productService *service.ProductService) *ConsumedProduct {
+	consumedProduct := &ConsumedProduct{GinEngine: ginEngine, UserService: userService, ProductService: productService}
 	consumedProduct.Start()
 	return consumedProduct
 }

@@ -16,7 +16,7 @@ func NewRecipeRepository(db *Database) *RecipeRepo {
 	return &RecipeRepo{data: db}
 }
 
-func (recipeRepo *RecipeRepo) SaveRecipe(recipe request.Recipe) (*response.Recipe, error) {
+func (recipeRepo *RecipeRepo) AddRecipe(recipe request.Recipe) (*response.Recipe, error) {
 	database := recipeRepo.data.DB
 
 	tagLabels := make([]string, len(recipe.Tags))
@@ -239,7 +239,7 @@ func (recipeRepo *RecipeRepo) retrieveRecipes() ([]response.Recipe, error) {
 	var recipes []response.Recipe
 	database := recipeRepo.data.DB
 
-	recipesQuery := `SELECT id, title, author, duration, difficulty, rating, number_of_ratings, score, kcal, icon FROM recipes`
+	recipesQuery := `SELECT * FROM recipes`
 	rows, err := database.Query(recipesQuery)
 	if err != nil {
 		return nil, err

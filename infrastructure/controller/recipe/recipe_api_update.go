@@ -33,7 +33,7 @@ func (updateController *UpdateController) updateRecipe(context *gin.Context) {
 		returnAPI.Error(context, http.StatusBadRequest)
 		return
 	}
-	var recipeRepo = *updateController.recipe.OpenFoodFactsService.RecipeRepo
+	var recipeRepo = *updateController.recipe.RecipeService.RecipeRepo
 
 	responseRecipe, err := recipeRepo.UpdateRecipe(recipeId, recipe)
 	if err != nil {

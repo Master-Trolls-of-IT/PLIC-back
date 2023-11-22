@@ -15,8 +15,8 @@ type ProductRepo struct {
 	data *Database
 }
 
-func NewProductRepository(db *Database) *ProductRepo {
-	return &ProductRepo{data: db}
+func NewProductRepository(data *Database) *ProductRepo {
+	return &ProductRepo{data: data}
 }
 
 func (productRepo *ProductRepo) GetProductByBarCode(barcode string) (response.Product, error) {
@@ -88,7 +88,7 @@ func (productRepo *ProductRepo) getNutrientsDataByNutrientID(nutrientID int) (re
 	return convert.NutrientsMappingToNutrients(nutrientsMapping), nil
 }
 
-func (productRepo *ProductRepo) SaveProduct(product response.Product, barcode string) (bool, error) {
+func (productRepo *ProductRepo) SaveProduct(product *response.Product, barcode string) (bool, error) {
 	var database = productRepo.data.DB
 
 	nutrientsID, err := productRepo.insertNutrientData(product.Nutrients)
@@ -99,7 +99,7 @@ func (productRepo *ProductRepo) SaveProduct(product response.Product, barcode st
 	var insertProductQuery = `
 		INSERT INTO product (brand, name, image_url, nutriscore_score, nutriscore_grade, ecoscore, barcode, isWater,
 		quantity, serving_quantity, serving_size, nutrients_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
-		RETURNING id
+		RETURNING id;
 		`
 	var productID int
 	err = database.QueryRow(insertProductQuery, product.Brand, product.Name, product.ImageURL, product.NutriScore.Score,
@@ -108,6 +108,7 @@ func (productRepo *ProductRepo) SaveProduct(product response.Product, barcode st
 	if err != nil {
 		return false, err
 	}
+	product.ID = productID
 
 	return true, nil
 }

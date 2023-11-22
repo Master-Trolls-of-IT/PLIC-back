@@ -6,13 +6,13 @@ import (
 )
 
 type Recipe struct {
-	GinEngine            *gin.Engine
-	AuthService          *service.AuthService
-	OpenFoodFactsService *service.OpenFoodFactsService
+	GinEngine     *gin.Engine
+	UserService   *service.UserService
+	RecipeService *service.RecipeService
 }
 
-func NewRecipeController(ginEngine *gin.Engine, authService *service.AuthService, openFoodFactsService *service.OpenFoodFactsService) *Recipe {
-	recipe := &Recipe{GinEngine: ginEngine, AuthService: authService, OpenFoodFactsService: openFoodFactsService}
+func NewRecipeController(ginEngine *gin.Engine, UserService *service.UserService, recipeService *service.RecipeService) *Recipe {
+	recipe := &Recipe{GinEngine: ginEngine, UserService: UserService, RecipeService: recipeService}
 	recipe.Start()
 	return recipe
 }

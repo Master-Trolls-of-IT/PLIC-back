@@ -28,7 +28,7 @@ func (addController *AddController) addMeal(context *gin.Context) {
 		return
 	}
 
-	var mealRepo = *addController.meal.OpenFoodFactsService.MealRepo
+	var mealRepo = *addController.meal.MealService.MealRepo
 
 	responseMeal, err := mealRepo.SaveMeal(meal)
 	if err != nil {

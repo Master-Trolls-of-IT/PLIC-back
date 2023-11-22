@@ -36,8 +36,8 @@ func (addController *AddController) addConsumedProduct(context *gin.Context) {
 	barcode := consumedProductAdd.Barcode
 	quantity := consumedProductAdd.Quantity
 
-	var productRepo = *addController.consumedProduct.OpenFoodFactsService.ProductRepo
-	var userRepo = *addController.consumedProduct.AuthService.UserRepo
+	var productRepo = *addController.consumedProduct.ProductService.ProductRepo
+	var userRepo = *addController.consumedProduct.UserService.UserRepo
 
 	product, dbError := productRepo.GetProductByBarCode(barcode)
 	user, dbError := userRepo.GetUserByEmail(email)

@@ -29,7 +29,7 @@ func (registerController *RegisterController) register(context *gin.Context) {
 		return
 	}
 
-	var userRepo = *registerController.user.AuthService.UserRepo
+	var userRepo = *registerController.user.UserService.UserRepo
 	registered, _ := userRepo.Register(&user)
 
 	if registered {

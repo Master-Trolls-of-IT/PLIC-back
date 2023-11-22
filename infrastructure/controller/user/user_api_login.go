@@ -29,7 +29,7 @@ func (loginController *LoginController) login(context *gin.Context) {
 	if err := context.ShouldBindJSON(&login); err != nil {
 		returnAPI.Error(context, http.StatusBadRequest)
 	}
-	var userRepo = *loginController.user.AuthService.UserRepo
+	var userRepo = *loginController.user.UserService.UserRepo
 	loggedIn, err := userRepo.CheckLogin(&login)
 	if err != nil {
 		returnAPI.Error(context, http.StatusUnauthorized)

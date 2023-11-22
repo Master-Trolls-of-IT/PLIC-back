@@ -27,10 +27,12 @@ func (consumeController *ConsumeController) consumeMeal(context *gin.Context) {
 		returnAPI.Error(context, http.StatusBadRequest)
 		return
 	}
-	var mealRepo = *consumeController.meal.OpenFoodFactsService.MealRepo
+	var mealRepo = *consumeController.meal.MealService.MealRepo
 	products, err := mealRepo.ConsumeMeal(meal)
 	if err != nil {
 		returnAPI.Error(context, http.StatusInternalServerError)
+	} else if len(products) == 0 {
+		returnAPI.Success(context, http.StatusOK, nil)
 	} else {
 		returnAPI.Success(context, http.StatusOK, products)
 	}
