@@ -4,7 +4,6 @@ import (
 	"flag"
 	"gaia-api/domain/service"
 	api "gaia-api/infrastructure/controller"
-	"gaia-api/infrastructure/controller/product"
 	"gaia-api/infrastructure/repository"
 
 	_ "github.com/golang-jwt/jwt/v5"
@@ -37,11 +36,8 @@ func main() {
 	productService := service.NewProductService(productRepo)
 	mealService := service.NewMealService(mealRepo)
 
-	//API
-	OpenFoodFactsAPI := product.NewOpenFoodFactsAPI()
-
 	//Server Instance
-	ginServer := api.NewServer(userService, productService, mealService, OpenFoodFactsAPI)
+	ginServer := api.NewServer(userService, productService, mealService)
 
 	ginServer.Start()
 }
