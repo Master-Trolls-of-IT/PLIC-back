@@ -25,7 +25,6 @@ func (getAllController *GetAllController) getAllRecipe(context *gin.Context) {
 
 	recipes, err := recipeRepo.GetAllRecipes()
 	if err != nil {
-
 		returnAPI.Error(context, http.StatusInternalServerError)
 		return
 	}

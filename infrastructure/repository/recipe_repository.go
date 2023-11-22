@@ -2,6 +2,7 @@ package repository
 
 import (
 	"fmt"
+	"gaia-api/domain/entity/convert"
 	"gaia-api/domain/entity/mapping"
 	"gaia-api/domain/entity/request"
 	"gaia-api/domain/entity/response"
@@ -59,8 +60,8 @@ func (recipeRepo *RecipeRepo) AddRecipe(recipe request.Recipe) (*response.Recipe
 		return nil, err
 	}
 
-	// Retrieve the recipe
-	responseRecipe := response.Recipe{RecipeItem: response.RecipeItem{ID: responseRecipeID, Title: recipe.Title, Rating: 0, NumberOfRatings: 0, Duration: recipe.Duration, Difficulty: recipe.Difficulty, Score: 0, Ingredients: recipe.Ingredients, Author: recipe.UserEmail, Steps: recipe.Steps, Tags: []response.RecipeTag{}, Kcal: 0, Image: ""}}
+	// Retrieve the recipe with a conversion to response.Recipe
+	responseRecipe := convert.RequestRecipeToResponseRecipe(recipe, responseRecipeID)
 	responseRecipes := []response.Recipe{responseRecipe}
 
 	err = recipeRepo.retrieveRecipeTags(responseRecipes)
