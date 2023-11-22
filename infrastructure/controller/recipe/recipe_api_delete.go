@@ -27,7 +27,7 @@ func (deleteController *DeleteController) deleteRecipe(context *gin.Context) {
 		returnAPI.Error(context, http.StatusBadRequest)
 		return
 	}
-	var recipeRepo = *deleteController.recipe.OpenFoodFactsService.RecipeRepo
+	var recipeRepo = *deleteController.recipe.RecipeService.RecipeRepo
 
 	err = recipeRepo.DeleteRecipe(recipeID)
 	if err != nil {
