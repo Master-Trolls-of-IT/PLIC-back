@@ -17,14 +17,16 @@ type Server struct {
 	UserService    *service.UserService
 	ProductService *service.ProductService
 	MealService    *service.MealService
+	RecipeService  *service.RecipeService
 }
 
 func NewServer(
 	userService *service.UserService,
 	productService *service.ProductService,
 	mealService *service.MealService,
+	recipeService *service.RecipeService,
 ) *Server {
-	return &Server{UserService: userService, ProductService: productService, MealService: mealService}
+	return &Server{UserService: userService, ProductService: productService, MealService: mealService, RecipeService: recipeService}
 }
 
 func (server *Server) Start() {
@@ -33,7 +35,7 @@ func (server *Server) Start() {
 	connexion.NewConnexionController(ginEngine)
 	consumedProduct.NewConsumedProductController(ginEngine, server.UserService, server.ProductService)
 	meal.NewMealController(ginEngine, server.UserService, server.MealService)
-	recipe.NewRecipeController(ginEngine, server.UserService)
+	recipe.NewRecipeController(ginEngine, server.UserService, server.RecipeService)
 	product.NewProductController(ginEngine, server.ProductService)
 	token.NewTokenController(ginEngine)
 	user.NewUserController(ginEngine, server.UserService)
