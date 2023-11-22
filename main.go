@@ -30,14 +30,16 @@ func main() {
 	userRepo := repository.NewUserRepository(db)
 	productRepo := repository.NewProductRepository(db)
 	mealRepo := repository.NewMealRepository(db, productRepo)
+	recipeRepo := repository.NewRecipeRepository(db)
 
 	//Service
 	userService := service.NewUserService(userRepo)
 	productService := service.NewProductService(productRepo)
 	mealService := service.NewMealService(mealRepo)
+	recipeService := service.NewRecipeService(recipeRepo)
 
 	//Server Instance
-	ginServer := api.NewServer(userService, productService, mealService)
+	ginServer := api.NewServer(userService, productService, mealService, recipeService)
 
 	ginServer.Start()
 }
