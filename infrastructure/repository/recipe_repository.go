@@ -43,37 +43,28 @@ func (recipeRepo *RecipeRepo) AddRecipe(recipe request.Recipe) (*response.Recipe
 		return nil, err
 	}
 	responseRecipeID, _ := strconv.Atoi(recipeID)
-	// Insert recipe ingredients
-	recipeIngredientInsert := `INSERT INTO recipe_ingredient (recipe_id, label) VALUES ($1, $2)`
-	for _, ingredient := range recipe.Ingredients {
-		if _, err := database.Exec(recipeIngredientInsert, responseRecipeID, ingredient); err != nil {
-			fmt.Print("Error inserting recipe ingredients")
-			fmt.Print(err)
-			return nil, err
-		}
-	}
-	// Associate recipe ID with tags
-	recipeTagsInsert := `INSERT INTO recipe_tag (recipe_id, tag_id)
-    						SELECT $1, tag.id FROM tag WHERE tag.label = ANY($2::TEXT[])`
-	fmt.Print(tagLabels)
-	if _, err := database.Exec(recipeTagsInsert, responseRecipeID, pq.Array(tagLabels)); err != nil {
-		fmt.Print("Error inserting recipe tags")
+
+	// Insert recipe ingredients / steps / tags
+	err := recipeRepo.InsertRecipeIngredients(responseRecipeID, recipe.Ingredients)
+	if err != nil {
 		return nil, err
 	}
-	// Associate recipe ID with steps
-	recipeStepsInsert := `INSERT INTO recipe_step (recipe_id, step, label) VALUES ($1, $2, $3)`
-	for i, step := range recipe.Steps {
-		if _, err := database.Exec(recipeStepsInsert, responseRecipeID, i+1, step); err != nil {
-			fmt.Print("Error inserting recipe steps")
-			fmt.Print(err)
-			return nil, err
-		}
+
+	err = recipeRepo.InsertRecipeTags(responseRecipeID, tagLabels)
+	if err != nil {
+		return nil, err
 	}
+
+	err = recipeRepo.InsertRecipeSteps(responseRecipeID, recipe.Steps)
+	if err != nil {
+		return nil, err
+	}
+
 	// Retrieve the recipe
 	responseRecipe := response.Recipe{RecipeItem: response.RecipeItem{ID: responseRecipeID, Title: recipe.Title, Rating: 0, NumberOfRatings: 0, Duration: recipe.Duration, Difficulty: recipe.Difficulty, Score: 0, Ingredients: recipe.Ingredients, Author: recipe.UserEmail, Steps: recipe.Steps, Tags: []response.RecipeTag{}, Kcal: 0, Image: ""}}
 	responseRecipes := []response.Recipe{responseRecipe}
 
-	err := recipeRepo.retrieveRecipeTags(responseRecipes)
+	err = recipeRepo.retrieveRecipeTags(responseRecipes)
 	if err != nil {
 		fmt.Print("Error retrieving recipe tags")
 		return nil, err
@@ -136,17 +127,16 @@ func (recipeRepo *RecipeRepo) GetUserRecipes(userEmail string) ([]response.Recip
 
 func (recipeRepo *RecipeRepo) DeleteRecipe(recipeID int) error {
 	database := recipeRepo.data.DB
-
-	deleteRecipeIngredientsQuery := `DELETE FROM recipe_ingredient WHERE recipe_id = $1`
-	if _, err := database.Exec(deleteRecipeIngredientsQuery, recipeID); err != nil {
+	err := recipeRepo.DeleteRecipeIngredient(recipeID)
+	if err != nil {
 		return err
 	}
-	deleteRecipeTagsQuery := `DELETE FROM recipe_tag WHERE recipe_id = $1`
-	if _, err := database.Exec(deleteRecipeTagsQuery, recipeID); err != nil {
+	err = recipeRepo.DeleteRecipeStep(recipeID)
+	if err != nil {
 		return err
 	}
-	deleteRecipeStepsQuery := `DELETE FROM recipe_step WHERE recipe_id = $1`
-	if _, err := database.Exec(deleteRecipeStepsQuery, recipeID); err != nil {
+	err = recipeRepo.DeleteRecipeTag(recipeID)
+	if err != nil {
 		return err
 	}
 	deleteRecipeQuery := `DELETE FROM recipes WHERE id = $1`
@@ -159,6 +149,7 @@ func (recipeRepo *RecipeRepo) DeleteRecipe(recipeID int) error {
 func (recipeRepo *RecipeRepo) UpdateRecipe(recipeID int, recipe request.Recipe) (*response.Recipe, error) {
 	database := recipeRepo.data.DB
 
+	// Get all the lists
 	tagLabels := make([]string, len(recipe.Tags))
 	for i, tag := range recipe.Tags {
 		tagLabels[i] = tag.Label
@@ -179,58 +170,41 @@ func (recipeRepo *RecipeRepo) UpdateRecipe(recipeID int, recipe request.Recipe) 
 		fmt.Print(err)
 		return nil, err
 	}
-	// Delete all recipe ingredients
-	deleteRecipeIngredientsQuery := `DELETE FROM recipe_ingredient WHERE recipe_id = $1`
-	if _, err := database.Exec(deleteRecipeIngredientsQuery, recipeID); err != nil {
-		fmt.Print("Error deleting recipe ingredients")
-		fmt.Print(err)
+	// Delete all recipe ingredients / steps / tags
+	err := recipeRepo.DeleteRecipeIngredient(recipeID)
+	if err != nil {
 		return nil, err
 	}
-	// Insert recipe ingredients
-	recipeIngredientInsert := `INSERT INTO recipe_ingredient (recipe_id, label) VALUES ($1, $2)`
-	for _, ingredient := range recipe.Ingredients {
-		if _, err := database.Exec(recipeIngredientInsert, recipeID, ingredient); err != nil {
-			fmt.Print("Error inserting recipe ingredients")
-			fmt.Print(err)
-			return nil, err
-		}
+	err = recipeRepo.DeleteRecipeStep(recipeID)
+	if err != nil {
+		return nil, err
 	}
-	// Delete all recipe tags
-	deleteRecipeTagsQuery := `DELETE FROM recipe_tag WHERE recipe_id = $1`
-	if _, err := database.Exec(deleteRecipeTagsQuery, recipeID); err != nil {
-		fmt.Print("Error deleting recipe tags")
-		fmt.Print(err)
+	err = recipeRepo.DeleteRecipeTag(recipeID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Insert recipe ingredients
+	err = recipeRepo.InsertRecipeIngredients(recipeID, recipe.Ingredients)
+	if err != nil {
 		return nil, err
 	}
 	// Insert recipe tags
-	recipeTagsInsert := `INSERT INTO recipe_tag (recipe_id, tag_id)
-    						SELECT $1, tag.id FROM tag WHERE tag.label = ANY($2::TEXT[])`
-	if _, err := database.Exec(recipeTagsInsert, recipeID, pq.Array(tagLabels)); err != nil {
-		fmt.Print("Error inserting recipe tags")
-		fmt.Print(err)
-		return nil, err
-	}
-	// Delete all recipe steps
-	deleteRecipeStepsQuery := `DELETE FROM recipe_step WHERE recipe_id = $1`
-	if _, err := database.Exec(deleteRecipeStepsQuery, recipeID); err != nil {
-		fmt.Print("Error deleting recipe steps")
-		fmt.Print(err)
+	err = recipeRepo.InsertRecipeTags(recipeID, tagLabels)
+	if err != nil {
 		return nil, err
 	}
 	// Insert recipe steps
-	recipeStepsInsert := `INSERT INTO recipe_step (recipe_id, step, label) VALUES ($1, $2, $3)`
-	for i, step := range recipe.Steps {
-		if _, err := database.Exec(recipeStepsInsert, recipeID, i+1, step); err != nil {
-			fmt.Print("Error inserting recipe steps")
-			fmt.Print(err)
-			return nil, err
-		}
+	err = recipeRepo.InsertRecipeSteps(recipeID, recipe.Steps)
+	if err != nil {
+		return nil, err
 	}
+
 	// Retrieve the recipe
 	responseRecipe := response.Recipe{RecipeItem: response.RecipeItem{ID: recipeID, Title: recipe.Title, Rating: 0, NumberOfRatings: 0, Duration: recipe.Duration, Difficulty: recipe.Difficulty, Score: 0, Ingredients: recipe.Ingredients, Author: recipe.UserEmail, Steps: recipe.Steps, Tags: []response.RecipeTag{}, Kcal: 0, Image: ""}}
 	responseRecipes := []response.Recipe{responseRecipe}
 
-	err := recipeRepo.retrieveRecipeTags(responseRecipes)
+	err = recipeRepo.retrieveRecipeTags(responseRecipes)
 	if err != nil {
 		return nil, err
 	}
@@ -347,6 +321,77 @@ func (recipeRepo *RecipeRepo) retrieveRecipeTags(recipes []response.Recipe) erro
 			tags = append(tags, tag)
 		}
 		recipes[i].RecipeItem.Tags = tags
+	}
+	return nil
+}
+
+func (recipeRepo *RecipeRepo) DeleteRecipeIngredient(recipeId int) error {
+	database := recipeRepo.data.DB
+
+	deleteRecipeIngredientsQuery := `DELETE FROM recipe_ingredient WHERE recipe_id = $1`
+	if _, err := database.Exec(deleteRecipeIngredientsQuery, recipeId); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (recipeRepo *RecipeRepo) DeleteRecipeTag(recipeId int) error {
+	database := recipeRepo.data.DB
+
+	deleteRecipeTagsQuery := `DELETE FROM recipe_tag WHERE recipe_id = $1`
+	if _, err := database.Exec(deleteRecipeTagsQuery, recipeId); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (recipeRepo *RecipeRepo) DeleteRecipeStep(recipeId int) error {
+	database := recipeRepo.data.DB
+
+	deleteRecipeStepsQuery := `DELETE FROM recipe_step WHERE recipe_id = $1`
+	if _, err := database.Exec(deleteRecipeStepsQuery, recipeId); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (recipeRepo *RecipeRepo) InsertRecipeIngredients(recipeId int, ingredients []string) error {
+	database := recipeRepo.data.DB
+
+	recipeIngredientInsert := `INSERT INTO recipe_ingredient (recipe_id, label) VALUES ($1, $2)`
+	for _, ingredient := range ingredients {
+		if _, err := database.Exec(recipeIngredientInsert, recipeId, ingredient); err != nil {
+			fmt.Print("Error inserting recipe ingredients")
+			fmt.Print(err)
+			return err
+		}
+	}
+	return nil
+}
+
+func (recipeRepo *RecipeRepo) InsertRecipeTags(recipeId int, tags []string) error {
+	database := recipeRepo.data.DB
+
+	recipeTagsInsert := `INSERT INTO recipe_tag (recipe_id, tag_id)
+							SELECT $1, tag.id FROM tag WHERE tag.label = ANY($2::TEXT[])`
+	if _, err := database.Exec(recipeTagsInsert, recipeId, pq.Array(tags)); err != nil {
+		fmt.Print("Error inserting recipe tags")
+		fmt.Print(err)
+		return err
+	}
+	return nil
+}
+
+func (recipeRepo *RecipeRepo) InsertRecipeSteps(recipeId int, steps []string) error {
+	database := recipeRepo.data.DB
+
+	recipeStepsInsert := `INSERT INTO recipe_step (recipe_id, step, label) VALUES ($1, $2, $3)`
+	for i, step := range steps {
+		if _, err := database.Exec(recipeStepsInsert, recipeId, i+1, step); err != nil {
+			fmt.Print("Error inserting recipe steps")
+			fmt.Print(err)
+			return err
+		}
 	}
 	return nil
 }
