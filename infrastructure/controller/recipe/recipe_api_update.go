@@ -39,7 +39,7 @@ func (updateController *UpdateController) updateRecipe(context *gin.Context) {
 	if err != nil {
 		returnAPI.Error(context, http.StatusInternalServerError)
 	} else {
-		returnAPI.Success(context, http.StatusCreated, *responseRecipe)
+		returnAPI.Success(context, http.StatusOK, *responseRecipe)
 	}
 
 }
