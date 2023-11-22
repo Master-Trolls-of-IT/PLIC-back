@@ -17,4 +17,9 @@ func NewRecipeController(ginEngine *gin.Engine, UserService *service.UserService
 }
 
 func (recipe *Recipe) Start() {
+	NewGetAllController(recipe)
+	NewGetUserController(recipe)
+	NewAddController(recipe)
+	NewDeleteController(recipe)
+	NewUpdateController(recipe)
 }
