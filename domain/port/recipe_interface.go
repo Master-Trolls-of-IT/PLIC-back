@@ -6,7 +6,7 @@ import (
 )
 
 type RecipeInterface interface {
-	SaveRecipe(recipe request.Recipe) (*response.Recipe, error)
+	AddRecipe(recipe request.Recipe) (*response.Recipe, error)
 	GetAllRecipes() ([]response.Recipe, error)
 	GetUserRecipes(userEmail string) ([]response.Recipe, error)
 	DeleteRecipe(recipeID int) error

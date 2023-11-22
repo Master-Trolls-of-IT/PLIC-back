@@ -16,7 +16,7 @@ func NewRecipeRepository(db *Database) *RecipeRepo {
 	return &RecipeRepo{data: db}
 }
 
-func (recipeRepo *RecipeRepo) SaveRecipe(recipe request.Recipe) (*response.Recipe, error) {
+func (recipeRepo *RecipeRepo) AddRecipe(recipe request.Recipe) (*response.Recipe, error) {
 	database := recipeRepo.data.DB
 
 	tagLabels := make([]string, len(recipe.Tags))

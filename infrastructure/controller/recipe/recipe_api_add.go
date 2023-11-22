@@ -30,7 +30,7 @@ func (addController *AddController) addRecipe(context *gin.Context) {
 
 	var recipeRepo = *addController.recipe.RecipeService.RecipeRepo
 
-	responseRecipe, err := recipeRepo.SaveRecipe(recipe)
+	responseRecipe, err := recipeRepo.AddRecipe(recipe)
 	if err != nil {
 		returnAPI.Error(context, http.StatusInternalServerError)
 	} else {
