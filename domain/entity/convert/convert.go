@@ -3,6 +3,7 @@ package convert
 import (
 	"encoding/json"
 	"gaia-api/domain/entity/mapping"
+	"gaia-api/domain/entity/request"
 	"gaia-api/domain/entity/response"
 	"golang.org/x/exp/slices"
 	"strconv"
@@ -78,5 +79,38 @@ func OpenFoodFactsNutrientsToNutrients(openFoodFactsNutrients mapping.OpenFoodFa
 		Fiber:         openFoodFactsNutrients.Fiber,
 		Proteins:      openFoodFactsNutrients.Proteins,
 		Salt:          openFoodFactsNutrients.Salt,
+	}
+}
+
+func RequestRecipeToResponseRecipe(requestRecipe request.Recipe, responseId int) response.Recipe {
+	return response.Recipe{
+		ID:              responseId,
+		Title:           requestRecipe.Title,
+		Rating:          0,
+		NumberOfRatings: 0,
+		Duration:        requestRecipe.Duration,
+		Difficulty:      requestRecipe.Difficulty,
+		Score:           0,
+		Ingredients:     requestRecipe.Ingredients,
+		Author:          requestRecipe.UserEmail,
+		Steps:           requestRecipe.Steps,
+		Tags:            []response.RecipeTag{},
+		Kcal:            0,
+		Image:           "",
+	}
+}
+
+func RecipeMappingToRecipe(recipeMapping mapping.Recipe) response.Recipe {
+	return response.Recipe{
+		ID:              recipeMapping.ID,
+		Title:           recipeMapping.Title,
+		Author:          recipeMapping.Author,
+		Rating:          recipeMapping.Rating,
+		NumberOfRatings: recipeMapping.NumberOfRatings,
+		Duration:        recipeMapping.Duration,
+		Difficulty:      recipeMapping.Difficulty,
+		Score:           recipeMapping.Score,
+		Kcal:            recipeMapping.Kcal,
+		Image:           recipeMapping.Image,
 	}
 }
