@@ -6,10 +6,6 @@ type RecipeTag struct {
 }
 
 type Recipe struct {
-	RecipeItem RecipeItem `json:"recipeItem"`
-}
-
-type RecipeItem struct {
 	ID              int         `json:"id"`
 	Title           string      `json:"title"`
 	Rating          int         `json:"rating"`

@@ -1,6 +1,6 @@
 package mapping
 
-type RecipeItem struct {
+type Recipe struct {
 	ID              int    `db:"id"`
 	Title           string `db:"title"`
 	Author          string `db:"author"`

@@ -83,7 +83,7 @@ func OpenFoodFactsNutrientsToNutrients(openFoodFactsNutrients mapping.OpenFoodFa
 }
 
 func RequestRecipeToResponseRecipe(requestRecipe request.Recipe, responseId int) response.Recipe {
-	responseItem := response.RecipeItem{
+	return response.Recipe{
 		ID:              responseId,
 		Title:           requestRecipe.Title,
 		Rating:          0,
@@ -98,7 +98,19 @@ func RequestRecipeToResponseRecipe(requestRecipe request.Recipe, responseId int)
 		Kcal:            0,
 		Image:           "",
 	}
+}
+
+func RecipeMappingToRecipe(recipeMapping mapping.Recipe) response.Recipe {
 	return response.Recipe{
-		RecipeItem: responseItem,
+		ID:              recipeMapping.ID,
+		Title:           recipeMapping.Title,
+		Author:          recipeMapping.Author,
+		Rating:          recipeMapping.Rating,
+		NumberOfRatings: recipeMapping.NumberOfRatings,
+		Duration:        recipeMapping.Duration,
+		Difficulty:      recipeMapping.Difficulty,
+		Score:           recipeMapping.Score,
+		Kcal:            recipeMapping.Kcal,
+		Image:           recipeMapping.Image,
 	}
 }
